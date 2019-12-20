@@ -1,0 +1,59 @@
+Package: cylcop
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Florian",
+           family = "Hodel",
+           role = c("aut", "cre"),
+           email = "florian.hodel@yahoo.com",
+           comment = c(ORCID = "0000-0002-0099-1006"))
+Description: What the package does (one paragraph).
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5),
+Imports: 
+    circular,
+    stats,
+    extraDistr,
+    purrr,
+    sound,
+    dplyr (>= 0.7.0),
+    copula,
+    stringr,
+    rlang,
+    methods,
+    mvtnorm,
+    GoFKernel,
+    Wrapped,
+    MASS,
+    data.table,
+    infotheo,
+    ggplot2,
+    utils,
+    rgl,
+    viridis,
+    plotly,
+    cowplot
+RoxygenNote: 7.0.2
+Collate: 
+    'correlation.R'
+    'cyl_cop_class.R'
+    'cyl_cubsec.R'
+    'cyl_gauss.R'
+    'cyl_quadsec.R'
+    'cyl_rect_combine.R'
+    'cyl_rot_combine.R'
+    'cyl_vonmises.R'
+    'cylcop-package.R'
+    'density.R'
+    'fit_cop_corr.R'
+    'fit_cop_mle.R'
+    'fit_margin.R'
+    'global.R'
+    'plotting_functions.R'
+    'simulate_trajectory.R'
+    'utils.R'
+    'wrappedcauchy.R'
+    'zzz.R'
