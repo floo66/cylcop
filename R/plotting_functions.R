@@ -369,7 +369,6 @@ cop_scat_plot <- function(traj) {
 #'   "ggplot": heatmap
 #' @param resolution A numerical value. The density or distribution will be calculated at \code{resolution^2} points.
 #' @param n_gridlines A numerical value giving the number of gridlines drawn in u and v direction.
-#'
 #' @return The plot.
 #' @export
 #'
@@ -400,25 +399,27 @@ cop_plot <- function(copula,
       plot_type != "plotly" && plot_type != "ggplot") {
     stop(cylcop::error_sound(), "plot_type must be rgl, plotly or ggplot")
   }
-
-  printCop(copula)
+  if(cylcop.env$silent==F)  printCop(copula)
 
 
 # Generate matrix of values
 
   u <- seq(0, 1, length.out = resolution)
   v <- seq(0, 1, length.out = resolution)
-  u[1] <- 0.00000001
-  u[length(u)] <- 0.99999999
-  v[1] <- 0.00000001
-  v[length(v)] <- 0.99999999
+
+  #only necessary when we use the dCopula generic of the copula package and not our own dCopula generic
+  # u[1] <- 0.00000001
+  # u[length(u)] <- 0.99999999
+  # v[1] <- 0.00000001
+  # v[length(v)] <- 0.99999999
 
   u_grid <- seq(0, 1, length.out = n_gridlines)
   v_grid <- seq(0, 1, length.out = n_gridlines)
-  u_grid[1] <- 0.00000001
-  u_grid[length(u_grid)] <- 0.99999999
-  v_grid[1] <- 0.00000001
-  v_grid[length(v_grid)] <- 0.99999999
+  #only necessary when we use the dCopula generic of the copula package and not our own dCopula generic
+  # u_grid[1] <- 0.00000001
+  # u_grid[length(u_grid)] <- 0.99999999
+  # v_grid[1] <- 0.00000001
+  # v_grid[length(v_grid)] <- 0.99999999
 
   if (plot_type == "rgl" || plot_type == "plotly") {
     mat <- matrix(ncol = resolution, nrow = resolution)
@@ -430,11 +431,11 @@ cop_plot <- function(copula,
     for (i in c(1, resolution)) {
       mat[i,] <- map2_dbl(u[i], v,  ~ fun(c(.x, .y), copula))
     }
-
+    if(cylcop.env$silent==F){
     #generate progressbar
     time <- (proc.time() - ptm)[3] * resolution / 2 %>% as.integer()
     if (time > 10) {
-      cat(
+      message(
         "estimated time for calculation of surface: ",
         floor(time / 60),
         " minutes, ",
@@ -443,16 +444,17 @@ cop_plot <- function(copula,
       )
       pb <- utils::txtProgressBar(min = 2, max = resolution - 1)
     }
+    }
 
     #calculate rest of grid
     for (i in seq(2, resolution - 1)) {
       mat[i,] <- map2_dbl(u[i], v,  ~ fun(c(.x, .y), copula))
-      if (time > 10){
+      if (time > 10 && cylcop.env$silent==F){
         utils::setTxtProgressBar(pb, i)
         if(i==resolution/2) cylcop::waiting_sound()
       }
     }
-    if (time > 10){
+    if (time > 10 && cylcop.env$silent==F){
       close(pb)
       cylcop::done_sound()
     }
@@ -474,13 +476,13 @@ cop_plot <- function(copula,
         time <- time / (resolution ^ 2)
 
         #set progress bar
-        if (time * (n_gridlines ^ 2) > 10) {
-          cat(
+        if (time * (n_gridlines ^ 2) > 10 && cylcop.env$silent==F) {
+          message(
             "gridlines are not a multiple of the surface points and have to be newly calculated.\nThis will take ",
             floor(time * (n_gridlines ^ 2) / 60),
             " minutes, ",
             (time * (n_gridlines ^ 2)) - 60 * floor(time * (n_gridlines ^ 2) / 60),
-            " seconds\n"
+            " seconds"
           )
         }
 
@@ -712,19 +714,24 @@ cop_plot <- function(copula,
       theme(
         panel.background = element_rect(fill = NA),
         panel.ontop = TRUE,
-        panel.grid = element_blank()
+        panel.grid = element_blank(),
+        axis.title = element_text(size = 36, colour = "black"),
+        axis.text = element_text(size = 36, colour = "black"),
+        legend.title = element_text(size = 36, colour = "black"),
+        legend.text = element_text(size = 36, colour = "black")
+
       ) +
       geom_raster(aes(fill = .data$z), alpha = 0.2) +
       geom_vline(
         xintercept = seq(0, 1, by = 0.125),
         colour = "grey60",
-        size = 0.2,
+        size = 0.8,
         alpha = 0.25
       ) +
       geom_hline(
         yintercept = seq(0, 1, by = 0.125),
         colour = "grey60",
-        size = 0.2,
+        size = 0.8,
         alpha = 0.25
       ) +
       scale_x_continuous(limits=c(0,1),expand=c(0,0)) +

@@ -66,18 +66,20 @@ setMethod("optCor", "cyl_vonmises", function(copula,
   min <- 0
   max <- Inf
   param_name <- "kappa"
-  cat(
-    "find parameter kappa\nmethod:",
+  if(cylcop.env$silent==F){
+    message(
+    " find parameter kappa\nmethod: ",
     method,
-    "\naccuracy :",
+    "\naccuracy: ",
     acc,
-    "\nnumber of samples, n, in each step:",
+    "\nnumber of samples, n, in each step: ",
     n,
-    "\n\n"
-  )
+    "\n"
+  )}
   kappa <-
     search_cor(copula, data, method, acc, n, min, max, param_name)
-  cat("kappa approx. ", kappa, "\n")
+  if(cylcop.env$silent==F){
+    message("kappa approx. ", kappa, "\n")}
   return(kappa)
 })
 
@@ -116,20 +118,22 @@ setMethod("optCor", "cyl_quadsec", function(copula,
   min <- 0
   max <- 1 / (2 * pi)
   param_name <- "a"
-  cat(
-    "find parameter",
+  if (cylcop.env$silent==FALSE){
+    message(
+    "find parameter ",
     param_name,
-    "\nmethod:",
+    "\nmethod: ",
     method,
-    "\naccuracy :",
+    "\naccuracy: ",
     acc,
-    "\nnumber of samples, n, in each step:",
+    "\nnumber of samples, n, in each step: ",
     n,
-    "\n\n"
-  )
+    "\n"
+  )}
   a <-
     search_cor(copula, data, method, acc, n, min, max, param_name)
-  cat("a approx.", a, " or ", -a, "\n")
+  if(cylcop.env$silent==F){
+    message("a approx. ", a, " or ", -a, "\n")}
   return(a)
 })
 
@@ -175,17 +179,17 @@ setMethod("optCor", "cyl_cubsec", function(copula,
 
   if (parameter == "a" || parameter =="b") {
     param_name <- parameter
-    cat(
-      "find parameter",
+    if(cylcop.env$silent==F){message(
+      "find parameter ",
       param_name,
-      "\nmethod:",
+      "\nmethod: ",
       method,
-      "\naccuracy :",
+      "\naccuracy: ",
       acc,
-      "\nnumber of samples, n, in each step:",
+      "\nnumber of samples, n, in each step: ",
       n,
-      "\n\n"
-    )
+      "\n"
+    )}
     param <-
       search_cor(copula,
                  data,
@@ -195,28 +199,29 @@ setMethod("optCor", "cyl_cubsec", function(copula,
                  min,
                  max,
                  param_name
-                 )
-    cat(param_name ,"approx.", param, "\n")
+      )
+    if(cylcop.env$silent==F){message(param_name ," approx. ", param, "\n")}
     return(param)
   }
 
   else if (parameter == "both") {
-    cat(
-      "find parameters a and b\nmethod:",
+    if(cylcop.env$silent==F){
+    message(
+      "find parameters a and b\nmethod: ",
       method,
-      "\naccuracy :",
+      "\naccuracy: ",
       acc,
-      "\nnumber of samples, n, in each step:",
+      "\nnumber of samples, n, in each step: ",
       n,
-      "\n\n"
-    )
+      "\n"
+    )}
 
     if (method == "cor_cyl") {
       fun <- function(theta, x)
-        cor_cyl(theta, x, plot = F)
+        cylcop::cor_cyl(theta, x, plot = F)
     }
     else if (method == "mi") {
-      fun <- mi_binned
+      fun <- cylcop::mi_binned
     }
 
     #calculate correlation values for all possible combinations of a and b, find the minimum
@@ -224,25 +229,29 @@ setMethod("optCor", "cyl_cubsec", function(copula,
     a <- seq(min, max, by = acc)
     b <- seq(min, max, by = acc)
     input <- expand.grid(a, b)
-    result <- Inf
-    cat("total steps:", nrow(input))
+    diff <- Inf
+    if(cylcop.env$silent==F){
+      message("total steps: ", nrow(input))}
     for (i in 1:nrow(input)) {
       if (i %% 10 == 0)
-        cat("\ncurrent step:", i)
-      copula <- setCopParam(copula, param_val=as.matrix(input[3,]), param_name=c("a","b"))
+        if(cylcop.env$silent==F){
+          message("\ncurrent step: ", i)}
+      copula <- setCopParam(copula, param_val=as.matrix(input[i,]), param_name=c("a","b"))
       sample <- rCopula(n, copula)
       test <- fun(c(sample[, 1]), c(sample[, 2]))
-      if (abs(cor - test) < result) {
-        result <- test
+      if (abs(cor - test) < diff) {
+        diff <- abs(cor - test)
         final_a <- input[i, 1]
         final_b <- input[i, 2]
       }
     }
-    cat("the optimal parameter set is: a=",
+    if(cylcop.env$silent==F){
+      message("\nthe optimal parameter set is: a= ",
         round(final_a, 2),
-        ", b=",
+        ", b= ",
         round(final_b, 2),
-        "\n")
+        "\n")}
+    return(c(final_a,final_b))
   }
   else
     stop(cylcop::error_sound(),
@@ -287,19 +296,21 @@ setMethod("optCor", "cyl_rot_combine", function(copula, theta, x, acc, n, method
   if (is.null(acc))
     acc <- 0.5
   param_name <- copula@param.names[1]
-  cat(
-    "find parameter",
+  if(cylcop.env$silent==F){
+    message(
+    "find parameter ",
     param_name,
-    "\nmethod:",
+    "\nmethod: ",
     method,
-    "\naccuracy :",
+    "\naccuracy: ",
     acc,
-    "\nnumber of samples, n, in each step:",
+    "\nnumber of samples, n, in each step: ",
     n,
-    "\n\n"
-  )
+    "\n"
+  )}
   a <- search_cor(copula, data, "mi", acc, n, min, max, param_name)
-  cat(param_name, "approx.", a, "\n")
+  if(cylcop.env$silent==F){
+    message(param_name, "approx. ", a, "\n")}
   return(a)
 })
 
@@ -337,41 +348,45 @@ setMethod("optCor", "cyl_rect_combine", function(copula,
     stop(cylcop::error_sound(),
          "only methods 'cor_cyl' and 'mi' are impelemented")
   min <- 0
-  max <- copula@param.upbnd
   if (is.null(acc))
     acc <- 0.5
   if (!background) {
+    max <- copula@param.upbnd[1]
     param_name <- copula@param.names[1]
-    cat(
-      "find parameter",
+    if(cylcop.env$silent==F){
+      message(
+      "find parameter ",
       param_name,
-      "\nmethod:",
+      "\nmethod: ",
       method,
-      "\naccuracy :",
+      "\naccuracy: ",
       acc,
-      "\nnumber of samples, n, in each step:",
+      "\nnumber of samples, n, in each step: ",
       n,
-      "\n\n"
-    )
+      "\n"
+    )}
   }
   else {
+    max <- copula@param.upbnd[which(stringr::str_starts(copula@param.names,"bg_"))[1]]
     param_name <- copula@param.names[which(stringr::str_starts(copula@param.names,"bg_"))[1]]
-    cat(
-      "find background parameter",
+    if(cylcop.env$silent==F){
+      message(
+      "find background parameter ",
       param_name,
-      "\nmethod:",
+      "\nmethod: ",
       method,
-      "\naccuracy :",
+      "\naccuracy: ",
       acc,
-      "\nnumber of samples, n, in each step:",
+      "\nnumber of samples, n, in each step: ",
       n,
-      "\n\n"
-    )
+      "\n"
+    )}
   }
 
   a <-
     search_cor(copula, data, method, acc, n, min, max, param_name)
-  cat(param_name, "approx.", a,"\n")
+  if(cylcop.env$silent==F){
+    message(param_name, "approx. ", a,"\n")}
   return(a)
 })
 
@@ -428,14 +443,16 @@ search_cor <-
 
 #exponential search for upper and lower bounds
 
-    cat("Starting exponential search :\n")
+    if(cylcop.env$silent==F){
+      cat("Starting exponential search: \n")}
     while ((current < cor) && (bound < max)) {
-      cat(param_name, ">", bound, "\n")
+      if(cylcop.env$silent==F){
+        cat(param_name, ">", bound, "\n")}
       bound <- bound * 2
+      if(bound>=max) break
       copula <- setCopParam(copula, param_val=bound, param_name=param_name)
       sample <- rCopula(n, copula)
       current <- fun(c(sample[, 1]), c(sample[, 2]))
-
     }
 
 
@@ -447,9 +464,11 @@ search_cor <-
     l <- 1
     r <- length(vals)
     m = floor((l + r) / 2)
-    cat("Starting binary search :\n")
+    if(cylcop.env$silent==F){
+      cat("Starting binary search :\n")}
     while (m != l & m != r) {
-      cat(vals[l], " < ", param_name, " < ",  vals[r], "\n")
+      if(cylcop.env$silent==F){
+        cat(vals[l], " < ", param_name, " < ",  vals[r], "\n")}
       copula <- setCopParam(copula, param_val=vals[m], param_name=param_name)
       sample <- rCopula(n, copula)
       current <- fun(c(sample[, 1]), c(sample[, 2]))

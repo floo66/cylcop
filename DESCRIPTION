@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "florian.hodel@yahoo.com",
            comment = c(ORCID = "0000-0002-0099-1006"))
-Description: What the package does (one paragraph).
+Description: Wbilackage does (one paragraph).
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -35,11 +35,14 @@ Imports:
     rgl,
     viridis,
     plotly,
-    cowplot
+    cowplot,
+    movMF
 RoxygenNote: 7.0.2
 Collate: 
-    'correlation.R'
     'cyl_cop_class.R'
+    'Ccond.R'
+    'aaaglobal.R'
+    'correlation.R'
     'cyl_cubsec.R'
     'cyl_gauss.R'
     'cyl_quadsec.R'
@@ -51,7 +54,7 @@ Collate:
     'fit_cop_corr.R'
     'fit_cop_mle.R'
     'fit_margin.R'
-    'global.R'
+    'mixedvonmises.R'
     'plotting_functions.R'
     'simulate_trajectory.R'
     'utils.R'

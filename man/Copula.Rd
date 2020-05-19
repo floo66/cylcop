@@ -6,6 +6,7 @@
 \alias{rCopula}
 \alias{dCopula}
 \alias{pCopula}
+\alias{dCopula,matrix,Copula-method}
 \alias{rCopula,numeric,cyl_cubsec-method}
 \alias{dCopula,matrix,cyl_cubsec-method}
 \alias{pCopula,matrix,cyl_cubsec-method}
@@ -29,6 +30,8 @@
 dCopula(u, copula, log=FALSE, ...)
 pCopula(u, copula, ...)
 rCopula(n, copula, ...)
+
+\S4method{dCopula}{matrix,Copula}(u, copula)
 
 \S4method{rCopula}{numeric,cyl_cubsec}(n, copula)
 
@@ -67,11 +70,11 @@ rCopula(n, copula, ...)
 \S4method{pCopula}{matrix,cyl_vonmises}(u, copula)
 }
 \arguments{
-\item{n}{Number of random samples to be generated with \code{rCopula}.}
+\item{u}{Matrix of numeric values in I^2, containing as first collumn the circular (periodic) and as second the linear dimension}
 
 \item{copula}{An object of class \code{cyl_copula} or \code{Copula}.}
 
-\item{u}{Matrix of numeric values in I^2, containing as first collumn the circular (periodic) and as second the linear dimension}
+\item{n}{Number of random samples to be generated with \code{rCopula}.}
 
 \item{log}{Logical indicating whether the logarithm of the density should be returned. For \code{cyl_copula} always \code{log = FALSE}.}
 
@@ -79,4 +82,10 @@ rCopula(n, copula, ...)
 }
 \description{
 These methods belong to the corresponding generics of the \code{copula} package.
+}
+\details{
+WARNING!!!
+The function dCopula is a special case, and cylcop::dCopula does not refer to the generic dCopula of the \code{copula} package.
+The difference is that copula::dCopula() will return a density of 0 for points on the boundary, whereas cylcop::dCopula() will
+return the correct density on the boundaries for both \code{cyl_copula} or \code{Copula} objects.
 }

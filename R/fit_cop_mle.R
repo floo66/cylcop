@@ -21,7 +21,8 @@
 #' @param traceOpt A logical value, denoting whether to print information regarding
 #'   convergence, current values, etc. during the optimization process.
 #'
-#' @return The same type of \code{cyl_copula} object as \code{copula}, but with optimized parameters.
+#' @return A list containing the same type of \code{cyl_copula} object as \code{copula},
+#'  but with optimized parameters, the log likelihood and the AIC.
 #' @export
 #'
 optML <-  function(copula,
@@ -163,7 +164,8 @@ prep_n_check_ML <-
 #' @param traceOpt A logical value, denoting whether to print information regarding
 #'   convergence, current values, etc. during the optimization process.
 #'
-#' @return The same type of \code{cyl_copula} object as \code{copula}, but with optimized parameters.
+#' @return A list containing the same type of \code{cyl_copula} object as \code{copula},
+#'  but with optimized parameters, the log likelihood and the AIC.
 #' @export
 #'
 fit_LL <-
@@ -228,7 +230,7 @@ fit_LL <-
         LL <- -Inf
       }
       else{
-        LL <- sum(log(dCopula(emp_cop, copula = copula)))
+        LL <- sum(log(cylcop::dCopula(emp_cop, copula = copula)))
         if (is.na(LL))
           LL <- -Inf
       }
@@ -293,12 +295,14 @@ fit_LL <-
       )
     }
 
-    cat("finished, optimized parameters are:\n")
+    if(cylcop.env$silent==F){
+      message("finished, optimized parameters are: ")
     for (i in seq_along(param_name)) {
-      cat(param_name[i], " = ", fit$par[i], "\n")
+      message(param_name[i], " = ", fit$par[i])
     }
-    cat("logL = ", loglik, "\n\n")
-    if (loglik > 10 ^ 10) {
+    message("logL = ", loglik, "\nAIC = ", 2*length(param_name)-2*loglik)
+    }
+    if (loglik > 10 ^ 10 || loglik < -10^10) {
       warning(
         cylcop:: warning_sound(),
         "Optimization seems to have gone wrong. logL is very large. Try one of these:\n",
@@ -308,5 +312,5 @@ fit_LL <-
 
     opt_cop <-
       setCopParam(copula, param_val = fit$par, param_name = param_name)
-    return(opt_cop)
+    return(list(copula=opt_cop,logL=loglik, AIC=(2*length(param_name)-2*loglik)))
   }

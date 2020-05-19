@@ -194,6 +194,33 @@ setGeneric("setCopParam",
            signature = "copula")
 
 
+#' Calculate the conditional Copula
+#'
+#' @param u Matrix of numeric values in I^2, containing as first collumn
+#'  the circular (periodic) and as second the linear dimension.
+#' @param copula A \code{cyl_copula} or 2-dimensional \code{copula} object.
+#' @param cond_on Column number of u on which the copula is conditioned. E.g if
+#' \code{cond_on=2}, the function calculates for each element in the first column of u
+#' the Copula conditional on the element in the second column.
+#' @param inverse logical indicating whether the inverse of the coniditional copula is
+#' calculated.
+#' @param ... Additional arguments.
+#'
+#' @return A vector containing the values of the distribution of the copula at
+#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}
+#'
+#' @details This is a generic that calls the function \code{copula::cCopula}, for 2-dimensional objects
+#' from the \code{copula}-package for which \code{copula::cCopula} is available. Note that the
+#' input arguments and the output of \code{cylcop::cCopula} differ from those of \code{copula::cCopula}.
+#'
+#' @name cCopula
+#'
+setGeneric("cCopula",
+           function(u, copula, cond_on=2, inverse=F,...)
+             standardGeneric("cCopula"),
+           signature = "copula")
+
+
 
 #' Check new \code{cyl_copula} parameters
 #'
@@ -234,6 +261,12 @@ param_num_checked <- function(copula, param_val, param_name){
 #'
 #' These methods belong to the corresponding generics of the \code{copula} package.
 #'
+#' WARNING!!!
+#' The function dCopula is a special case, and cylcop::dCopula does not refer to the generic dCopula of the \code{copula} package.
+#' The difference is that copula::dCopula() will return a density of 0 for points on the boundary, whereas cylcop::dCopula() will
+#' return the correct density on the boundaries for both \code{cyl_copula} or \code{Copula} objects.
+#'
+#'
 #' @param copula An object of class \code{cyl_copula} or \code{Copula}.
 #' @param u Matrix of numeric values in I^2, containing as first collumn the circular (periodic) and as second the linear dimension
 #' @param n Number of random samples to be generated with \code{rCopula}.
@@ -246,3 +279,34 @@ param_num_checked <- function(copula, param_val, param_name){
 #' @aliases rCopula dCopula pCopula
 #
 NULL
+
+
+setGeneric("dCopula", function(u, copula, log=FALSE, ...) {
+  if(!is.matrix(u)) u <- rbind(u, deparse.level = 0L)
+  stopifnot(dim(copula) == ncol(u))
+
+  outside.01 <- function(u, strictly=TRUE) {
+    if(strictly)
+      apply(u, 1, function(x) any(x <	 0, 1 <	 x))
+    else
+      apply(u, 1, function(x) any(x <= 0, 1 <= x))
+  }
+
+  u.is.out <- outside.01(u, strictly=TRUE)## copula package uses here strictly=FALSE
+  if(any.out <- any(u.is.out, na.rm=TRUE))
+    u[] <- pmax(0, pmin(1, u)) # <- "needed", as some methods give error
+  r <- standardGeneric("dCopula") # the result of calling  <dCopula-method)(u, copula, ..)
+  if(any.out) ##  outside cube  ==> zero mass, (but not when on cube boundary, in contrast to copula-package) :
+    r[u.is.out & !is.na(u.is.out)] <- if(log) -Inf else 0.
+  r
+},
+package = "cylcop")
+
+#' Calcualte density
+#' @rdname Copula
+#' @export
+setMethod("dCopula", signature("matrix", "Copula"), function(u, copula) {
+  #workaround to get the correct density at the boundaries
+  u[u < .Machine$double.eps] <- .Machine$double.eps
+  copula::dCopula(u,copula)
+})

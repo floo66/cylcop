@@ -6,7 +6,7 @@
 \alias{cylcop-package}
 \title{cylcop: What the Package Does (One Line, Title Case)}
 \description{
-What the package does (one paragraph).
+Wbilackage does (one paragraph).
 }
 \author{
 \strong{Maintainer}: Florian Hodel \email{florian.hodel@yahoo.com} (\href{https://orcid.org/0000-0002-0099-1006}{ORCID})

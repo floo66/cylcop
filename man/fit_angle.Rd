@@ -6,19 +6,22 @@
 \usage{
 fit_angle(
   theta,
-  parametric = c("vonmises", "wrappedcauchy", FALSE),
-  bandwidth = NULL
+  parametric = c("vonmises", "wrappedcauchy", "mixedvonmises", FALSE),
+  bandwidth = NULL,
+  mu = NULL
 )
 }
 \arguments{
 \item{theta}{A numeric vector of angles in [-pi, pi).}
 
 \item{parametric}{Either a character string describing what distribution
-should be fitted "vonmises" or "wrappedcauchy" or FALSE if a non-parametric
+should be fitted "vonmises", "wrappedcauchy", "mixedvonmises", or FALSE if a non-parametric
 estimation (kernel density) should be made.}
 
-\item{bandwidth}{The numeric value of for the kernel density bandwidth.
+\item{bandwidth}{If \code{parametric=F} The numeric value of the kernel density bandwidth.
 Default is  \code{cylcop::opt_circ_bw(theta, "adhoc")}.}
+
+\item{mu}{(optional) Fixed mean direction of parametric distribution}
 }
 \value{
 If a parametric estimate is made, a list containing the estimated parameters, their

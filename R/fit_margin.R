@@ -90,10 +90,11 @@ opt_lin_bw <- function(x,
 #'
 #' @param theta A numeric vector of angles in [-pi, pi).
 #' @param parametric Either a character string describing what distribution
-#'   should be fitted "vonmises" or "wrappedcauchy" or FALSE if a non-parametric
+#'   should be fitted "vonmises", "wrappedcauchy", "mixedvonmises", or FALSE if a non-parametric
 #'   estimation (kernel density) should be made.
-#' @param bandwidth The numeric value of for the kernel density bandwidth.
+#' @param bandwidth If \code{parametric=F} The numeric value of the kernel density bandwidth.
 #'  Default is  \code{cylcop::opt_circ_bw(theta, "adhoc")}.
+#' @param mu (optional) Fixed mean direction of parametric distribution
 #'
 #' @return If a parametric estimate is made, a list containing the estimated parameters, their
 #' standard errors and the loglikelihood is returned.
@@ -103,28 +104,39 @@ opt_lin_bw <- function(x,
 #'
 fit_angle <-
   function(theta,
-           parametric = c("vonmises", "wrappedcauchy", FALSE),
-           bandwidth = NULL) {
+           parametric = c("vonmises", "wrappedcauchy", "mixedvonmises", FALSE),
+           bandwidth = NULL, mu=NULL) {
     theta <- na.omit(theta)
 
     if (!parametric == FALSE) {
-
-      if (parametric == "vonmises") {
+     if(!parametric %in% c("vonmises", "wrappedcauchy", "mixedvonmises")){
+       stop(cylcop::error_sound(),
+            "distribution must be vonmises, wrappedcauchy or mixedvonmises")
+     }
+     else if (parametric == "vonmises") {
+       if(!is.null(mu) && length(mu)!=1){
+         stop("If mean direction is not estimated, length of mu should be 1")
+       }
         distr <- suppressWarnings(circular::mle.vonmises(
           theta,
-          mu = NULL,
+          mu = mu,
           kappa = NULL,
           bias = FALSE
         ))
         logL <-
           suppressWarnings(circular::dvonmises(theta, distr$mu, distr$kappa)) %>% log() %>% sum()
+        df <- ifelse(is.null(mu),2,1)
         out <-
-          list(
-            mu = distr$mu %>% as.double() %>% round(3),
-            kappa = distr$kappa %>% round(3),
-            se.mu = distr$se.mu %>% round(3),
-            se.kappa = distr$se.kappa %>% round(3),
-            logL = logL %>% round(5)
+          list(coef=
+            list(mu = distr$mu %>% as.double() ,
+            kappa = distr$kappa
+            ),
+            se=list(mu = distr$se.mu ,
+            kappa = distr$se.kappa
+            ),
+            logL = logL ,
+            AIC = 2*df-2*logL ,
+            name="vonmises"
           )
         msg <-
           paste0(
@@ -139,16 +151,79 @@ fit_angle <-
             distr$se.kappa %>% round(3),
             ")\n",
             "logL:\t",
-            logL %>% round(5)
+            logL %>% round(5),
+            "\n",
+            "AIC:\t",
+            2*df-2*logL %>% round(3),
+            "\n"
           )
-        cat(msg)
+        if(cylcop.env$silent==F){
+          message(msg)}
+        return(out)
+      }
+
+     else if (parametric == "mixedvonmises") {
+       distr <- mle.mixedvonmises(theta, mu=mu)
+
+#for compatibility with other distributions calculate logL with circular package
+        logL <-suppressWarnings(circular::dmixedvonmises(theta,
+                                                         distr$mu[1],
+                                                         distr$mu[2],
+                                                         distr$kappa[1],
+                                                         distr$kappa[2],
+                                                         distr$prop) %>%
+                                  log() %>% sum())
+        df <- ifelse(is.null(mu),5,3)
+        out <-
+          list(
+            coef=list(
+            mu1 = distr$mu[1] ,
+            mu2 = distr$mu[2] ,
+            kappa1 = distr$kappa[1] ,
+            kappa2 = distr$kappa[2] ,
+            prop = distr$prop
+            ),
+            se=list(),
+            logL = logL ,
+            AIC = 2*df-2*logL ,
+            name="mixedvonmises"
+          )
+        msg <-
+          paste0(
+            "mu1:\t",
+            distr$mu[1] %>% round(3),
+            "\n",
+            "mu2:\t",
+            distr$mu[2] %>% round(3),
+            "\n",
+            "kappa1:\t",
+            distr$kappa[1] %>% round(3),
+            "\n",
+            "kappa2:\t",
+            distr$kappa[2] %>% round(3),
+            "\n",
+            "prop:\t",
+            distr$prop %>% round(3),
+            "\n",
+            "logL:\t",
+            logL %>% round(5),
+            "\n",
+            "AIC:\t",
+            2*df-2*logL %>% round(3),
+            "\n"
+          )
+        if(cylcop.env$silent==F){
+          message(msg)}
         return(out)
       }
 
       else if (parametric == "wrappedcauchy") {
+        if(!is.null(mu) && length(mu)!=1){
+          stop("If mean direction is not estimated, length of mu should be 1")
+        }
         distr <- suppressWarnings(circular::mle.wrappedcauchy(
           theta,
-          mu = NULL,
+          mu = mu,
           rho = NULL,
           tol = 1e-15,
           max.iter = 100
@@ -158,12 +233,17 @@ fit_angle <-
         logL <-
           suppressWarnings(circular::dwrappedcauchy(theta, mu = distr$mu, rho = distr$rho)) %>%
           log() %>% sum()
+        df <- ifelse(is.null(mu),2,1)
         #parameterization used in wprappedg("cauchy"), is scale=-ln(rho)
         out <-
           list(
-            location = distr$mu %>% as.double() %>% round(3),
-            scale = -log(distr$rho) %>% round(3),
-            logL = logL %>% round(5)
+            coef=list(
+            location = distr$mu %>% as.double() ,
+            scale = -log(distr$rho)
+            ),
+            logL = logL ,
+            AIC = 2*df-2*logL ,
+            name="wrappedcauchy"
           )
         msg <- paste0(
           "location:\t",
@@ -173,9 +253,14 @@ fit_angle <-
           -log(distr$rho) %>% round(3),
           "\n",
           "logL:\t\t",
-          logL %>% round(5)
+          logL %>% round(5),
+          "\n",
+          "AIC:\t",
+          2*df-2*logL %>% round(3),
+          "\n"
         )
-        cat(msg)
+        if(cylcop.env$silent==F){
+          message(msg)}
         return(out)
       }
     }
@@ -229,10 +314,26 @@ fit_steplength<- function(x, parametric = c("beta", "cauchy", "chi-squared",
     parametric <- match.arg(parametric)
 
   if (!parametric == FALSE) {
+    if(!parametric %in% c("beta", "cauchy", "chi-squared",
+                          "exponential", "gamma",
+                          "lognormal", "logistic",
+                          "normal","t", "weibull")){
+      stop(cylcop::error_sound(),
+           "distribution not supported")
+    }
     distr <- MASS::fitdistr(x, densfun = parametric, start = start)
-    show(distr)
-    cat("\nlogL= ", distr$loglik, "\n")
-    return(distr)
+    out <-
+      list(
+        coef=as.list(distr$estimate),
+        se=as.list(distr$sd),
+        logL=distr$loglik ,
+        AIC=2*attributes(logLik(distr))$df-2*distr$loglik,
+        name=parametric
+      )
+    if(cylcop.env$silent==F){
+      message(show(distr),"\nlogL= ", distr$loglik, "\n",
+            "AIC= ", 2*attributes(logLik(distr))$df-2*logLik(distr), "\n")}
+    return(out)
   }
 
   else{

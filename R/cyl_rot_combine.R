@@ -66,10 +66,11 @@ cyl_rot_combine <- function(copula, shift = FALSE) {
       "provide a (rotated) 'copula'-object from the 'copula'-package as input"
     )
 
-  cat(name,
-      "made periodic in u, by taking arithmetic mean with 90 degree rotated",
+  if(cylcop.env$silent==F){
+    message(name,
+      " made periodic in u, by taking arithmetic mean with 90 degree rotated ",
       name,
-      "\n")
+      "\n")}
 
   new(
     "cyl_rot_combine",
@@ -129,7 +130,7 @@ setMethod("dCopula", signature("matrix", "cyl_rot_combine"), function(u, copula)
   if (copula@shift)
     u <- (u + 0.5) %% 1
   # period_cop is a Copula object from the 'copula'-package and we can use the corresponding methods
-  dCopula(cbind(u, v), period_cop)
+  cylcop::dCopula(cbind(u, v), period_cop)
 })
 
 
@@ -167,6 +168,38 @@ setMethod("pCopula", signature("matrix", "cyl_rot_combine"), function(u, copula)
   else
     cdf <- pCopula(cbind(u, v), period_cop)
   return(cdf)
+})
+
+
+
+#' Condtional copula
+#' @rdname cCopula
+#' @export
+setMethod("cCopula", signature("cyl_rot_combine"), function(u, copula, cond_on=2, inverse=F) {
+  u_orig <- matrix(ncol=2,u)
+  length <- nrow(u)
+  v <- u_orig[, 2, drop = F]
+  u <- u_orig[, 1, drop = F]
+
+  # Take linear linear copula and rotate it 90 degrees, i.e "flip" in u-direction
+  copula90 <- rotCopula(copula@orig.cop, flip = c(TRUE, FALSE))
+  # now take the average (i.e. a convex sum) to get a copula periodic in u
+  period_cop <-
+    mixCopula(list(copula@orig.cop, copula90), w = c(0.5, 0.5))
+
+
+  if (!copula@shift) {
+    result <- cylcop::cCopula(u_orig,period_cop, cond_on, inverse)
+  }
+  else{
+    result <- matrix(ncol=2,rep(1,length))
+    result[u>=0.5,] <- cylcop::cCopula(matrix(ncol=2,c(rep(1,nrow(v[u>=0.5])),v[u>=0.5])),period_cop, cond_on, inverse)+
+      cylcop::cCopula(matrix(ncol=2,c(rep(0.5,nrow(v[u>=0.5])),v[u>=0.5])),period_cop, cond_on, inverse)+
+      cylcop::cCopula(matrix(ncol=2,c(rep(u-0.5,nrow(v[u>=0.5])),v[u>=0.5])),period_cop, cond_on, inverse)
+    result[u<0.5,] <- cylcop::cCopula(matrix(ncol=2,c(rep(0.5,nrow(v[u<0.5])),v[u<0.5])),period_cop, cond_on, inverse)+
+      cylcop::cCopula(matrix(ncol=2,c(rep(u+0.5,nrow(v[u<0.5])),v[u<0.5])),period_cop, cond_on, inverse)
+  }
+  return(result)
 })
 
 

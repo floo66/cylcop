@@ -11,16 +11,15 @@
 #'   which can be obtained using \code{fit_angle(...,parametric = FALSE)}.
 #' @param marginal_lin A character string denoting the name of the linear distribution. I.e. the name of its distribution function without the "p"
 #'   e.g. "norm" for normal distribution.
-#' @param parameter_lin  A list of parameters of the circular marginal dsitribution. For \code{marginal_circ = "dens"}, \code{parameter_circ} must be the density object,
+#' @param parameter_lin  A list of parameters of the linear marginal dsitribution. For \code{marginal_circ = "dens"}, \code{parameter_circ} must be the density object,
 #'   which can be obtained using \code{fit_steplength(...,parametric = FALSE)}.
-#'
 #' @return A data.frame containing the trajectory.
 #' @export
 #'
 make_traj <-
   function(n,
            copula,
-           marginal_circ = c("vonmises","wrappedcauchy", "dens", "hnorm"),
+           marginal_circ = c("vonmises","wrappedcauchy", "mixedvonmises", "dens", "hnorm"),
            parameter_circ = list(0, 1),
            marginal_lin,
            parameter_lin = list()) {
@@ -30,30 +29,25 @@ make_traj <-
     #get the  marginal distributions, densities, etc. into one list
     marg_circ <- get_marg(marginal_circ)
     marg_lin <- get_marg(marginal_lin)
-
+    if(cylcop.env$silent==F){
     #echo what functions and parameters are used
-    cat("\n")
     printCop(copula)
-    cat("\n")
-    cat(
+    message(
       sprintf(
         "%-18s %-20s parameters: %-60s",
         "Circular marginal:",
         marginal_circ,
         print_param(marg_circ$d, parameter_circ)
-        ),
-      "\n"
-    )
-    cat(
+        ))
+    message(
       sprintf(
         "%-18s %-20s parameters: %-60s",
         "Linear marginal:",
         marginal_lin,
         print_param(marg_lin$r, parameter_lin)
       ),
-      "\n\n"
-    )
-
+      "\n")
+}
     #Test if the precision of the approximation for the wrapped cauchy marginal distribution is sufficient
     if(marginal_circ=="wrappedcauchy")
       tryCatch(do.call(marg_circ$p, c(0, parameter_circ)),
@@ -104,17 +98,17 @@ make_traj <-
     time <- 0
 
     for (i in 3:n) {
-
+      if(cylcop.env$silent==F){
       #get time for 100 steps of trajectory, if trajectory is at least that long, to set up the progress bar
       if (i == 100) {
         time <- (proc.time() - ptm)[3] %>% as.double()
         if ((time / 100 * n) > 5) {
-          cat(
+          message(
             "estimated time to generate trajectory: ",
             floor((time / 100 * n) / 60),
             " minutes, ",
             (time / 100 * n) - 60 * floor((time / 100 * n) / 60),
-            " seconds\n"
+            " seconds"
           )
           pb <- utils::txtProgressBar(min = 1, max = n)
         }
@@ -122,6 +116,7 @@ make_traj <-
       if ((time / 100 * n) > 5 && i >= 100){
         utils::setTxtProgressBar(pb, i)
        if(i==n/2) cylcop::waiting_sound()
+      }
       }
 
       #get a sample of 2 correlated uniformly distributed random variables.
@@ -163,11 +158,12 @@ make_traj <-
       prevp2 <- prevp1
       prevp1 <- point
     }
-
+    if(cylcop.env$silent==F){
     #close progress bar
     if ((time / 100 * n) > 5 && n >= 100){
       close(pb)
       cylcop::done_sound()
+    }
     }
     return(traj)
     }

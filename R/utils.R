@@ -225,6 +225,9 @@ print_param <-
 #' @examples
 #' get_marg("norm")
 get_marg <- function(marg_type) {
+  if(marg_type=="exponential") marg_type <- "exp"
+  if(marg_type=="gauss" || marg_type=="normal") marg_type <- "norm"
+
   tryCatch({
     list(
       "d" = (paste0("d", marg_type) %>% get()),
@@ -245,6 +248,37 @@ get_marg <- function(marg_type) {
 }
 
 
+#' Set options
+#'
+#'
+#' @param silent logical, suppress all sound and messages
+#'
+#' @export
+#'
+cylcop_set_option <- function(silent=FALSE){
+  assign("silent", silent, envir=cylcop.env)
+}
+
+
+
+#' Get options
+#'
+#' @param option character string, name of the option
+#'
+#' @return
+#' The value of option
+#' @export
+#'
+cylcop_get_option <- function(option=NULL){
+  if(is.null(option)){
+    result <- ls(cylcop.env)
+  }
+  else{
+ result<-get(option,envir=cylcop.env)
+  }
+  return(result)
+}
+
 
 
 #--------------Set sounds----------------
@@ -257,25 +291,32 @@ get_marg <- function(marg_type) {
 
 #' Error sound
 #'
-#' @include global.R
+#' @include aaaglobal.R
 #' @return Play the error sound
 #' @export
 #'
 error_sound <- function() {
-  if(happiness==T){
+  if(cylcop.env$silent==F){
+    decide <- runif(1)
+    if(decide>0.5){
     sound::play(sound::loadSample(system.file("extdata", "error.wav", package = "cylcop")))
+    }
+    else{
+      sound::play(sound::loadSample(system.file("extdata", "confusion.wav", package = "cylcop")))
+
+    }
   }
   else{}
 }
 
 #' Warning sound
 #'
-#' @include global.R
+#' @include aaaglobal.R
 #' @return Play the warning sound
 #' @export
 #'
 warning_sound <- function() {
-  if(happiness==T){
+  if(cylcop.env$silent==F){
     sound::play(sound::loadSample(system.file("extdata", "warning.wav", package = "cylcop")))
   }
   else{}
@@ -283,12 +324,12 @@ warning_sound <- function() {
 
 #' Waiting sound
 #'
-#' @include global.R
+#' @include aaaglobal.R
 #' @return Play the waiting sound
 #' @export
 #'
 waiting_sound <- function() {
-  if(happiness==T){
+  if(cylcop.env$silent==F){
     sound::play(sound::loadSample(system.file("extdata", "waiting.wav", package = "cylcop")))
   }
   else{}
@@ -296,12 +337,12 @@ waiting_sound <- function() {
 
 #' Done sound
 #'
-#' @include global.R
+#' @include aaaglobal.R
 #' @return Play the done sound
 #' @export
 #'
 done_sound <- function() {
-  if(happiness==T){
+  if(cylcop.env$silent==F){
     sound::play(sound::loadSample(system.file("extdata", "done.wav", package = "cylcop")))
   }
   else{}

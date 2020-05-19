@@ -68,10 +68,8 @@ setMethod("rCopula", signature("numeric", "cyl_quadsec"), function(n, copula) {
   #Calcualte the inverse of the conditional distribution of V given u, C_u(v) and
   #evaluate it at w
   else{
-    alpha_prime <- a * 2 * pi * cos(2 * pi * u)
-    v <-
-      (alpha_prime + 1 - sqrt((alpha_prime + 1) ^ 2 - 4 * alpha_prime * w)) /
-      (2 * alpha_prime)
+    mat <- matrix(ncol=2,c(u,w))
+    v <- cylcop::cCopula(mat,copula,cond_on=1, inverse=T)
     cop_uv <- cbind(u, v)
   }
   return(cop_uv)
@@ -83,6 +81,7 @@ setMethod("rCopula", signature("numeric", "cyl_quadsec"), function(n, copula) {
 #' @rdname Copula
 #' @export
 setMethod("dCopula", signature("matrix", "cyl_quadsec"), function(u, copula) {
+
   a <- copula@parameters[1]
   v <- u[, 2, drop = F]
   u <- u[, 1, drop = F]
@@ -109,6 +108,38 @@ setMethod("pCopula", signature("matrix", "cyl_quadsec"), function(u, copula) {
   return(c(cdf))
 })
 
+#' Condtional copula
+#' @rdname cCopula
+#' @export
+setMethod("cCopula", signature("cyl_quadsec"), function(u, copula, cond_on=2, inverse=F) {
+  a <- copula@parameters[1]
+  u_orig <- matrix(ncol=2,u)
+  length <- nrow(u)
+  v <- u_orig[, 2, drop = F]
+  u <- u_orig[, 1, drop = F]
+
+  if(cond_on==2){
+    alpha <- a * sin(2 * pi * u)
+    if(inverse==F){
+      result <- u+alpha-2*v*alpha
+    }
+    if(inverse==T){
+      result <-  numerical_inv_conditional_cop(u_orig, copula, cond_on=2)
+    }
+  }
+  else if(cond_on==1){
+    alpha_prime <- a * 2 * pi * cos(2 * pi * u)
+    if(inverse==F){
+      result<- v+alpha_prime*(v-v^2)
+    }
+    if(inverse==T){
+      result<- (alpha_prime + 1 - sqrt((alpha_prime + 1) ^ 2 - 4 * alpha_prime * v)) /
+        (2 * alpha_prime)
+    }
+  }
+  else stop("cond_on must be either 1 or 2")
+  return(result%>%as.numeric())
+})
 
 
 #-----Change attributes of existing cyl_quadsec object.-------------------------------------------

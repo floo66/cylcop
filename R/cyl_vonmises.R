@@ -70,14 +70,8 @@ setMethod("rCopula", signature("numeric", "cyl_vonmises"), function(n, copula) {
   w <- runif(n)
   #Calcualte the inverse of the conditional distribution of V given u, C_u(v) and
   #evaluate it at w
-  #this is the inverse of pvonmises(v, mu=2*pi*u), which is the integrand in the copula cdf function below,
-  #(1/(2*pi))*qvonmises(pvonmises(v, mu=2*pi*u),mu=2*pi*u)=v
-  v <- (1 / (2 * pi)) *
-    map2_dbl(u, w, ~ circular::qvonmises(.y,
-                               mu = circular::circular(2 * pi * .x - mu),
-                               kappa = kappa,
-                               from = circular::circular(0)
-             ))
+
+  v <- cylcop::cCopula(matrix(ncol=2,c(u,w)),copula,cond_on=1,inverse = T)
   if (copula@flip)
     u <- 1 - u
   cop_uv <- cbind(u, v)
@@ -155,6 +149,76 @@ setMethod("pCopula", signature("matrix", "cyl_vonmises"), function(u, copula) {
     cdf <- prob(unflipped, l = c((1 - u), 0), u = c(1, v))
   }
   return(c(cdf))
+})
+
+
+
+#' Condtional copula
+#' @rdname cCopula
+#' @export
+setMethod("cCopula", signature("cyl_vonmises"), function(u, copula, cond_on=2, inverse=F) {
+  u_orig <- matrix(ncol=2,u)
+  mu <- copula@parameters[1]
+  kappa <- copula@parameters[2]
+  v <- u_orig[, 2, drop = F]
+  u <- u_orig[, 1, drop = F]
+
+  if(cond_on==2){
+    if(!copula@flip){
+      if(inverse==F){
+        result <-
+          map2_dbl(u, v, ~ circular::pvonmises(2*pi*.x,
+                                               mu = circular::circular(2 * pi * .y + mu),
+                                               kappa = kappa,
+                                               from = circular::circular(0)))
+      }
+      if(inverse==T){
+
+        #this is the inverse of pvonmises(v, mu=2*pi*u), which is the integrand in the copula cdf function,
+        #(1/(2*pi))*qvonmises(pvonmises(2*pi*v, mu=2*pi*u),mu=2*pi*u)=v
+        result <- (1 / (2 * pi)) *
+          map2_dbl(u, v, ~ circular::qvonmises(.x,
+                                               mu = circular::circular(2 * pi * .y + mu),
+                                               kappa = kappa,
+                                               from = circular::circular(0)))
+      }
+    }
+    else if (copula@flip){
+      #if flip, we need to integrate the cdf from 1-u to 1 instead of 0 to u
+      if(inverse==F){
+        result <-
+          map2_dbl(u, v, ~ circular::pvonmises(2*pi,
+                                               mu = circular::circular(2 * pi * .y + mu),
+                                               kappa = kappa,
+                                               from = circular::circular((1-.x)*2*pi)))
+      }
+      if(inverse==T){
+        #TODO find analytical formula
+        result <- numerical_inv_conditional_cop(c(u,v),copula,cond_on = 2)
+      }
+    }
+  }
+  else if(cond_on==1){
+    if (copula@flip)
+      #we still integrate from 0 to v, but at 1-u instead of u
+      u <- 1 - u
+    if(inverse==F){
+      result <-
+        map2_dbl(u, v, ~ circular::pvonmises(2*pi*.y,
+                                             mu = circular::circular(2 * pi * .x - mu),
+                                             kappa = kappa,
+                                             from = circular::circular(0)))
+    }
+    if(inverse==T){
+      result <- (1 / (2 * pi)) *
+        map2_dbl(u, v, ~ circular::qvonmises(.y,
+                                             mu = circular::circular(2 * pi * .x - mu),
+                                             kappa = kappa,
+                                             from = circular::circular(0)))
+    }
+  }
+  else stop("cond_on must be either 1 or 2")
+  return(result%>%as.numeric())
 })
 
 
