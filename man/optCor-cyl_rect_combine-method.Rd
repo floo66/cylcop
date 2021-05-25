@@ -28,7 +28,7 @@ correlation. DEFAULT: 0.5}
 \item{n}{The number of sample points at each optimization step (parameter value). DEFAULT: 10000}
 
 \item{method}{A string of characters, describing what correlation metric to
-use. Either Kendall's tau ("tau"), a rank-based circular-linear coefficient
+use. Either Kendall's tau ("tau", recommended), a rank-based circular-linear coefficient
 ("cor_cyl"), or mutual information ("mi_cyl").}
 
 \item{background}{A logical value describing whether to optimize the parameter of the background copula, (TRUE) or

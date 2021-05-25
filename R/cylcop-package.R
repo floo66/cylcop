@@ -3,7 +3,6 @@
 #' @importFrom dplyr  %>% mutate
 #' @importFrom purrr  modify_if map2_dbl map_dbl map pmap_dbl
 #' @importFrom methods new is
-#' @importFrom Wrapped dwrappedg pwrappedg rwrappedg qwrappedg
 #' @importFrom data.table frank
 #' @importFrom ggplot2 ggplot aes geom_point ylab xlab geom_hline
 #' @importFrom ggplot2 element_blank element_line element_text

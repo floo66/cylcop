@@ -28,7 +28,7 @@ Default is  \code{cylcop::opt_lin_bw(x, "adhoc")}.}
 If a parametric estimate is made, a list containing the estimated parameters, their
 standard errors and the loglikelihood is returned.
 If a nonparametric estimate is made, the output comes from
-the funtion \code{GoFKernel::density.reflected()}.
+the function \code{GoFKernel::density.reflected()}.
 }
 \description{
 This function finds parameter estimates of the marginal linear

@@ -9,13 +9,13 @@
 \title{Density, distribution, random number generation and quantiles of the wrapped
 Cauchy distribution}
 \usage{
-rwrappedcauchy(n, location = 0, scale = 1, ...)
+rwrappedcauchy(n, location = 0, scale = 1)
 
-dwrappedcauchy(theta, location = 0, scale = 1, K = 100)
+dwrappedcauchy(theta, location = 0, scale = 1, K = 100, check_prec = F)
 
-pwrappedcauchy(theta, location = 0, scale = 1, K = 100)
+pwrappedcauchy(theta, location = 0, scale = 1, K = 100, check_prec = F)
 
-qwrappedcauchy(p, location = 0, scale = 1, K = 100)
+qwrappedcauchy(p, location = 0, scale = 1, K = 100, check_prec = F)
 }
 \arguments{
 \item{n}{Number of random samples to be generated.}
@@ -25,11 +25,12 @@ qwrappedcauchy(p, location = 0, scale = 1, K = 100)
 \item{scale}{The numeric value of the parameter tuning the spread of the
 density.}
 
-\item{...}{Additional arguments (NOT USED ???)}
-
-\item{theta}{Anumeric vector hoding the angles at which to calculate the density or distribution.}
+\item{theta}{A numeric vector hoding the angles at which to calculate the density or distribution.}
 
 \item{K}{The limit used to approximate the distribution.}
+
+\item{check_prec}{Logical, whether to check if precision of numerical approximation
+with the current parameters is higher than 99%}
 
 \item{p}{vector of probabilities}
 }
