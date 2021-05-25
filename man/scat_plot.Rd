@@ -7,7 +7,7 @@
 scat_plot(traj, periodic = FALSE)
 }
 \arguments{
-\item{traj}{A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.}
+\item{traj}{A data.frame containing the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.}
 
 \item{periodic}{A logical value denoting whether the plot should be periodically extended past -pi and pi.}
 }

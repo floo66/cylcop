@@ -7,7 +7,7 @@
 search_cor(
   copula,
   data,
-  method = c("cor_cyl", "mi"),
+  method = c("cor_cyl", "mi_cyl"),
   acc,
   n,
   min,
@@ -22,7 +22,7 @@ search_cor(
 
 \item{method}{A string of characters, describing what correlation metric to
 use. Either a rank-based circular-linear coefficient ("cor_cyl") or mutual
-information ("mi").}
+information ("mi_cyl").}
 
 \item{acc}{A numeric value, the interval of the copula parameter at which to evaluate the
 correlation.}

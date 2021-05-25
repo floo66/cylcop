@@ -29,7 +29,7 @@ rwrappedcauchy <- function(n,
                     location = location,
                     scale = scale)
 
-  # returns x-y coordinates of points on a circle of radius 1, conver to angles:
+  # returns x-y coordinates of points on a circle of radius 1, convert to angles:
   angle <- sign(temp[, 2]) * acos(temp[, 1])
 }
 

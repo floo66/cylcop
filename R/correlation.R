@@ -1,15 +1,18 @@
 #' Estimate a rank-based circular-linear correlation-coefficient-like parameter
 #'
-#' Nomenclature afer Solow 1988 but with radians instead of degrees.
+#' The code is based on \insertCite{Mardia1976;textual}{cylcop}, \insertCite{Solow1988;textual}{cylcop}
+#' and \insertCite{Tu2015;textual}{cylcop}. The function returns a numeric value
+#' between 0 and 1, not -1 and 1, hence "correlation-coefficient-LIKE".
 #'
 #' @param theta A numeric vector of angles (measurements of a circular variable).
 #' @param x A numeric vector of steplengths (measurements of a linear variable).
-#' @param plot A logical value whether a plot of the regression line should be dislpayed.
 #'
-#' @return The function returns a numeric value between 0 and 1, not -1 and 1, hence "correlation-coefficient-LIKE"
+#' @return A numeric value between 0 and 1
 #' @export
 #'
-cor_cyl <- function(theta, x, plot = TRUE) {
+cor_cyl <- function(theta, x) {
+
+#Variable names as in Solow 1988 but with radians instead of degrees.
 
 # Assigning ranks to angular and linear measurements
 
@@ -29,37 +32,11 @@ cor_cyl <- function(theta, x, plot = TRUE) {
   if (n %% 2 == 0) {
     a <- 1 / (1 + 5 * (1 / tan(pi / n)) ^ 2 + 4 * (1 / tan(pi / n)) ^ 4)
   }
-  else{
+  else{symmetrize
     a <- 2 * (sin(pi / n)) ^ 4 / ((1 + (cos(pi / n))) ^ 3)
   }
 
   D <- a * (C ^ 2 + S ^ 2)
-
-# Plot regression line
-  if (plot) {
-    lm_test <- lm(r_x ~ cos(r_theta_star) + sin(r_theta_star), data = data)
-    reg_line <- data.frame(theta = seq(0, 2 * pi, 0.01))
-    reg_line <-
-      mutate(
-        reg_line,
-        x = as.double(coef(lm_test)[1]) + as.double(coef(lm_test)[2]) * cos(theta) +
-          as.double(coef(lm_test)[3]) * sin(theta)
-      )
-    p <- ggplot() +
-      geom_point(data = data, aes(x = .data$r_x, y = .data$r_theta_star)) +
-      geom_point(data = reg_line, aes(x = x, y = theta), color = "red") +
-      theme_bw() +
-      xlab("linear rank") +
-      ylab("circular rank") +
-      theme(
-        axis.title = element_text(size = 12, colour = "black"),
-        axis.text = element_text(size = 10, colour = "black"),
-        panel.border = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.position = "none"
-      )
-    plot(p)
-  }
 
   return(D)
 }
@@ -69,6 +46,16 @@ cor_cyl <- function(theta, x, plot = TRUE) {
 #' Estimate the mutual information between a circular and a linear random
 #' variable
 #'
+#' The mutual information can be normalized to lie between 0 ans 1
+#' by dividing by the product of the entropies of \code{x} and \code{theta}.
+#' Even if \code{x} and \code{theta} are perfectly correlated, the normalized
+#' mutual information will not be 1 if the underlying copula is periodic and
+#' symmetric. Therefore, we can set \code{symmetrize=T} to set all u-values of
+#' the empirical copula that are larger than 0.5 to 1-0.5. The mutual information
+#' is then calculated from those values and is exactly 1 in the case of
+#' perfect correlation as captured by e.g.
+#' \code{cyl_rect_combine(normalCopula(1))}.
+#'
 #' @param theta A numeric vector of angles (measurements of a circular
 #'   variable).
 #' @param x A numeric vector of steplengths (measurements of a linear
@@ -76,14 +63,12 @@ cor_cyl <- function(theta, x, plot = TRUE) {
 #' @param normalize A logical value whether the mutual information should be
 #'   normalized to lie within [0,1].
 #' @param symmetrize A logical value whether it should be assumed that positive
-#'   and negative angles are equivalent. If they are indeed exactly equivalent
-#'   and \code{symmetrize=F}, the maximal normalized mutual information will be about
-#'   0.5.
+#'   and negative angles are equivalent.
 #'
 #' @return A numeric value, the mutual information between \code{theta} and \code{x}.
 #' @export
 #'
-mi_binned <- function(theta,
+mi_cyl <- function(theta,
                       x,
                       normalize = T,
                       symmetrize = F) {

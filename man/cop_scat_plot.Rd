@@ -4,10 +4,14 @@
 \alias{cop_scat_plot}
 \title{Make scatterplot of copula values}
 \usage{
-cop_scat_plot(traj)
+cop_scat_plot(input)
 }
 \arguments{
-\item{traj}{#' @param traj A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.}
+\item{input}{Either
+a data.frame containing the trajectory. Must contain collumns
+\code{traj$cop_u} and \code{traj$cop_v}\\
+or\\
+a \code{copula} object or \code{cyl_copula} object.}
 }
 \value{
 The scatterplot.

@@ -10,7 +10,7 @@
   x,
   acc,
   n,
-  method = c("cor_cyl", "mi"),
+  method = c("cor_cyl", "mi_cyl"),
   parameter = "both"
 )
 }
@@ -30,7 +30,7 @@ and/or b). DEFAULT: 10000}
 
 \item{method}{A string of characters, describing what correlation metric to
 use. Either a rank-based circular-linear coefficient ("cor_cyl") or mutual
-information ("mi").}
+information ("mi_cyl").}
 
 \item{parameter}{A character string specifying which parameter to optimize,
 "a", "b", or "both"}

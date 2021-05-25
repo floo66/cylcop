@@ -12,7 +12,7 @@
 #'
 qmixedvonmises <- function(p, mu1, mu2, kappa1, kappa2, prop) {
 
-  if(p>0.999999) return(pi)
+  if(all(p>0.999999)) return(rep(pi,length(p)))
 
   #Numerically find the inverse. This can get pretty slow, because the entire calculation is repeated
   #every time qmixedvonmises() is called
@@ -27,15 +27,26 @@ qmixedvonmises <- function(p, mu1, mu2, kappa1, kappa2, prop) {
   npts<-1000
   pts<-seq(-pi,(pi-0.000001),length.out = npts)
 
-  result <- tryCatch(stats::spline(cylcop_mixedvonmises.env$cdf, pts, method = "hyman", xout = p)$y,
+  interpolate_from_prev_calc <- function(mu1, mu2, kappa1, kappa2, prop){
+    if(any(c(mu1, mu2, kappa1, kappa2, prop)!=cylcop_mixedvonmises.env$parameter_vals)){
+      stop("not the parameters in the environment")
+    }
+    result <- stats::spline(cylcop_mixedvonmises.env$cdf, pts, method = "hyman", xout = p)$y
+    return(result)
+  }
+
+  result <- tryCatch(interpolate_from_prev_calc(mu1, mu2, kappa1, kappa2, prop),
             error=function(e){
               #cylcop.env$cdf doesn't exist yet, i.e. first time calling the function
+              #Or it corresponds to other parameter values than the ones the function is currently called with
+              assign("parameter_vals",c(mu1,mu2,kappa1,kappa2,prop),envir=cylcop_mixedvonmises.env)
               assign("cdf",
                      suppressWarnings(pmixedvonmises(pts, mu1, mu2, kappa1, kappa2, prop, from=-pi)),
                      envir=cylcop_mixedvonmises.env)
               result <- stats::spline(cylcop_mixedvonmises.env$cdf, pts, method = "hyman", xout = p)$y
               return(result)
             })
+  result[which(p>0.999999)] <- pi
   return(result)
 }
 

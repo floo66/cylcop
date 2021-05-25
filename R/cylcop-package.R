@@ -22,6 +22,7 @@
 #' @importFrom circular rmixedvonmises dmixedvonmises pmixedvonmises
 #' @importFrom extraDistr rhnorm phnorm dhnorm qhnorm
 #' @importFrom movMF movMF
+#' @importFrom Rdpack reprompt
 #' @keywords internal
 "_PACKAGE"
 

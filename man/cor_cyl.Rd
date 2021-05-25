@@ -4,18 +4,18 @@
 \alias{cor_cyl}
 \title{Estimate a rank-based circular-linear correlation-coefficient-like parameter}
 \usage{
-cor_cyl(theta, x, plot = TRUE)
+cor_cyl(theta, x)
 }
 \arguments{
 \item{theta}{A numeric vector of angles (measurements of a circular variable).}
 
 \item{x}{A numeric vector of steplengths (measurements of a linear variable).}
-
-\item{plot}{A logical value whether a plot of the regression line should be dislpayed.}
 }
 \value{
-The function returns a numeric value between 0 and 1, not -1 and 1, hence "correlation-coefficient-LIKE"
+A numeric value between 0 and 1
 }
 \description{
-Nomenclature afer Solow 1988 but with radians instead of degrees.
+The code is based on \insertCite{Mardia1976;textual}{cylcop}, \insertCite{Solow1988;textual}{cylcop}
+and \insertCite{Tu2015;textual}{cylcop}. The function returns a numeric value
+between 0 and 1, not -1 and 1, hence "correlation-coefficient-LIKE".
 }

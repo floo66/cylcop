@@ -251,7 +251,7 @@ get_marg <- function(marg_type) {
 #' Set options
 #'
 #'
-#' @param silent logical, suppress all sound and messages
+#' @param silent logical, suppress all sounds and messages
 #'
 #' @export
 #'

@@ -39,10 +39,7 @@ setClass("cyl_cubsec", contains = "cyl_copula")
 #'
 cyl_cubsec <- function(a = 1 / (2 * pi),
                        b = 1 / (2 * pi)) {
-
-
-
-  lowbnd = c(-1 / (2 * pi),-1 / (2 * pi))
+  lowbnd = c(-1 / (2 * pi), -1 / (2 * pi))
   upbnd = c(1 / (2 * pi), 1 / (2 * pi))
 
   new(
@@ -63,8 +60,8 @@ cyl_cubsec <- function(a = 1 / (2 * pi),
 setMethod("rCopula", signature("numeric", "cyl_cubsec"), function(n, copula) {
   u <- runif(n)
   w <- runif(n)
-  mat <- matrix(ncol=2,c(u,w))
-  v <- cylcop::cCopula(mat,copula,cond_on=1, inverse=T)
+  mat <- matrix(ncol = 2, c(u, w))
+  v <- cylcop::cCopula(mat, copula, cond_on = 1, inverse = T)
   cop_uv <- cbind(u, v)
   return(cop_uv)
 })
@@ -117,75 +114,126 @@ setMethod("pCopula", signature("matrix", "cyl_cubsec"), function(u, copula) {
 #' Condtional copula
 #' @rdname cCopula
 #' @export
-setMethod("cCopula", signature("cyl_cubsec"), function(u, copula, cond_on=2, inverse=F) {
+setMethod("cCopula", signature("cyl_cubsec"), function(u,
+                                                       copula,
+                                                       cond_on = 2,
+                                                       inverse = F) {
   a <- copula@parameters[1]
   b <- copula@parameters[2]
-  u_orig <- matrix(ncol=2,u)
+  u_orig <- matrix(ncol = 2, u)
   length <- nrow(u)
   v <- u_orig[, 2, drop = F]
   u <- u_orig[, 1, drop = F]
 
-  if(cond_on==2){
+  if (cond_on == 2) {
     alpha <- a * sin(2 * pi * u)
     beta <- -b * sin(2 * pi * u)
-    if(inverse==F){
-      result <- u + (-alpha + beta)*(1 - v)*v + (1 - v)*(alpha*(1 - v) + beta*v) - v*(alpha*(1 - v) + beta*v)
+    if (inverse == F) {
+      result <-
+        u + (-alpha + beta) * (1 - v) * v + (1 - v) * (alpha * (1 - v) + beta *
+                                                         v) - v * (alpha * (1 - v) + beta * v)
     }
-    if(inverse==T){
-      result <-  numerical_inv_conditional_cop(u_orig, copula, cond_on=2)
+    if (inverse == T) {
+      result <-  numerical_inv_conditional_cop(u_orig, copula, cond_on = 2)
     }
   }
-  else if(cond_on==1){
-    if(inverse==F){
+  else if (cond_on == 1) {
+    if (inverse == F) {
       alpha_prime <- a * 2 * pi * cos(2 * pi * u)
       beta_prime <- -b * 2 * pi * cos(2 * pi * u)
-      result<-  v + v * alpha_prime + v ^ 2 * (beta_prime - 2 * alpha_prime) +
+      result <-
+        v + v * alpha_prime + v ^ 2 * (beta_prime - 2 * alpha_prime) +
         v ^ 3 * (alpha_prime - beta_prime)
     }
-    if(inverse==T){
-      result<- map2_dbl(u, v, function(u,w){
-        alpha_prime <- a * 2 * pi * cos(2 * pi * u)
-        beta_prime <- -b * 2 * pi * cos(2 * pi * u)
-        if(abs(w-1)<0.0000001) return(1.0)
-        if(abs(w)<0.0000001) return(0.0)
-        term1<- -18*alpha_prime^2 - 2*alpha_prime^3 + 27*alpha_prime*beta_prime + 3*alpha_prime^2*beta_prime - 9*beta_prime^2 + 3*alpha_prime*beta_prime^2 - 2*beta_prime^3 + 27*alpha_prime^2*w - 54*alpha_prime*beta_prime*w + 27*beta_prime^2*w
-        term2<- sqrt(as.complex(4*(3*alpha_prime - alpha_prime^2 - 3*beta_prime + alpha_prime*beta_prime - beta_prime^2)^3 +
-                                  (-18*alpha_prime^2 - 2*alpha_prime^3 + 27*alpha_prime*beta_prime + 3*alpha_prime^2*beta_prime -
-                                     9*beta_prime^2 + 3*alpha_prime*beta_prime^2 - 2*beta_prime^3 +
-                                     27*alpha_prime^2*w - 54*alpha_prime*beta_prime*w + 27*beta_prime^2*w)^2))
+    if (inverse == T) {
+      if (abs(a + b) < 0.001) {
+        #numerical instability in the analytical solution, use numeric approximation instead
+        result <-
+          numerical_inv_conditional_cop(u_orig, copula, cond_on = 1)
+      } else{
+        result <- map2_dbl(u, v, function(u, w) {
+          alpha_prime <- a * 2 * pi * cos(2 * pi * u)
+          beta_prime <- -b * 2 * pi * cos(2 * pi * u)
+          if (abs(w - 1) < 0.0000001)
+            return(1.0)
+          if (abs(w) < 0.0000001)
+            return(0.0)
+          term1 <-
+            -18 * alpha_prime ^ 2 - 2 * alpha_prime ^ 3 + 27 * alpha_prime * beta_prime + 3 *
+            alpha_prime ^ 2 * beta_prime - 9 * beta_prime ^ 2 + 3 * alpha_prime * beta_prime ^
+            2 - 2 * beta_prime ^ 3 + 27 * alpha_prime ^ 2 * w - 54 * alpha_prime * beta_prime *
+            w + 27 * beta_prime ^ 2 * w
+          term2 <-
+            sqrt(as.complex(
+              4 * (
+                3 * alpha_prime - alpha_prime ^ 2 - 3 * beta_prime + alpha_prime * beta_prime - beta_prime ^
+                  2
+              ) ^ 3 +
+                (
+                  -18 * alpha_prime ^ 2 - 2 * alpha_prime ^ 3 + 27 * alpha_prime * beta_prime + 3 *
+                    alpha_prime ^ 2 * beta_prime -
+                    9 * beta_prime ^ 2 + 3 * alpha_prime *
+                    beta_prime ^ 2 - 2 * beta_prime ^ 3 +
+                    27 * alpha_prime ^ 2 * w - 54 * alpha_prime *
+                    beta_prime * w + 27 * beta_prime ^ 2 * w
+                ) ^ 2
+            ))
 
-        if(abs(Re(term1+term2))<10^(-11)){
-          #avoid numerical instability
-          mat <- matrix(ncol=2,c(u,w))
-          solution <- numerical_inv_conditional_cop(mat, copula, cond_on = 1)
-          return(solution)
-        }
+          if (abs(Re(term1 + term2)) < 10 ^ (-11)) {
+            #avoid numerical instability
+            mat <- matrix(ncol = 2, c(u, w))
+            solution <-
+              numerical_inv_conditional_cop(mat, copula, cond_on = 1)
+            return(solution)
+          }
 
-         term3<-(term1+term2)^(1/3)
+          term3 <- (term1 + term2) ^ (1 / 3)
 
-        solution1 <- -((beta_prime - 2*alpha_prime)/(3*(alpha_prime - beta_prime))) -
-          (complex(real = 1, imaginary = sqrt(3))* term3 / (6*2^(1/3)*(alpha_prime - beta_prime))) +
-          (complex(real = 1, imaginary = -sqrt(3))*(3*alpha_prime - alpha_prime^2 - 3*beta_prime + alpha_prime*beta_prime - beta_prime^2)/(3*2^(2/3)*(alpha_prime - beta_prime)*term3))
+          solution1 <-
+            -((beta_prime - 2 * alpha_prime) / (3 * (alpha_prime - beta_prime))) -
+            (complex(real = 1, imaginary = sqrt(3)) * term3 / (6 * 2 ^ (1 /
+                                                                          3) * (alpha_prime - beta_prime))) +
+            (
+              complex(real = 1, imaginary = -sqrt(3)) * (
+                3 * alpha_prime - alpha_prime ^ 2 - 3 * beta_prime + alpha_prime * beta_prime - beta_prime ^
+                  2
+              ) / (3 * 2 ^ (2 / 3) * (alpha_prime - beta_prime) * term3)
+            )
 
-        solution2 <- -((beta_prime - 2*alpha_prime)/(3*(alpha_prime - beta_prime))) -
-          (complex(real = 1, imaginary = -sqrt(3))* term3 / (6*2^(1/3)*(alpha_prime - beta_prime))) +
-          (complex(real = 1, imaginary = sqrt(3))*(3*alpha_prime - alpha_prime^2 - 3*beta_prime + alpha_prime*beta_prime - beta_prime^2)/(3*2^(2/3)*(alpha_prime - beta_prime)*term3))
+          solution2 <-
+            -((beta_prime - 2 * alpha_prime) / (3 * (alpha_prime - beta_prime))) -
+            (complex(real = 1, imaginary = -sqrt(3)) * term3 / (6 * 2 ^ (1 /
+                                                                           3) * (alpha_prime - beta_prime))) +
+            (
+              complex(real = 1, imaginary = sqrt(3)) * (
+                3 * alpha_prime - alpha_prime ^ 2 - 3 * beta_prime + alpha_prime * beta_prime - beta_prime ^
+                  2
+              ) / (3 * 2 ^ (2 / 3) * (alpha_prime - beta_prime) * term3)
+            )
 
-        solution3 <- -((beta_prime - 2*alpha_prime)/(3*(alpha_prime - beta_prime))) +
-          (term3 / (3*2^(1/3)*(alpha_prime - beta_prime))) -
-          ((2^(1/3)*(3*alpha_prime - alpha_prime^2 - 3*beta_prime + alpha_prime*beta_prime - beta_prime^2))/(3*(alpha_prime - beta_prime)*term3))
-        solution <- c(solution1, solution2, solution3)
-        real <- Re(solution)
-        imaginary <- abs(Im(solution))
-        ind <- which(real>=0 & real <=1)
-        ind2 <- which(imaginary[ind]==min(imaginary[ind]))
-        return(real[ind][ind2])
-      })
+          solution3 <-
+            -((beta_prime - 2 * alpha_prime) / (3 * (alpha_prime - beta_prime))) +
+            (term3 / (3 * 2 ^ (1 / 3) * (alpha_prime - beta_prime))) -
+            ((
+              2 ^ (1 / 3) * (
+                3 * alpha_prime - alpha_prime ^ 2 - 3 * beta_prime + alpha_prime * beta_prime - beta_prime ^
+                  2
+              )
+            ) / (3 * (alpha_prime - beta_prime) * term3))
+          solution <- c(solution1, solution2, solution3)
+          real <- Re(solution)
+          imaginary <- abs(Im(solution))
+          ind <- which(real >= 0 & real <= 1)
+          ind2 <- which(imaginary[ind] == min(imaginary[ind]))
+          return(real[ind][ind2])
+        })
+      }
 
     }
   }
-  else stop("cond_on must be either 1 or 2")
-  return(result%>%as.numeric())
+  else
+    stop("cond_on must be either 1 or 2")
+  return(result %>% as.numeric())
 })
 
 
@@ -195,7 +243,8 @@ setMethod("cCopula", signature("cyl_cubsec"), function(u, copula, cond_on=2, inv
 #' @rdname setCopParam
 #' @export
 setMethod("setCopParam", "cyl_cubsec", function(copula, param_val, param_name) {
-  if(is.null(param_name)) param_name<-copula@param.names
+  if (is.null(param_name))
+    param_name <- copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)
   copula@parameters[param_num] <- param_val
   return(copula)

@@ -17,7 +17,7 @@ cop_plot(
 
 \item{type}{A string of characters, either "pdf or "cdf".}
 
-\item{plot_type}{A string of characters. Available plottypes are:
+\item{plot_type}{A string of characters. Available plot types are:
 "rgl": surface plot,
 "plotly": interactive surface plot, or
 "ggplot": heatmap}

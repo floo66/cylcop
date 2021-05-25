@@ -23,42 +23,41 @@ make_traj <-
            parameter_circ = list(0, 1),
            marginal_lin,
            parameter_lin = list()) {
-
-#-----checks preparations and get parameters-------------------------------------------
+    #-----checks preparations and get parameters-------------------------------------------
 
     #get the  marginal distributions, densities, etc. into one list
     marg_circ <- get_marg(marginal_circ)
     marg_lin <- get_marg(marginal_lin)
     if(cylcop.env$silent==F){
-    #echo what functions and parameters are used
-    printCop(copula)
-    message(
-      sprintf(
-        "%-18s %-20s parameters: %-60s",
-        "Circular marginal:",
-        marginal_circ,
-        print_param(marg_circ$d, parameter_circ)
+      #echo what functions and parameters are used
+      printCop(copula)
+      message(
+        sprintf(
+          "%-18s %-18s parameters: %s",
+          "\nCircular marginal:",
+          marginal_circ,
+          print_param(marg_circ$d, parameter_circ)
         ))
-    message(
-      sprintf(
-        "%-18s %-20s parameters: %-60s",
-        "Linear marginal:",
-        marginal_lin,
-        print_param(marg_lin$r, parameter_lin)
-      ),
-      "\n")
-}
+      message(
+        sprintf(
+          "%-18s %-18s parameters: %s",
+          "Linear marginal:",
+          marginal_lin,
+          print_param(marg_lin$r, parameter_lin)
+        ),
+        "\n")
+    }
     #Test if the precision of the approximation for the wrapped cauchy marginal distribution is sufficient
     if(marginal_circ=="wrappedcauchy")
       tryCatch(do.call(marg_circ$p, c(0, parameter_circ)),
-              warning = function(w) {
-                rlang::abort(conditionMessage(w))
-              })
+               warning = function(w) {
+                 rlang::abort(conditionMessage(w))
+               })
 
     #give warnings regarding approximations, with hnorm as marginal
     if (any(is(copula) == "cyl_gauss") && marginal_circ != "hnorm") {
       warning(cylcop::warning_sound(),
-        "gaussian copula only gives at least approximatley correct results when used with hnorm as
+              "gaussian copula only gives at least approximatley correct results when used with hnorm as
         marginal circular distribution"
       )
     }
@@ -69,9 +68,9 @@ make_traj <-
       prob <- 1 - do.call(extraDistr::phnorm, c(pi, parameter_circ))
       if (prob > 0.0001) {
         warning(cylcop::warning_sound(),
-          "The probability to draw a value from hnorm that is larger than pi is ",
-          round(100 * prob, 5),
-          "%"
+                "The probability to draw a value from hnorm that is larger than pi is ",
+                round(100 * prob, 5),
+                "%"
         )
       }
     }
@@ -91,79 +90,95 @@ make_traj <-
       )
 
 
-#-----actually produce trajectory-------------------------------------------
-
+    #-----actually produce trajectory-------------------------------------------
+    if(n<=100){
+      step_start <- 3
+      step_end <- n
+    }else if (n<1002 & n>100){
+      step_start <- c(3,101)
+      step_end <- c(100,n)
+    }else{
+      step_start <- c(3,101,seq(1001,(n-1),1000))
+      step_end <- unique(c(100,seq(1000,n,1000),n))
+    }
     #start timer
     ptm <- proc.time()
     time <- 0
 
-    for (i in 3:n) {
-      if(cylcop.env$silent==F){
-      #get time for 100 steps of trajectory, if trajectory is at least that long, to set up the progress bar
-      if (i == 100) {
-        time <- (proc.time() - ptm)[3] %>% as.double()
-        if ((time / 100 * n) > 5) {
-          message(
-            "estimated time to generate trajectory: ",
-            floor((time / 100 * n) / 60),
-            " minutes, ",
-            (time / 100 * n) - 60 * floor((time / 100 * n) / 60),
-            " seconds"
-          )
-          pb <- utils::txtProgressBar(min = 1, max = n)
-        }
-      }
-      if ((time / 100 * n) > 5 && i >= 100){
-        utils::setTxtProgressBar(pb, i)
-       if(i==n/2) cylcop::waiting_sound()
-      }
-      }
-
-      #get a sample of 2 correlated uniformly distributed random variables.
-      #Subtract a small number to avoid to get "exactly" 1 (within machine precision) and therefore a steplength of INF
-      cop_uv <- rCopula(1, copula)
-      if(any(cop_uv==1)){
-        cop_uv[which(cop_uv>0.99999999999)] <- 0.99999999999
-      }
-      if(any(cop_uv==0)){
-        cop_uv[which(cop_uv<0.00000000001)] <- 0.00000000001
-      }
-      #convert to correlated marg_lin and marg_circ distributions using the inverse cdf's
-      steplength <- do.call(marg_lin$q, c(cop_uv[2], parameter_lin))
+    for(i in 1:length(step_start)){
+      cop_sample <- rCopula((step_end[i]-step_start[i]+1), copula)
+      step_vec <- do.call(marg_lin$q, c(list(p=cop_sample[,2]), parameter_lin))
       if (marginal_circ == "vonmises") {
         #We supress warnings, so we are not annoyed by the warning of the conversion to circular
-        #As usual the circular package is a huge pile of equine manure, but I figured the following:
         #To get the quantile function of the full circle [0,2pi) distribution, use
         # angle <- suppressWarnings(do.call(qvonmises, c(cop_uv[1],parameter_circ, list(from=0))) )
         #you can then convert it to angles on the half circle. Or you use the the quantile function
         #of the half circle [-pi,pi) distribution directly, as below. Both approaches obviouysly give different results,
         #but you can convert them into each other by changing the copula for symmetry reasons. See text
-        angle <-
+        angle_vec <-
           suppressWarnings(do.call(marg_circ$q,
-                                   c(cop_uv[1], parameter_circ, list(from = -pi)
-                                     )) - 2 * pi)
-      }
-      else{
-        angle <- do.call(marg_circ$q, c(cop_uv[1], parameter_circ))
-      }
-
-      #with hnorm, we only get "right-turns" so we flip them to left turns with a probability of 0.5
-      if (marginal_circ == "hnorm" && runif(1) < 0.5) {
-        angle <- (-1) * angle
+                                   c(list(p=cop_sample[,1]), parameter_circ, list(from = -pi)
+                                   )) - 2 * pi)
+      }else{
+        angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ))
       }
 
-      #take the step and add it to trajectory
-      point <- angstep2xy(angle, steplength, prevp1, prevp2)
-      traj[i, ] <- c(point, steplength, angle, cop_uv[2], cop_uv[1])
-      prevp2 <- prevp1
-      prevp1 <- point
+      step_in_batch <- 1
+      for(step in step_start[i]:step_end[i]){
+        cop_uv <- cop_sample[step_in_batch,,drop=F]
+        if(any(cop_uv==1)){
+          cop_uv[which(cop_uv>0.99999999999)] <- 0.99999999999
+        }
+        if(any(cop_uv==0)){
+          cop_uv[which(cop_uv<0.00000000001)] <- 0.00000000001
+        }
+        #convert to correlated marg_lin and marg_circ distributions using the inverse cdf's
+        steplength <- step_vec[step_in_batch]
+        angle <- angle_vec[step_in_batch]
+
+        #with hnorm, we only get "right-turns" so we flip them to left turns with a probability of 0.5
+        if (marginal_circ == "hnorm" && runif(1) < 0.5) {
+          angle <- (-1) * angle
+        }
+
+
+        #take the step and add it to trajectory
+        point <- angstep2xy(angle, steplength, prevp1, prevp2)
+        traj[step, ] <- c(point, steplength, angle, cop_uv[2], cop_uv[1])
+        prevp2 <- prevp1
+        prevp1 <- point
+
+        step_in_batch <- step_in_batch+1
+      }
+
+      if(cylcop.env$silent==F){
+        #get time for 100 steps of trajectory, if trajectory is at least that long, to set up the progress bar
+        if (step_end[i] == 100) {
+          time <- (proc.time() - ptm)[3] %>% as.double()
+          if ((time / 100 * n) > 20) {
+            message(
+              "Estimated time to generate trajectory: ",
+              floor((time / 100 * n) / 60),
+              " minutes, ",
+              round((time / 100 * n) - 60 * floor((time / 100 * n) / 60)),
+              " seconds"
+            )
+            pb <- utils::txtProgressBar(min = 1, max = n)
+          }
+        }
+        if ((time / 100 * n) > 20 && step_end[i] >= 100){
+          utils::setTxtProgressBar(pb, step_end[i])
+          if(i==which(step_end>=n/2)[1]) cylcop::waiting_sound()
+        }
+      }
+
     }
     if(cylcop.env$silent==F){
-    #close progress bar
-    if ((time / 100 * n) > 5 && n >= 100){
-      close(pb)
-      cylcop::done_sound()
-    }
+      #close progress bar
+      if ((time / 100 * n) > 20 && n >= 100){
+        close(pb)
+        cylcop::done_sound()
+      }
     }
     return(traj)
-    }
+  }

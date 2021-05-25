@@ -74,7 +74,7 @@ cyl_rot_combine <- function(copula, shift = FALSE) {
 
   new(
     "cyl_rot_combine",
-    name = paste("'periodized'",name),
+    name = paste("cyl_rot_combine of",name),
     parameters = base_copula@parameters,
     param.names = base_copula@param.names,
     param.lowbnd = base_copula@param.lowbnd,
@@ -83,6 +83,20 @@ cyl_rot_combine <- function(copula, shift = FALSE) {
     shift = shift
   )
 }
+
+
+#' cyl_rot_combine show method
+#' @param object A \code{cyl_rot_combine}-object
+#' @describeIn cyl_copula-class What is printed
+#' @export
+setMethod("show", "cyl_rot_combine", function(object) {
+  cat(object@name, "\n")
+  for (i in seq_along(object@parameters)) {
+    cat(object@param.names[i], "=", object@parameters[i], "\n")
+  }
+  if (object@shift)
+    cat("Copula is peridoically shifted by 0.5u")
+})
 
 
 

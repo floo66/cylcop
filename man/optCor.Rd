@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_cop_corr.R
 \name{optCor}
 \alias{optCor}
-\title{Roughly estimate cyl_copula parameters from some correlation metric}
+\title{Roughly estimate copula parameters from some correlation metric}
 \usage{
 optCor(
   copula,
@@ -10,12 +10,12 @@ optCor(
   x,
   acc = NULL,
   n = 10000,
-  method = c("cor_cyl", "mi"),
+  method = c("cor_cyl", "mi_cyl", "tau"),
   ...
 )
 }
 \arguments{
-\item{copula}{A \code{cyl_copula} object}
+\item{copula}{A \code{cyl_copula} or \code{copula} object.}
 
 \item{theta}{A numeric vector of angles (measurements of a circular
 variable).}
@@ -27,14 +27,16 @@ variable).}
 \item{n}{The number of sample points at each optimization step (parameter value).}
 
 \item{method}{A string of characters, describing what correlation metric to use.
-Either a rank-based circular-linear coefficient ("cor_cyl") or
-mutual information ("mi").}
+Either a rank-based circular-linear coefficient ("cor_cyl"),
+mutual information ("mi_cyl"), or Kendall's tau ("tau").}
 
-\item{...}{Adittional parameters.}
+\item{...}{Additional parameters (see individual methods).}
 }
 \value{
 A numeric value or vector containing the estimated parameter value(s).
 }
 \description{
-See individual methods for more detailed explanations.
+See individual methods for more detailed explanations. Kendall's tau is only
+available for \code{cyl_rect_combine}-copulae, for which it is the reccomneded
+method to use.
 }

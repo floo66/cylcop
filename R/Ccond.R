@@ -123,7 +123,9 @@ setMethod("cCopula", "Copula", function(u, copula, cond_on, inverse) {
   if(cond_on==2){
     u_swap <- matrix(ncol=2,c(u[,2],u[,1]))
     tryCatch({
-      copula::cCopula(u_swap,copula,indices =2, inverse = inverse) %>% as.numeric()
+      result <- copula::cCopula(u_swap,copula,indices =2, inverse = inverse) %>% as.numeric()
+      if(any(is.na(result))) stop()
+      result
     }, error = function(e) {
       if(inverse==F){
       numerical_conditional_cop(u,copula,cond_on = 2)
@@ -135,7 +137,9 @@ setMethod("cCopula", "Copula", function(u, copula, cond_on, inverse) {
   }
   else if(cond_on==1){
     tryCatch({
-      copula::cCopula(u,copula,indices =2, inverse = inverse) %>% as.numeric()
+      result <- copula::cCopula(u,copula,indices =2, inverse = inverse) %>% as.numeric()
+      if(any(is.na(result))) stop()
+      result
     }, error = function(e) {
       if(inverse==F){
         numerical_conditional_cop(u,copula,cond_on = 1)

@@ -159,7 +159,7 @@ prep_n_check_ML <-
 #' @param optim.method optimizer used in \code{optim()}, can be
 #'   "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", or "Brent"
 #' @param optim.control A list of additional controls passed to \code{optim()}.
-#' @param estimate.variance A logical valu, denoting whether to include an
+#' @param estimate.variance A logical value, denoting whether to include an
 #'   estimate of the variance (NOT YET IMPLEMENTED).
 #' @param traceOpt A logical value, denoting whether to print information regarding
 #'   convergence, current values, etc. during the optimization process.

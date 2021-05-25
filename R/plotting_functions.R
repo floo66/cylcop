@@ -1,7 +1,7 @@
 
 #' Make scatterplot of turning angles ans steplengths
 #'
-#' @param traj A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
+#' @param traj A data.frame containing the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
 #' @param periodic A logical value denoting whether the plot should be periodically extended past -pi and pi.
 #'
 #' @return The scatterplot
@@ -97,7 +97,7 @@ scat_plot <- function(traj, periodic = FALSE) {
         aes(x = .data$steplength),
         fill = "red",
         alpha = 0.1,
-        size = 0.2
+        color = "black"
       )
     ymarg <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
       geom_ribbon(
@@ -110,9 +110,9 @@ scat_plot <- function(traj, periodic = FALSE) {
       coord_flip()
 
     p1 <-
-      cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top")
+      suppressWarnings(cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top"))
     p2 <-
-      cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right")
+      suppressWarnings(cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right"))
   }
 
 #if no periodic image should be plotted
@@ -144,7 +144,7 @@ scat_plot <- function(traj, periodic = FALSE) {
         aes(x = .data$steplength),
         fill = "red",
         alpha = 0.1,
-        size = 0.2
+        color = "black"
       )
     ymarg <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
       geom_ribbon(
@@ -158,12 +158,12 @@ scat_plot <- function(traj, periodic = FALSE) {
       coord_flip()
 
     p1 <-
-      cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top")
+      suppressWarnings(cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top"))
     p2 <-
-      cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right")
+      suppressWarnings(cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right"))
   }
 
-  return(cowplot::ggdraw(p2))
+  return(suppressWarnings(cowplot::ggdraw(p2)))
 }
 
 
@@ -175,7 +175,7 @@ scat_plot <- function(traj, periodic = FALSE) {
 #' @export
 #'
 traj_plot <- function(traj) {
-  ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
+p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
     geom_point(aes(colour = 1:length(traj$pos_x))) +
     geom_path(aes(colour = 1:length(traj$pos_x))) +
     geom_point(
@@ -193,6 +193,7 @@ traj_plot <- function(traj) {
       axis.title = element_text(size = 12, colour = "black"),
       axis.text = element_text(size = 10, colour = "black")
     )
+  suppressWarnings(plot(p))
 }
 
 
@@ -306,9 +307,9 @@ circ_plot <- function(traj) {
 
 # plot
 
-  ggplot() +
+  p <- ggplot() +
     circ_plot_layers +
-    geom_point(data = traj, aes(y = .data$steplength, x = as.numeric(.data$angle))) +
+    geom_point(data = traj, aes(y = .data$steplength, x = as.numeric(.data$angle)),alpha=0.5,size=0.3) +
     geom_line(data = marginal_angle_dens,
               aes(y = .data$y, x = .data$x),
               colour = "grey60",
@@ -323,19 +324,38 @@ circ_plot <- function(traj) {
       alpha = 0.3,
       fill = "blue"
     )
+  suppressWarnings(plot(p))
 }
 
 
 #' Make scatterplot of copula values
 #'
-#' @param traj #' @param traj A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
+#' @param input Either
+#' a data.frame containing the trajectory. Must contain collumns
+#' \code{traj$cop_u} and \code{traj$cop_v}\\
+#' or\\
+#' a \code{copula} object or \code{cyl_copula} object.
 #'
 #' @return The scatterplot.
 #' @export
 #'
-cop_scat_plot <- function(traj) {
+cop_scat_plot <- function(input) {
+
+  if ((any(is(input) == "cyl_copula"))||(any(is(input) == "Copula"))){
+    sample <- rCopula(10000,input)
+    traj <- data.frame(cop_u=sample[,1], cop_v=sample[,2])
+  } else if (is.data.frame(input)){
+    if(!all(c("cop_u","cop_v") %in% colnames(input))){
+      stop(cylcop::error_sound(), "trajectory must contain the columns 'cop_u' and 'cop_v'")
+    }
+    traj <- input
+  }
+  else{
+    stop(cylcop::error_sound(), "Provide either a (cyl_)copula object or a trajectory data.frame")
+  }
+
   plot_theme <- list(
-    geom_point(),
+    geom_point(size=0.01,alpha=0.5),
     theme(legend.position = "none"),
     theme_bw(),
     xlab("v"),
@@ -354,7 +374,7 @@ cop_scat_plot <- function(traj) {
     scale_y_continuous(breaks = seq(0, 1, 0.2)) +
     plot_theme +
     coord_fixed()
-  return(cowplot::ggdraw(p))
+  return(suppressWarnings(cowplot::ggdraw(p)))
 }
 
 
@@ -363,7 +383,7 @@ cop_scat_plot <- function(traj) {
 #'
 #' @param copula A \code{cyl_copula} object.
 #' @param type A string of characters, either "pdf or "cdf".
-#' @param plot_type A string of characters. Available plottypes are:
+#' @param plot_type A string of characters. Available plot types are:
 #'   "rgl": surface plot,
 #'   "plotly": interactive surface plot, or
 #'   "ggplot": heatmap
@@ -422,33 +442,38 @@ cop_plot <- function(copula,
   # v_grid[length(v_grid)] <- 0.99999999
 
   if (plot_type == "rgl" || plot_type == "plotly") {
-    mat <- matrix(ncol = resolution, nrow = resolution)
+
+    mat <- as.matrix(expand.grid(u = u, v = v))
 
     #set time for progress bar
+    time <- 0
     ptm <- proc.time()
 
     #calculate first and last slice of values to get an idea of the time it takes on average
-    for (i in c(1, resolution)) {
-      mat[i,] <- map2_dbl(u[i], v,  ~ fun(c(.x, .y), copula))
-    }
+
+    outp <- rep(NA, resolution^2)
+    outp[1:resolution] <- fun(mat[1:resolution,],copula)
+    outp[(nrow(mat)-resolution+1):nrow(mat)] <- fun(mat[(nrow(mat)-resolution+1):nrow(mat),],copula)
+
+
     if(cylcop.env$silent==F){
-    #generate progressbar
-    time <- (proc.time() - ptm)[3] * resolution / 2 %>% as.integer()
-    if (time > 10) {
-      message(
-        "estimated time for calculation of surface: ",
-        floor(time / 60),
-        " minutes, ",
-        time - 60 * floor(time / 60),
-        " seconds\n"
-      )
-      pb <- utils::txtProgressBar(min = 2, max = resolution - 1)
-    }
+      #generate progressbar
+      time <- (proc.time() - ptm)[3] * resolution / 2 %>% as.integer()
+      if (time > 10) {
+        message(
+          "estimated time for calculation of surface: ",
+          floor(time / 60),
+          " minutes, ",
+          round(time - 60 * floor(time / 60)),
+          " seconds\n"
+        )
+        pb <- utils::txtProgressBar(min = 2, max = resolution - 1)
+      }
     }
 
     #calculate rest of grid
     for (i in seq(2, resolution - 1)) {
-      mat[i,] <- map2_dbl(u[i], v,  ~ fun(c(.x, .y), copula))
+      outp[((i-1)*resolution+1):(i*resolution)] <- fun(mat[((i-1)*resolution+1):(i*resolution),],copula)
       if (time > 10 && cylcop.env$silent==F){
         utils::setTxtProgressBar(pb, i)
         if(i==resolution/2) cylcop::waiting_sound()
@@ -459,42 +484,59 @@ cop_plot <- function(copula,
       cylcop::done_sound()
     }
 
+    quant_995 <- quantile(outp,probs = 0.995)
+    max_outp <- max(outp)
+    if(max_outp>(2*quant_995)){
+      outp[which(outp>quant_995)] <- quant_995
+      warning(
+        cylcop:: warning_sound(),
+        paste0("Maximum of ", type, " is ", round(max_outp,2),
+               "; for better visulatization,\n values larger than ",
+               round(quant_995,2), " (99.5 percentile) are cut off.")
+      )
+    }
 
-#------------Make surface plot with rgl------
+    mat <- matrix(outp, ncol = resolution, nrow=resolution, byrow = F)
+
+
+
+    #if gridlines are at already calculated gridvalues, no need to recalculate them
+    if ((resolution - 1) %% (n_gridlines - 1) == 0) {
+      if(n_gridlines==0) mat_grid <- u_grid else{
+        mat_grid <- mat[seq(1, resolution, (resolution - 1) / (n_gridlines - 1)),
+            seq(1, resolution, (resolution - 1) / (n_gridlines - 1))]
+      }
+    }
+
+    #calculate gridlines
+    else{
+      time <- time / (resolution ^ 2)
+
+      #Calculate timing
+      if (time * (n_gridlines ^ 2) > 10 && cylcop.env$silent==F) {
+        message(
+          "gridlines are not a multiple of the surface points and have to be newly calculated.\nThis will take ",
+          floor(time * (n_gridlines ^ 2) / 60),
+          " minutes, ",
+          round((time * (n_gridlines ^ 2)) - 60 * floor(time * (n_gridlines ^ 2) / 60)),
+          " seconds"
+        )
+      }
+
+      #calculate values for gridlines
+      mat_grid <- as.matrix(expand.grid(u = u_grid, v = v_grid))
+      quant_995 <- quantile(outp,probs = 0.995)
+      outp_grid <- fun(mat_grid,copula)
+      if(max_outp>(2*quant_995)){
+        outp_grid[which(outp_grid>quant_995)] <- quant_995
+      }
+      mat_grid <- matrix(outp_grid, ncol = n_gridlines, nrow=n_gridlines, byrow = F)
+    }
+
+    #------------Make surface plot with rgl------
 
     if (plot_type == "rgl") {
-
-      #if gridlines are at already calculated gridvalues, no need to recalculate them
-      if ((resolution - 1) %% (n_gridlines - 1) == 0) {
-        mat_grid <-
-          mat[seq(1, resolution, (resolution - 1) / (n_gridlines - 1)),
-              seq(1, resolution, (resolution - 1) / (n_gridlines - 1))]
-      }
-
-      #calculate gridlines
-      else{
-        time <- time / (resolution ^ 2)
-
-        #set progress bar
-        if (time * (n_gridlines ^ 2) > 10 && cylcop.env$silent==F) {
-          message(
-            "gridlines are not a multiple of the surface points and have to be newly calculated.\nThis will take ",
-            floor(time * (n_gridlines ^ 2) / 60),
-            " minutes, ",
-            (time * (n_gridlines ^ 2)) - 60 * floor(time * (n_gridlines ^ 2) / 60),
-            " seconds"
-          )
-        }
-
-        #calculate values for gridlines
-        mat_grid <- matrix(ncol = n_gridlines, nrow = n_gridlines)
-        for (i in seq(1, n_gridlines)) {
-          mat_grid [i,] <- map2_dbl(u_grid[i], v_grid,  ~ fun(c(.x, .y), copula))
-        }
-      }
-
-
-# Generate title
+      # Generate title
 
       if (any(is(copula) == "Copula")) {
         title <-
@@ -517,7 +559,7 @@ cop_plot <- function(copula,
                     ", ",
                     copula@param.names[i],
                     " = ",
-                    copula@parameters[i])
+                    round(copula@parameters[i],3))
           }
         }
         title <-
@@ -525,9 +567,9 @@ cop_plot <- function(copula,
       }
 
 
-# Make plot
+      # Make plot
 
-      persp3d(
+      p <-  persp3d(
         u,
         v,
         mat,
@@ -542,8 +584,9 @@ cop_plot <- function(copula,
         else
           "C(u,v)",
         expand = 0
-      ) +
-        surface3d(
+      ) +      light3d(theta = 0, phi = 30) +
+        title3d(main = title)+
+        (if(n_gridlines>0){surface3d(
           u_grid,
           v_grid,
           mat_grid,
@@ -551,13 +594,11 @@ cop_plot <- function(copula,
           lit = FALSE,
           front = "lines",
           back = "lines"
-        ) +
-        light3d(theta = 0, phi = 30) +
-        title3d(main = title)
+        )} )
     }
 
 
-#------------Make interactive surface plot with plotly------
+    #------------Make interactive surface plot with plotly------
 
     else if (plot_type == "plotly") {
 
@@ -568,10 +609,10 @@ cop_plot <- function(copula,
       }
 
 
-# Calculate values for gridlines
+      # Calculate values for gridlines
 
       gridlines_x <- expand.grid(u = u_grid, v = v_grid)
-      zg <- pmap_dbl(gridlines_x,  ~ fun(c(.x, .y), copula))
+      zg <- c(mat_grid)
       gridlines_x <-
         mutate(gridlines_x, zg) %>% dplyr::rename(ug = u) %>% dplyr::rename(vg = v)
 
@@ -580,7 +621,7 @@ cop_plot <- function(copula,
 
       gridlines_y <- expand.grid(v = u_grid, u = v_grid)
       gridlines_y <- gridlines_y[c("u", "v")]
-      zg <- pmap_dbl(gridlines_y,  ~ fun(c(.x, .y), copula))
+      zg <- c(t(mat_grid))
       gridlines_y <-
         mutate(gridlines_y, zg) %>% dplyr::rename(ug = u) %>% dplyr::rename(vg = v)
 
@@ -588,7 +629,7 @@ cop_plot <- function(copula,
       gridlines_y$zg <- gridlines_y$zg + 0.01
 
 
-# Generate title
+      # Generate title
 
       if (any(is(copula) == "Copula")) {
         title <-
@@ -611,7 +652,7 @@ cop_plot <- function(copula,
                     ", ",
                     copula@param.names[i],
                     " = ",
-                    copula@parameters[i])
+                    round(copula@parameters[i],3))
           }
         }
         title <-
@@ -619,7 +660,7 @@ cop_plot <- function(copula,
       }
 
 
-# Make plot
+      # Make plot
 
       p <-
         plot_ly(
@@ -649,43 +690,44 @@ cop_plot <- function(copula,
         ) %>% add_surface()
 
 
-# Add gridlines
-
-      for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
-        p <-
-          add_trace(
-            p,
-            data = gridlines_x[i:(i + n_gridlines - 1), ],
-            x = ~ vg,
-            y = ~ ug,
-            z = ~ zg,
-            type = 'scatter3d',
-            mode = 'lines',
-            opacity = 0.95,
-            line = list(
-              width = 0.9,
-              color = "white",
-              reverscale = FALSE
+      # Add gridlines
+      if(n_gridlines>0){
+        for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
+          p <-
+            add_trace(
+              p,
+              data = gridlines_x[i:(i + n_gridlines - 1), ],
+              x = ~ vg,
+              y = ~ ug,
+              z = ~ zg,
+              type = 'scatter3d',
+              mode = 'lines',
+              opacity = 0.95,
+              line = list(
+                width = 0.9,
+                color = "white",
+                reverscale = FALSE
+              )
             )
-          )
-      }
-      for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
-        p <-
-          add_trace(
-            p,
-            data = gridlines_y[i:(i + n_gridlines - 1), ],
-            x = ~ vg,
-            y = ~ ug,
-            z = ~ zg,
-            type = 'scatter3d',
-            mode = 'lines',
-            opacity = 0.95,
-            line = list(
-              width = 0.9,
-              color = "white",
-              reverscale = FALSE
+        }
+        for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
+          p <-
+            add_trace(
+              p,
+              data = gridlines_y[i:(i + n_gridlines - 1), ],
+              x = ~ vg,
+              y = ~ ug,
+              z = ~ zg,
+              type = 'scatter3d',
+              mode = 'lines',
+              opacity = 0.95,
+              line = list(
+                width = 0.9,
+                color = "white",
+                reverscale = FALSE
+              )
             )
-          )
+        }
       }
       p %>% plotly::layout(showlegend = FALSE)
     }
@@ -697,12 +739,23 @@ cop_plot <- function(copula,
 # Calculate values on grid. Different grid layout, than plotly and rgl
 
     outp <- expand.grid(u = u, v = v)
-    outp$z <- pmap_dbl(outp,  ~ fun(c(.x, .y), copula))
-
+    #outp$z <- pmap_dbl(outp,  ~ fun(c(.x, .y), copula))
+    outp$z <-  fun(as.matrix(outp[,1:2]), copula)
+    quant_995 <- quantile(outp$z,probs = 0.995)
+    max_outp <- max(outp$z)
+    if(max_outp>(2*quant_995)){
+      outp$z[which(outp$z>quant_995)] <- quant_995
+      warning(
+        cylcop:: warning_sound(),
+        paste0("Maximum of ", type, " is ", round(max_outp,2),
+               "; for better visulatization,\n values larger than ",
+               round(quant_995,2), " (99.5 percentile) are cut off.")
+      )
+    }
 
 # Make plot
 
-    ggplot(outp, aes(v, u)) +
+    p <- ggplot(outp, aes(v, u)) +
       geom_raster(aes(fill = .data$z),interpolate = T,hjust=0,vjust=0) +
       coord_fixed() +
       theme_bw() +
@@ -715,10 +768,10 @@ cop_plot <- function(copula,
         panel.background = element_rect(fill = NA),
         panel.ontop = TRUE,
         panel.grid = element_blank(),
-        axis.title = element_text(size = 36, colour = "black"),
-        axis.text = element_text(size = 36, colour = "black"),
-        legend.title = element_text(size = 36, colour = "black"),
-        legend.text = element_text(size = 36, colour = "black")
+        axis.title = element_text(size = 12, colour = "black"),
+        axis.text = element_text(size = 12, colour = "black"),
+        legend.title = element_text(size = 12, colour = "black"),
+        legend.text = element_text(size = 12, colour = "black")
 
       ) +
       geom_raster(aes(fill = .data$z), alpha = 0.2) +
@@ -736,6 +789,6 @@ cop_plot <- function(copula,
       ) +
       scale_x_continuous(limits=c(0,1),expand=c(0,0)) +
       scale_y_continuous(limits=c(0,1),expand=c(0,0))
-
+    suppressWarnings(plot(p))
   }
 }

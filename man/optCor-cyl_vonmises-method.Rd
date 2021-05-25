@@ -4,7 +4,7 @@
 \alias{optCor,cyl_vonmises-method}
 \title{Roughly estimate cyl_vonmises parameter from some correlation metric}
 \usage{
-\S4method{optCor}{cyl_vonmises}(copula, theta, x, acc, n, method = c("cor_cyl", "mi"))
+\S4method{optCor}{cyl_vonmises}(copula, theta, x, acc, n, method = c("cor_cyl", "mi_cyl"))
 }
 \arguments{
 \item{copula}{A \code{cyl_vonmises} object}
@@ -21,7 +21,7 @@ correlation. DEFAULT: 0.5}
 
 \item{method}{A string of characters, describing what correlation metric to use.
 Either a rank-based circular-linear coefficient ("cor_cyl") or
-mutual information ("mi").}
+mutual information ("mi_cyl").}
 }
 \value{
 The estimated value of kappa.

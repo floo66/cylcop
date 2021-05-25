@@ -1,5 +1,5 @@
 Package: cylcop
-Title: What the Package Does (One Line, Title Case)
+Title: Circular-Linear Copulae with Angular Symmetry for Movement Data
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Florian",
@@ -7,7 +7,17 @@ Authors@R:
            role = c("aut", "cre"),
            email = "florian.hodel@yahoo.com",
            comment = c(ORCID = "0000-0002-0099-1006"))
-Description: Wbilackage does (one paragraph).
+Description: Circular-linear data arise e.g. when describing movement with
+    step lengths and turn angles, which are often correlated. This correlation 
+    can be modelled using copulae. Turn angles are usually symmetric, meaning 
+    that an animal has no inherent preference to turn left or right. 
+    This package, which extends the \code{copula}-package contains Classes (S4) 
+    of circular-linear, symmetric copulae, methods for density, (conditional) 
+    distribution, random number generation, bivariate dependence measures and
+    fitting parameters using maximum likelihood and other approaches. The 
+    package also contains many methods for plotting movement data and copulae.
+    Finally, we also provide an \href{https://cylcop.shinyapps.io/cylcop-graphs/}{app} that allows for interactive visualization 
+    and exploration of all copulae in this package.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -36,8 +46,10 @@ Imports:
     viridis,
     plotly,
     cowplot,
-    movMF
-RoxygenNote: 7.0.2
+    movMF,
+    Rdpack
+RdMacros: Rdpack
+RoxygenNote: 7.1.1
 Collate: 
     'cyl_cop_class.R'
     'Ccond.R'
@@ -55,6 +67,7 @@ Collate:
     'fit_cop_mle.R'
     'fit_margin.R'
     'mixedvonmises.R'
+    'opt_auto.R'
     'plotting_functions.R'
     'simulate_trajectory.R'
     'utils.R'

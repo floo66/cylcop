@@ -218,7 +218,7 @@ cyl_rect_combine <-
 
     new(
       "cyl_rect_combine",
-      name = paste("symmetrized", name),
+      name = paste("Rectangular patchwork of", name),
       parameters = parameters,     #contains all perameters of the copula in the rectangles
                                    #and of the copula outside the rectangles and the rectangles themselves
       param.names = param_names,   #dito
@@ -434,7 +434,7 @@ setMethod("dCopula", signature("matrix", "cyl_rect_combine"), function(u, copula
     c1 <- copula@sym.cop
 
     #rotate copula in the other rectangle
-    if (any(is(copula) == "cyl_vonmises")) {
+    if (any(is(copula@sym.cop) == "cyl_vonmises")) {
       rotated_cop <- copula@sym.cop
       rotated_cop@flip <- !copula@sym.cop@flip
       c2 <- rotated_cop
@@ -512,7 +512,7 @@ setMethod("dCopula", signature("matrix", "cyl_rect_combine"), function(u, copula
 
     pdf <- map2_dbl(u, v, function(u, v) {
 #(u,v) is in lower rectangle
-      if (u < lo2[1] && u > lo1[1]) {
+      if (u <= lo2[1] && u >= lo1[1]) {
         Vlou <- prob(copula@background.cop, lo1, c(u, 1))
         Vlov <-
           prob(copula@background.cop, lo1, c(low_rect[2], v))
@@ -529,7 +529,7 @@ setMethod("dCopula", signature("matrix", "cyl_rect_combine"), function(u, copula
       }
 
 #(u,v) is in upper rectangle
-      else if (u < up2[1] && u > up1[1]) {
+      else if (u <= up2[1] && u >= up1[1]) {
         Vupu <- prob(copula@background.cop, up1, c(u, 1))
         Vupv <-
           prob(copula@background.cop, up1, c(up_rect[2], v))

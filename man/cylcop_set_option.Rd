@@ -7,7 +7,7 @@
 cylcop_set_option(silent = FALSE)
 }
 \arguments{
-\item{silent}{logical, suppress all sound and messages}
+\item{silent}{logical, suppress all sounds and messages}
 }
 \description{
 Set options

@@ -80,7 +80,7 @@ setGeneric("printCop",
 #' @describeIn printCop Print \code{cyl_copula} parameters
 #' @export
 setMethod("printCop", "cyl_copula", function(copula) {
-  parameter_summary = paste(copula@param.names[1], " = ", copula@parameters[1])
+  parameter_summary = paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
   if (length(copula@parameters) > 1) {
     for (i in 2:length(copula@parameters)) {
       parameter_summary <-
@@ -88,7 +88,7 @@ setMethod("printCop", "cyl_copula", function(copula) {
               ", ",
               copula@param.names[i],
               " = ",
-              copula@parameters[i])
+              round(copula@parameters[i],4))
       if(i>2) break
     }
   }
@@ -99,7 +99,7 @@ setMethod("printCop", "cyl_copula", function(copula) {
   }
   cat(
     sprintf(
-      "%-18s %-20s parameters: %-60s",
+      "%-7s %-20s parameters: %s",
       "Copula:",
       copula@name,
       parameter_summary,
@@ -112,7 +112,7 @@ setMethod("printCop", "cyl_copula", function(copula) {
 #' @describeIn printCop Print \code{Copula} parameters
 #' @export
 setMethod("printCop", "Copula", function(copula) {
-  parameter_summary = paste(copula@param.names[1], " = ", copula@parameters[1])
+  parameter_summary = paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
   if (length(copula@parameters) > 1) {
     for (i in 2:length(copula@parameters)) {
       parameter_summary <-
@@ -120,7 +120,7 @@ setMethod("printCop", "Copula", function(copula) {
               ", ",
               copula@param.names[i],
               " = ",
-              copula@parameters[i])
+              round(copula@parameters[i],4))
       if(i>2) break
     }
   }
@@ -146,7 +146,7 @@ setMethod("printCop", "Copula", function(copula) {
   #print description
   cat(
     sprintf(
-      "%-18s %-20s parameters: %-60s",
+      "%-7s %-20s parameters: %s",
       "Copula:",
       name,
       parameter_summary,
@@ -308,5 +308,6 @@ package = "cylcop")
 setMethod("dCopula", signature("matrix", "Copula"), function(u, copula) {
   #workaround to get the correct density at the boundaries
   u[u < .Machine$double.eps] <- .Machine$double.eps
+  u[u > 1-.Machine$double.eps] <- 1-.Machine$double.eps
   copula::dCopula(u,copula)
 })

@@ -36,14 +36,15 @@ These can be any parameters in \code{copula@parameters}.}
 
 \item{optim.control}{A list of additional controls passed to \code{optim()}.}
 
-\item{estimate.variance}{A logical valu, denoting whether to include an
+\item{estimate.variance}{A logical value, denoting whether to include an
 estimate of the variance (NOT YET IMPLEMENTED).}
 
 \item{traceOpt}{A logical value, denoting whether to print information regarding
 convergence, current values, etc. during the optimization process.}
 }
 \value{
-The same type of \code{cyl_copula} object as \code{copula}, but with optimized parameters.
+A list containing the same type of \code{cyl_copula} object as \code{copula},
+ but with optimized parameters, the log likelihood and the AIC.
 }
 \description{
 Carry out MLE of copula parameters

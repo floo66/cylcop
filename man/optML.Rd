@@ -47,7 +47,8 @@ estimate of the variance (NOT YET IMPLEMENTED).}
 convergence, current values, etc. during the optimization process.}
 }
 \value{
-The same type of \code{cyl_copula} object as \code{copula}, but with optimized parameters.
+A list containing the same type of \code{cyl_copula} object as \code{copula},
+ but with optimized parameters, the log likelihood and the AIC.
 }
 \description{
 The code of this function is based on \code{copula::fitCopula()}.

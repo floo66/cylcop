@@ -229,7 +229,7 @@ fit_angle <-
           max.iter = 100
         ))
         # Calculating the density does not need a numerical approximation. Therefore we can use circular::dwrappedcauchy()
-        # instead of dwrappedcauchy(), but have to convert the parameter rho to scale
+        # instead of cylcop::dwrappedcauchy(), but have to convert the parameter rho to scale
         logL <-
           suppressWarnings(circular::dwrappedcauchy(theta, mu = distr$mu, rho = distr$rho)) %>%
           log() %>% sum()
@@ -301,7 +301,7 @@ fit_angle <-
 #' @return If a parametric estimate is made, a list containing the estimated parameters, their
 #' standard errors and the loglikelihood is returned.
 #' If a nonparametric estimate is made, the output comes from
-#' the funtion \code{GoFKernel::density.reflected()}.
+#' the function \code{GoFKernel::density.reflected()}.
 #' @export
 #'
 fit_steplength<- function(x, parametric = c("beta", "cauchy", "chi-squared",

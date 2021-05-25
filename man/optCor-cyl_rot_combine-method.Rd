@@ -4,7 +4,7 @@
 \alias{optCor,cyl_rot_combine-method}
 \title{Roughly estimate cyl_rot_combine parameter from some correlation metric}
 \usage{
-\S4method{optCor}{cyl_rot_combine}(copula, theta, x, acc, n, method = "mi")
+\S4method{optCor}{cyl_rot_combine}(copula, theta, x, acc, n, method = "mi_cyl")
 }
 \arguments{
 \item{copula}{A \code{cyl_rot_combine} object}
@@ -20,7 +20,7 @@ correlation. DEFAULT: 0.5}
 \item{n}{The number of sample points at each optimization step (parameter value). DEFAULT: 10000}
 
 \item{method}{A string of characters, describing what correlation metric to use.
-Only mutual information ("mi") makes sense}
+Only mutual information ("mi_cyl") makes sense}
 }
 \value{
 The estimated value of the copula parameter.
