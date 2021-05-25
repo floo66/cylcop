@@ -25,12 +25,12 @@ qwrappedcauchy(p, location = 0, scale = 1, K = 100, check_prec = F)
 \item{scale}{The numeric value of the parameter tuning the spread of the
 density.}
 
-\item{theta}{A numeric vector hoding the angles at which to calculate the density or distribution.}
+\item{theta}{A numeric vector holding the angles at which to calculate the density or distribution.}
 
 \item{K}{The limit used to approximate the distribution.}
 
 \item{check_prec}{Logical, whether to check if precision of numerical approximation
-with the current parameters is higher than 99%}
+with the current parameters is higher than 99\%.}
 
 \item{p}{vector of probabilities}
 }

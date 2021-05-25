@@ -32,7 +32,7 @@ cor_cyl <- function(theta, x) {
   if (n %% 2 == 0) {
     a <- 1 / (1 + 5 * (1 / tan(pi / n)) ^ 2 + 4 * (1 / tan(pi / n)) ^ 4)
   }
-  else{symmetrize
+  else{
     a <- 2 * (sin(pi / n)) ^ 4 / ((1 + (cos(pi / n))) ^ 3)
   }
 

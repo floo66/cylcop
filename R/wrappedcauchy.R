@@ -36,9 +36,10 @@ rwrappedcauchy <- function(n,
 #
 #' @rdname wrappedcauchy
 #' @param K The limit used to approximate the distribution.
-#' @param theta A numeric vector hoding the angles at which to calculate the density or distribution.
+#' @param theta A numeric vector holding the angles at which to calculate the density or distribution.
 #' @param check_prec Logical, whether to check if precision of numerical approximation
-#' with the current parameters is higher than 99%
+#' with the current parameters is higher than 99\%.
+#'
 #' @export
 #'
 dwrappedcauchy <- function(theta,
@@ -103,7 +104,7 @@ qwrappedcauchy <- function(p,
   qq=p
   for (i in 1:length(p))
   {
-    ff=function (theta) {pwrappedcauchy2(theta, location = location, scale= scale, K=K)-p[i]}
+    ff=function (theta) {pwrappedcauchy(theta, location = location, scale= scale, K=K)-p[i]}
     qq[i]=tryCatch(uniroot(ff,lower=-pi,upper=pi)$root,
                    # Becasue of the numerical approximation, the domain of qwrappedcauchy() does not go up to exactly 1
                    # if it throws an error, it is becasue p is larger than 1-epsilon, where epsilon gets smaller with increasing K
@@ -130,10 +131,10 @@ qwrappedcauchy <- function(p,
 check_precision <- function(scale, K){
 
   #the probability of drawing an angle smaller than pi from a wrapped cauchy with mean 0 should be 1
-     cdf<-rep(0,length(theta))
+     cdf<-0
    for (k in -K:K) cdf<-cdf+
-       pcauchy(theta+2*pi*k,location = location, scale = scale)-
-       pcauchy(-pi+2*pi*k,location = location, scale = scale)
+       pcauchy(pi+2*pi*k,location = 0, scale = scale)-
+       pcauchy(-pi+2*pi*k,location = 0, scale = scale)
    precision <- cdf
   if (precision < 0.99) {
     warning(
