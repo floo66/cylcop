@@ -108,24 +108,19 @@ make_traj <-
     for(i in 1:length(step_start)){
       cop_sample <- rCopula((step_end[i]-step_start[i]+1), copula)
       step_vec <- do.call(marg_lin$q, c(list(p=cop_sample[,2]), parameter_lin))
-      if (marginal_circ == "vonmises") {
-        #We supress warnings, so we are not annoyed by the warning of the conversion to circular
-        #To get the quantile function of the full circle [0,2pi) distribution, use
-        # angle <- suppressWarnings(do.call(qvonmises, c(cop_uv[1],parameter_circ, list(from=0))) )
-        #you can then convert it to angles on the half circle. Or you use the the quantile function
-        #of the half circle [-pi,pi) distribution directly, as below. Both approaches obviouysly give different results,
-        #but you can convert them into each other by changing the copula for symmetry reasons. See text
-        angle_vec <-
-          suppressWarnings(do.call(marg_circ$q,
-                                   c(list(p=cop_sample[,1]), parameter_circ, list(from = -pi)
-                                   )) - 2 * pi)
-      }else{
-        angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ))
-      }
+      angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ))
+      traj[step_start[i]:step_end[i],3] <- step_vec
+      traj[step_start[i]:step_end[i],4] <- angle_vec
+      traj[step_start[i]:step_end[i],5] <- cop_sample[2,]
+      traj[step_start[i]:step_end[i],6] <- cop_sample[1,]
 
       step_in_batch <- 1
+      x_pos_vec <- rep(0,length(step_start[i]:step_end[i]))
+      y_pos_vec <- x_pos_vec
       for(step in step_start[i]:step_end[i]){
+
         cop_uv <- cop_sample[step_in_batch,,drop=F]
+
         if(any(cop_uv==1)){
           cop_uv[which(cop_uv>0.99999999999)] <- 0.99999999999
         }
@@ -136,7 +131,8 @@ make_traj <-
         steplength <- step_vec[step_in_batch]
         angle <- angle_vec[step_in_batch]
 
-        #with hnorm, we only get "right-turns" so we flip them to left turns with a probability of 0.5
+
+        # with hnorm, we only get "right-turns" so we flip them to left turns with a probability of 0.5
         if (marginal_circ == "hnorm" && runif(1) < 0.5) {
           angle <- (-1) * angle
         }
@@ -144,12 +140,15 @@ make_traj <-
 
         #take the step and add it to trajectory
         point <- angstep2xy(angle, steplength, prevp1, prevp2)
-        traj[step, ] <- c(point, steplength, angle, cop_uv[2], cop_uv[1])
+        x_pos_vec[step_in_batch] <- point[1]
+        y_pos_vec[step_in_batch] <- point[2]
         prevp2 <- prevp1
         prevp1 <- point
 
         step_in_batch <- step_in_batch+1
       }
+      traj[step_start[i]:step_end[i],1] <- x_pos_vec
+      traj[step_start[i]:step_end[i],2] <- y_pos_vec
 
       if(cylcop.env$silent==F){
         #get time for 100 steps of trajectory, if trajectory is at least that long, to set up the progress bar
@@ -171,7 +170,6 @@ make_traj <-
           if(i==which(step_end>=n/2)[1]) cylcop::waiting_sound()
         }
       }
-
     }
     if(cylcop.env$silent==F){
       #close progress bar

@@ -63,7 +63,7 @@ setMethod("rCopula", signature("numeric", "cyl_quadsec"), function(n, copula) {
   #if a==0, u and v are independent, but you would divide by zero in the conditional quantile function
   # so we have to set it for this case here separately
   if (isTRUE(all.equal(a,0))) {
-    cop_uv <- c(u, w)
+    cop_uv <- cbind(u, w)
   }
   #Calcualte the inverse of the conditional distribution of V given u, C_u(v) and
   #evaluate it at w

@@ -322,6 +322,7 @@ fit_steplength<- function(x, parametric = c("beta", "cauchy", "chi-squared",
            "distribution not supported")
     }
     distr <- MASS::fitdistr(x, densfun = parametric, start = start)
+    if(parametric=="lognormal") parametric <- "lnorm"
     out <-
       list(
         coef=as.list(distr$estimate),

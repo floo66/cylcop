@@ -29,23 +29,13 @@ bearing <- function(point1, point2, fullcirc = TRUE) {
   }
   delx <- point2[1] - point1[1]
   dely <- point2[2] - point1[2]
-  if (fullcirc == TRUE) {
-    angle = circular::coord2rad(
-      delx,
-      dely,
-      control.circular = list(
-        units = "radians",
-        modulo = "2pi",
-        rotation = "clock",
-        zero = 0
-      )
-    )
-    angle <- as.double(angle)
-  }
-  else{
-    b <- sign(delx)
-    b[b == 0] <- 1  #corrects for the fact that sign(0) == 0
-    angle = b * (dely < 0) * pi + atan(delx / dely)
+
+  b <- sign(delx)
+  b[b == 0] <- 1  #corrects for the fact that sign(0) == 0
+  angle = b * (dely < 0) * pi + atan(delx / dely)
+
+  if(fullcirc==TRUE){
+    angle <- half2full_circ(angle)
   }
   return(angle)
 }
