@@ -7,7 +7,7 @@
 traj_plot(traj)
 }
 \arguments{
-\item{traj}{A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.}
+\item{traj}{A data.frame containing the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.}
 }
 \value{
 The plot

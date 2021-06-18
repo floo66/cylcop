@@ -6,7 +6,7 @@
 #' @importFrom data.table frank
 #' @importFrom ggplot2 ggplot aes geom_point ylab xlab geom_hline
 #' @importFrom ggplot2 element_blank element_line element_text
-#' @importFrom ggplot2 theme_bw theme coord_polar
+#' @importFrom ggplot2 theme_bw theme coord_polar unit
 #' @importFrom ggplot2 geom_label geom_segment geom_ribbon geom_raster
 #' @importFrom ggplot2 coord_fixed labs scale_colour_gradient geom_vline
 #' @importFrom ggplot2 geom_hline geom_path geom_line geom_density

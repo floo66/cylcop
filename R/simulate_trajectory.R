@@ -111,8 +111,8 @@ make_traj <-
       angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ))
       traj[step_start[i]:step_end[i],3] <- step_vec
       traj[step_start[i]:step_end[i],4] <- angle_vec
-      traj[step_start[i]:step_end[i],5] <- cop_sample[2,]
-      traj[step_start[i]:step_end[i],6] <- cop_sample[1,]
+      traj[step_start[i]:step_end[i],5] <- cop_sample[,2]
+      traj[step_start[i]:step_end[i],6] <- cop_sample[,1]
 
       step_in_batch <- 1
       x_pos_vec <- rep(0,length(step_start[i]:step_end[i]))
@@ -152,20 +152,20 @@ make_traj <-
 
       if(cylcop.env$silent==F){
         #get time for 100 steps of trajectory, if trajectory is at least that long, to set up the progress bar
-        if (step_end[i] == 100) {
+        if (step_end[i] == 1000) {
           time <- (proc.time() - ptm)[3] %>% as.double()
-          if ((time / 100 * n) > 20) {
+          if ((time / 1000 * n) > 20) {
             message(
               "Estimated time to generate trajectory: ",
-              floor((time / 100 * n) / 60),
+              floor((time / 1000 * n) / 60),
               " minutes, ",
-              round((time / 100 * n) - 60 * floor((time / 100 * n) / 60)),
+              round((time / 1000 * n) - 60 * floor((time / 1000 * n) / 60)),
               " seconds"
             )
             pb <- utils::txtProgressBar(min = 1, max = n)
           }
         }
-        if ((time / 100 * n) > 20 && step_end[i] >= 100){
+        if ((time / 1000 * n) > 20 && step_end[i] >= 1000){
           utils::setTxtProgressBar(pb, step_end[i])
           if(i==which(step_end>=n/2)[1]) cylcop::waiting_sound()
         }
@@ -173,7 +173,7 @@ make_traj <-
     }
     if(cylcop.env$silent==F){
       #close progress bar
-      if ((time / 100 * n) > 20 && n >= 100){
+      if ((time / 1000 * n) > 20 && n >= 1000){
         close(pb)
         cylcop::done_sound()
       }

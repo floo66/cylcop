@@ -74,7 +74,7 @@ opt_auto <- function(theta, x) {
     copula_lst[[1]] <- copula$copula
     AIC_lst[[1]] <- copula$AIC
   }
-  name_lst[[1]] <- "cyl_vonmises, positive correaltion"
+  name_lst[[1]] <- "cyl_vonmises, positive correlation"
 
   if (original_silent == F) {
     message("Optimizing copula 2, cyl_vonmises")

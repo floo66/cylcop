@@ -169,14 +169,15 @@ scat_plot <- function(traj, periodic = FALSE) {
 
 #' Plot the trajectories locations in x-y space
 #'
-#' @param traj A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
+#' @param traj A data.frame containing the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
 #'
 #' @return The plot
 #' @export
 #'
 traj_plot <- function(traj) {
-p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
-    geom_point(aes(colour = 1:length(traj$pos_x))) +
+  p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
+    geom_point(aes(colour = 1:length(traj$pos_x)),
+               size=min(4,100/nrow(traj))) +
     geom_path(aes(colour = 1:length(traj$pos_x))) +
     geom_point(
       data = dplyr::slice(traj, 1, nrow(traj)),  #mark first and last point of trajectory
@@ -198,6 +199,7 @@ p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
 
 
 
+
 #' Make circular scatterplot of turning angles an steplengths
 #'
 #' @param traj A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
@@ -206,8 +208,7 @@ p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
 #' @export
 #'
 circ_plot <- function(traj) {
-
-#circular marginal density estimated with vonMises kernel density and rough bandwidth estimate
+  #circular marginal density estimated with vonMises kernel density and rough bandwidth estimate
   marginal_angle_dens <- traj$angle %>%
     half2full_circ() %>%
     circular::circular(zero = 0, rotation = "counter") %>%
@@ -220,41 +221,63 @@ circ_plot <- function(traj) {
   marginal_angle_dens$x <- full2half_circ(marginal_angle_dens$x)
   marginal_angle_dens$y <- as.double(marginal_angle_dens$y)
 
-#set the breaks for the gridlines of the plot
-  y_breaks <- pretty(c(0, max(traj$steplength, na.rm = TRUE)), n = 5)
+  #set the breaks for the gridlines of the plot
+  y_breaks <- pretty(c(0, max(traj$steplength, na.rm = TRUE)), n = 6)
   y_breaks <- c(y_breaks, tail(y_breaks, 1) + y_breaks[2])
   x_breaks <- seq(-0.75 * pi, pi, 0.25 * pi)
 
-#blow up the marginal density, so its zero is the the outermost gridline of the circular plot
+  #blow up the marginal density, so its zero is the the outermost gridline of the circular plot
   marginal_angle_dens <- cbind(x = marginal_angle_dens$x,
-                               y = (0.2 * marginal_angle_dens$y + 1) * tail(y_breaks, 1)) %>%
+                               y = (0.6 * marginal_angle_dens$y + 1) * tail(y_breaks, 1)) %>%
     as.data.frame()
 
+  #set positions of radius labels
+  radius_label_pos <-  cbind(x = rep(c(-1,1),length(y_breaks))[2:(length(y_breaks) - 1)]*0.875 * pi,
+                             y = y_breaks[2:(length(y_breaks) - 1)]) %>%
+    as.data.frame()
 
-#set theme
+  #set positions of angle labels
+  angle_label_pos <-  cbind(x = x_breaks,
+                            y = ceiling(c(5,5,5,3,4,4,4,3)+marginal_angle_dens$y[map(x_breaks,~which.min(abs(marginal_angle_dens$x-.x)))%>%unlist()])) %>%
+    as.data.frame()
+
+  #convert to cartesian coordinates to determine plot-margins
+  angle_label_pos_cart <- angle_label_pos
+  angle_label_pos_cart$x <- angle_label_pos$y*sin(angle_label_pos$x)
+  angle_label_pos_cart$y <- angle_label_pos$y*cos(angle_label_pos$x)
+
+  panel_size <- max(max(abs(angle_label_pos_cart$x)),max(abs(angle_label_pos_cart$y)))
+  top_correction <- panel_size-abs(max(angle_label_pos_cart$y))
+  right_correction <- panel_size-abs(max(angle_label_pos_cart$x))
+  bottom_correction <- panel_size-abs(min(angle_label_pos_cart$y))
+  left_correction <- panel_size-abs(min(angle_label_pos_cart$x))
+
+
+  #set theme
 
   circ_plot_layers <- list(
-    geom_hline( yintercept = y_breaks, colour = "grey90", size = 0.2),
+    geom_hline( yintercept = y_breaks[seq(2,length(y_breaks),2)], colour = "darkgreen", size = 0.2),
+    geom_hline( yintercept = y_breaks[seq(1,length(y_breaks),2)], colour = "darkred", size = 0.2),
     #geom_vline(xintercept = x_breaks, colour = "grey90", size = 0.2),
     coord_polar(start = pi, clip = "off"),
 
-    scale_x_continuous(limits = c(-pi, pi),
-                       breaks = x_breaks,
-                       labels = c(expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
-                                             0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
-                                  )
-      ),
+    # scale_x_continuous(limits = c(-pi, pi),
+    # breaks = x_breaks,
+    # labels = c(expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
+    # 0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
+    # )
+    # ),
 
-    scale_y_continuous(breaks = y_breaks[1:(length(y_breaks) - 1)]),
-    geom_hline(
-      yintercept = y_breaks[(length(y_breaks) - 1)],
-      colour = "grey60",
-      size = 0.2
-    ),
+    # scale_y_continuous(breaks = y_breaks[1:(length(y_breaks) - 1)]),
+    # geom_hline(
+    #   yintercept = y_breaks[(length(y_breaks) - 1)],
+    #   colour = "darkred",
+    #   size = 0.3
+    # ),
 
     geom_hline(
       yintercept = tail(y_breaks, 1),
-      colour = "grey60",
+      colour = "grey30",
       size = 0.2
     ),
 
@@ -262,11 +285,13 @@ circ_plot <- function(traj) {
 
     theme(
       panel.grid = element_blank(),
+      panel.border=element_blank(),
+      axis.ticks.x = element_blank(),
       axis.title = element_blank(),
-      axis.text = element_text(size = 10, colour = "black"),
+      axis.text = element_blank(),
       axis.ticks.y = element_blank(),
       axis.text.y = element_blank(),
-      panel.border = element_blank()
+      plot.margin = unit(c(-10-5*top_correction, -10-5*right_correction, -10-5*bottom_correction, -10-5*left_correction), "pt")
     ),
 
     geom_segment(
@@ -276,7 +301,7 @@ circ_plot <- function(traj) {
         xend = x_breaks,
         yend = y_breaks[(length(y_breaks) - 1)]
       ),
-      colour = "grey90",
+      colour = "grey30",
       size = 0.2
     ),
 
@@ -284,10 +309,10 @@ circ_plot <- function(traj) {
       aes(
         x = x_breaks,
         y = tail(y_breaks, 1),
-        xend = x_breaks,
-        yend = 1.05 * max(marginal_angle_dens$y)
+        xend = angle_label_pos$x,
+        yend = angle_label_pos$y
       ),
-      colour = "grey90",
+      colour = "grey30",
       size = 0.2
     ),
 
@@ -295,24 +320,40 @@ circ_plot <- function(traj) {
     #neither does element_text(margin = margin())
     #The font size has different units for axes and labels, that's why I divide by 2.834646 below
     geom_label(
-      data = cbind(x = -0.875 * pi,
-                   y = y_breaks[2:(length(y_breaks) - 1)]) %>%
-        as.data.frame(),
+      data = radius_label_pos[seq(1,nrow(radius_label_pos),2),],
       aes(.data$x, .data$y, label = .data$y),
+      size = 10 / 2.834646,
+      color ="darkgreen",
+      label.size = 0
+    ),
+    geom_label(
+      data = radius_label_pos[seq(2,nrow(radius_label_pos),2),],
+      aes(.data$x, .data$y, label = .data$y),
+      size = 10 / 2.834646,
+      color ="darkred",
+      label.size = 0
+    ),
+
+    geom_label(
+      data = angle_label_pos,
+      aes(.data$x, .data$y),
+      label = c(expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
+                           0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
+      ),
       size = 10 / 2.834646,
       label.size = 0
     )
   )
 
 
-# plot
+  # plot
 
   p <- ggplot() +
     circ_plot_layers +
     geom_point(data = traj, aes(y = .data$steplength, x = as.numeric(.data$angle)),alpha=0.5,size=0.3) +
     geom_line(data = marginal_angle_dens,
               aes(y = .data$y, x = .data$x),
-              colour = "grey60",
+              colour = "black",
               size = 0.2) +
     geom_ribbon(
       data = marginal_angle_dens,
