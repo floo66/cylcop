@@ -29,7 +29,7 @@ which can be obtained using \code{fit_angle(...,parametric = FALSE)}.}
 \item{marginal_lin}{A character string denoting the name of the linear distribution. I.e. the name of its distribution function without the "p"
 e.g. "norm" for normal distribution.}
 
-\item{parameter_lin}{A list of parameters of the linear marginal dsitribution. For \code{marginal_circ = "dens"}, \code{parameter_circ} must be the density object,
+\item{parameter_lin}{A list of parameters of the linear marginal distribution. For \code{marginal_lin = "dens"}, \code{parameter_lin} must be the density object,
 which can be obtained using \code{fit_steplength(...,parametric = FALSE)}.}
 }
 \value{

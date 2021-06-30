@@ -11,7 +11,7 @@
 #'   which can be obtained using \code{fit_angle(...,parametric = FALSE)}.
 #' @param marginal_lin A character string denoting the name of the linear distribution. I.e. the name of its distribution function without the "p"
 #'   e.g. "norm" for normal distribution.
-#' @param parameter_lin  A list of parameters of the linear marginal dsitribution. For \code{marginal_circ = "dens"}, \code{parameter_circ} must be the density object,
+#' @param parameter_lin  A list of parameters of the linear marginal distribution. For \code{marginal_lin = "dens"}, \code{parameter_lin} must be the density object,
 #'   which can be obtained using \code{fit_steplength(...,parametric = FALSE)}.
 #' @return A data.frame containing the trajectory.
 #' @export
@@ -23,6 +23,7 @@ make_traj <-
            parameter_circ = list(0, 1),
            marginal_lin,
            parameter_lin = list()) {
+
     #-----checks preparations and get parameters-------------------------------------------
 
     #get the  marginal distributions, densities, etc. into one list
@@ -31,21 +32,29 @@ make_traj <-
     if(cylcop.env$silent==F){
       #echo what functions and parameters are used
       printCop(copula)
-      message(
-        sprintf(
-          "%-18s %-18s parameters: %s",
-          "\nCircular marginal:",
-          marginal_circ,
-          print_param(marg_circ$d, parameter_circ)
-        ))
-      message(
-        sprintf(
-          "%-18s %-18s parameters: %s",
-          "Linear marginal:",
-          marginal_lin,
-          print_param(marg_lin$r, parameter_lin)
-        ),
-        "\n")
+      if(marginal_circ != "dens"){
+        message(
+          sprintf(
+            "%-18s %-18s parameters: %s",
+            "\nCircular marginal:",
+            marginal_circ,
+            print_param(marg_circ$d, parameter_circ)
+          ))
+      }else{
+        message("\nangular non-parametric density")
+      }
+      if(marginal_lin != "dens"){
+        message(
+          sprintf(
+            "%-18s %-18s parameters: %s",
+            "Linear marginal:",
+            marginal_lin,
+            print_param(marg_lin$r, parameter_lin)
+          ),
+          "\n")
+      }else{
+        message("\nlinear non-parametric density")
+      }
     }
     #Test if the precision of the approximation for the wrapped cauchy marginal distribution is sufficient
     if(marginal_circ=="wrappedcauchy")
@@ -107,8 +116,10 @@ make_traj <-
 
     for(i in 1:length(step_start)){
       cop_sample <- rCopula((step_end[i]-step_start[i]+1), copula)
-      step_vec <- do.call(marg_lin$q, c(list(p=cop_sample[,2]), parameter_lin))
-      angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ))
+      if(marginal_lin!="dens") {step_vec <- do.call(marg_lin$q, c(list(p=cop_sample[,2]), parameter_lin))}
+      else{step_vec <- do.call(marg_lin$q,list(cop_sample[,2], parameter_lin))}
+      if(marginal_circ!="dens"){angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ))}
+      else{angle_vec <- do.call(marg_circ$q,list(cop_sample[,1], parameter_circ))}
       traj[step_start[i]:step_end[i],3] <- step_vec
       traj[step_start[i]:step_end[i],4] <- angle_vec
       traj[step_start[i]:step_end[i],5] <- cop_sample[,2]
