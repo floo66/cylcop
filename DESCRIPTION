@@ -28,7 +28,6 @@ Imports:
     stats,
     extraDistr,
     purrr,
-    sound,
     dplyr (>= 0.7.0),
     copula,
     stringr,

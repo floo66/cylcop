@@ -273,8 +273,7 @@ cylcop_get_option <- function(option=NULL){
 
 #--------------Set sounds----------------
 #
-# If you hate fun, you can set happiness=F in sysdata.rda
-# don't forget to remove setWavPlayer from global.R and zzz.R
+# Sound functions are commented out and sound-files not provided
 #
 
 
@@ -286,17 +285,17 @@ cylcop_get_option <- function(option=NULL){
 #' @export
 #'
 error_sound <- function() {
-  if(cylcop.env$silent==F){
-    decide <- runif(1)
-    if(decide>0.5){
-    sound::play(sound::loadSample(system.file("extdata", "error.wav", package = "cylcop")))
-    }
-    else{
-      sound::play(sound::loadSample(system.file("extdata", "confusion.wav", package = "cylcop")))
-
-    }
-  }
-  else{}
+  # if(cylcop.env$silent==F){
+  #   decide <- runif(1)
+  #   if(decide>0.5){
+  #   sound::play(sound::loadSample(system.file("extdata", "error.wav", package = "cylcop")))
+  #   }
+  #   else{
+  #     sound::play(sound::loadSample(system.file("extdata", "confusion.wav", package = "cylcop")))
+  #
+  #   }
+  # }
+  # else{}
 }
 
 #' Warning sound
@@ -306,10 +305,10 @@ error_sound <- function() {
 #' @export
 #'
 warning_sound <- function() {
-  if(cylcop.env$silent==F){
-    sound::play(sound::loadSample(system.file("extdata", "warning.wav", package = "cylcop")))
-  }
-  else{}
+  # if(cylcop.env$silent==F){
+  #   sound::play(sound::loadSample(system.file("extdata", "warning.wav", package = "cylcop")))
+  # }
+  # else{}
 }
 
 #' Waiting sound
@@ -319,10 +318,10 @@ warning_sound <- function() {
 #' @export
 #'
 waiting_sound <- function() {
-  if(cylcop.env$silent==F){
-    sound::play(sound::loadSample(system.file("extdata", "waiting.wav", package = "cylcop")))
-  }
-  else{}
+  # if(cylcop.env$silent==F){
+  #   sound::play(sound::loadSample(system.file("extdata", "waiting.wav", package = "cylcop")))
+  # }
+  # else{}
 }
 
 #' Done sound
@@ -332,8 +331,8 @@ waiting_sound <- function() {
 #' @export
 #'
 done_sound <- function() {
-  if(cylcop.env$silent==F){
-    sound::play(sound::loadSample(system.file("extdata", "done.wav", package = "cylcop")))
-  }
-  else{}
+  # if(cylcop.env$silent==F){
+  #   sound::play(sound::loadSample(system.file("extdata", "done.wav", package = "cylcop")))
+  # }
+  # else{}
 }
