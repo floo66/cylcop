@@ -18,7 +18,6 @@ Description: Classes (S4) of circular-linear, symmetric copulas with correspondi
     and copulas.
 License: GPL (>= 2)
 Encoding: UTF-8
-LazyData: true
 Depends:
     R (>= 3.5),
 Imports: 
