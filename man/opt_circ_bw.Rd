@@ -2,23 +2,71 @@
 % Please edit documentation in R/fit_margin.R
 \name{opt_circ_bw}
 \alias{opt_circ_bw}
-\title{Find the optimal bandwidth for circular kernel density estimate}
+\title{Find the Optimal Bandwidth for a Circular Kernel Density Estimate}
 \usage{
 opt_circ_bw(theta, loss = c("KullbackLeibler", "adhoc"), kappa.est = "ML")
 }
 \arguments{
-\item{theta}{A numeric vector of angles in [-pi, pi).}
+\item{theta}{\link[base]{numeric} \link[base]{vector} of angles in \eqn{[-\pi, \pi)}.}
 
-\item{loss}{A string of characters describing the loss function, either "KullbackLeibler" (leading to an MLE estimate),
-or "adhoc" leading to a rule-of-thumb estimate.}
+\item{loss}{\link[base]{character} string describing the loss function,
+either \code{"KullbackLeibler"} (leading to a maximum likelihood estimate), or \code{"adhoc"}
+ leading to a rule-of-thumb estimate.}
 
-\item{kappa.est}{Character string describing how the spread is estimated. Either maximum likelihood "ML"
-or trigonometric moment "trigmoments"}
+\item{kappa.est}{\link[base]{character} string describing how the spread is estimated.
+Either maximum likelihood \code{"ML"}, or trigonometric moment \code{"trigmoments"}.}
 }
 \value{
-The numeric value of the optimized bandwidth.
+A \link[base]{numeric} value, the optimized bandwidth.
 }
 \description{
-The ad-hoc method of finding the bandwidth parameter might give very bad results, especially for multimodal population distributions.
-In these cases it might help to set \code{kappa.est=trigmoments}.
+This function is basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}()}
+and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
+ package, simplifying their inputs. For more control,
+these '\pkg{circular}' functions could be used directly.
+The ad-hoc method of finding the bandwidth parameter might give very bad results,
+ especially for multimodal population distributions.
+In these cases it can help to set \code{kappa.est = trigmoments}.
+}
+\examples{
+require(circular)
+require(graphics)
+set.seed(123)
+n <- 100  #n (number of samples) is set small for performance. Increase n to
+# a value larger than 1000 to see the effects of multimodality
+
+angles <- circular::rmixedvonmises(n,
+  mu1 = circular::circular(0),
+  mu2 = circular::circular(pi),
+  kappa1 = 2,
+  kappa2 = 1,
+  prop = 0.5
+)
+angles <- as.double(angles)
+bw1 <- opt_circ_bw(theta = angles, loss="adhoc")
+bw2 <- opt_circ_bw(theta = angles, loss="adhoc", kappa.est = "trigmoments")
+bw3 <- opt_circ_bw(theta = angles, loss="KullbackLeibler")
+
+dens1 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw1)
+dens2 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw2)
+dens3 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw3)
+true_dens <- circular::dmixedvonmises(
+  circular(seq(-pi,pi,0.001)),
+  mu1 = circular::circular(0),
+  mu2 = circular::circular(pi),
+  kappa1 = 2,
+  kappa2 = 1,
+  prop = 0.5
+)
+
+plot(seq(-pi, pi, 0.001), true_dens, type = "l")
+lines(as.double(dens1$x), as.double(dens1$y), col = "red")
+lines(as.double(dens2$x), as.double(dens2$y), col = "green")
+lines(as.double(dens3$x), as.double(dens3$y), col = "blue")
+
+}
+\seealso{
+\code{circular::\link[circular]{bw.cv.ml.circular}()},
+\code{circular::\link[circular]{bw.nrd.circular}()},
+\code{\link{opt_circ_bw}()}.
 }

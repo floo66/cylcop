@@ -2,27 +2,56 @@
 % Please edit documentation in R/mixedvonmises.R
 \name{mle.mixedvonmises}
 \alias{mle.mixedvonmises}
-\title{mixed von Mises Maximum Likelihood Estimates}
+\title{Mixed von Mises Maximum Likelihood Estimates}
 \usage{
 mle.mixedvonmises(theta, mu = NULL)
 }
 \arguments{
-\item{theta}{vector of angles}
+\item{theta}{\link[base]{numeric} \link[base]{vector} of angles.}
 
-\item{mu}{(optional) vector holding the 2 mean directions (angles). If not specified
+\item{mu}{(optional) \link[base]{numeric} \link[base]{vector} of length 2
+ holding the 2 mean directions (angles). If not specified
 the mean directions are estimated.}
 }
 \value{
-A list containing the optimized parameters \code{mu}, \code{kappa}, and \code{prop}.
+A list containing the optimized parameters \code{mu1}, \code{mu2},
+\code{kappa1}, \code{kappa2} and \code{prop}.
 }
 \description{
-Computes the maximum likelihood estimates for the parameters of a von Mises distribution:
-the mean directions, the concentration parameters, and the proportion of the 2 distributions.
+Computes the maximum likelihood estimates for the parameters of a mixed
+von Mises distribution: the mean directions, the concentration parameters,
+and the proportion of the 2 distributions. The code is a simplified version of
+ \code{movMF::\link[movMF]{movMF}()} with the added
+feature of optionally fixed mean directions \insertCite{Hornik2014}{cylcop}.
 }
 \details{
-Code is a simplified version of \code{movMF::movMF()} with the added
-feature of optionally fixed mean directions, see references.
+The function complements the '\pkg{circular}' package, which
+provides functions to make maximum likelihood estimates of e.g. von Mises
+(\code{circular::\link[circular]{mle.vonmises}()}), or wrapped Cauchy distributions
+(\code{circular::\link[circular]{mle.wrappedcauchy}()})
+}
+\examples{
+set.seed(123)
+
+n <- 1000
+angles <- circular::rmixedvonmises(n,
+  mu1 = circular::circular(0),
+  mu2 = circular::circular(pi),
+  kappa1 = 2,
+  kappa2 = 1,
+  prop = 0.4
+)
+angles <- as.double(angles)
+mle.mixedvonmises(theta = angles)
+mle.mixedvonmises(theta = angles, mu = c(0, pi))
+
 }
 \references{
-Hornik, K. and Grun, B. (2014). movMF: An R Package for Fitting Mixtures of von Mises-Fisher Distributions. _J. Stat. Softw., 58(10)_, 164-168.
+\insertRef{Hornik2014}{cylcop}.
+}
+\seealso{
+\code{movMF::\link[movMF]{movMF}()},
+\code{circular::\link[circular]{mle.vonmises}()},
+\code{circular::\link[circular]{dmixedvonmises}()},
+\code{\link{qmixedvonmises}()}.
 }

@@ -2,18 +2,34 @@
 % Please edit documentation in R/cyl_cop_class.R
 \name{prob,cyl_copula-method}
 \alias{prob,cyl_copula-method}
-\title{Calculate the C-volume of a bivariate copula}
+\alias{prob}
+\title{Calculate the C-Volume of a '\code{cyl_copula}' Copula}
 \usage{
 \S4method{prob}{cyl_copula}(x, l, u)
 }
 \arguments{
-\item{x}{A \code{cyl_copula} object}
+\item{x}{\R object of class '\code{\linkS4class{cyl_copula}}'.}
 
-\item{l}{A numeric vector of length 2 holding the coordinates of the lower left corner in I^2}
+\item{l}{\link[base]{numeric} \link[base]{vector} of length 2 holding the coordinates of the
+lower left corner in \eqn{[0,1]^2}.}
 
-\item{u}{A numeric vector of length 2 holding the coordinates of the upper right corner in I^2}
+\item{u}{\link[base]{numeric} \link[base]{vector} of length 2 holding the coordinates of the
+upper right corner in \eqn{[0,1]^2}.}
+}
+\value{
+A \link[base]{numeric} in \eqn{[0,1]}, the probability that a draw from the
+2-dimensional copula \code{x} falls in the rectangle defined by \code{l} and
+\code{u}.
 }
 \description{
-This is a method corresponding to the generic \code{prob} in the
-\code{copula}-package
+This is a method corresponding to the generic \code{\link[copula]{prob}()} in the
+'\pkg{copula}' package.
+}
+\examples{
+cop <- cyl_quadsec(0.1)
+prob(cop, l = c(0.1, 0.3), u = c(0.3, 0.9))
+
+}
+\seealso{
+\code{copula::\link[copula]{prob}}
 }

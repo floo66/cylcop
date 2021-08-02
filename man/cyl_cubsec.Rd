@@ -2,19 +2,30 @@
 % Please edit documentation in R/cyl_cubsec.R
 \name{cyl_cubsec}
 \alias{cyl_cubsec}
-\title{Construction of \code{cyl_cubsec} objects}
+\title{Construction of '\code{cyl_cubsec}' Objects}
 \usage{
 cyl_cubsec(a = 1/(2 * pi), b = 1/(2 * pi))
 }
 \arguments{
-\item{a}{The numeric value of the first parameter of the copula. It must be in [- 1 / (2 * pi)), 1 / (2 * pi))]}
+\item{a}{\link[base]{numeric} value of the first parameter of the copula.
+It must be in \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.}
 
-\item{b}{The numeric value of the second parameter of the copula. It must be in [- 1 / (2 * pi)), 1 / (2 * pi))]}
+\item{b}{\link[base]{numeric} value of the second parameter of the copula.
+It must be in \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.}
 }
 \description{
-Construction of \code{cyl_cubsec} objects
+Constructs a circular-linear copula with cubic sections of class
+ '\code{\linkS4class{cyl_cubsec}}'.
 }
 \examples{
-cyl_cubsec(a = 0.1, b = -0.1)
+cop <- cyl_cubsec(a = 0.1, b = -0.1)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
 
+}
+\references{
+\insertRef{Nelsen1997}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
 }

@@ -2,16 +2,39 @@
 % Please edit documentation in R/plotting_functions.R
 \name{circ_plot}
 \alias{circ_plot}
-\title{Make circular scatterplot of turning angles an steplengths}
+\title{Circular Scatterplot of Turn Angles and Step Lengths}
 \usage{
 circ_plot(traj)
 }
 \arguments{
-\item{traj}{A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.}
+\item{traj}{\link[base]{data.frame} containing the trajectory produced by e.g.
+\code{\link{make_traj}()}. It must contain
+ the columns \code{traj$angle} and \code{traj$steplength}.}
 }
 \value{
-the plot.
+A '\code{\link[ggplot2]{ggplot}}' object.
 }
 \description{
-Make circular scatterplot of turning angles an steplengths
+This function produces a circular scatterplot with the step lengths plotted
+as distance from the center of a circle and the turn angles as angles
+(polar coordinates).
+}
+\examples{
+set.seed(123)
+
+traj <- make_traj(100,
+  copula = cyl_quadsec(0.1),
+  marginal_circ = "vonmises",
+  parameter_circ = list(0, 1),
+  marginal_lin = "weibull", list(shape=3)
+)
+plot1 <- circ_plot(traj)
+
+}
+\references{
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
+\code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
 }

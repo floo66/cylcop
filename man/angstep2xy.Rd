@@ -2,30 +2,33 @@
 % Please edit documentation in R/utils.R
 \name{angstep2xy}
 \alias{angstep2xy}
-\title{Calculate new position form angle and steplength}
+\title{Calculate the Next Position in a Trajectory from a Turn Angle and a Step Length}
 \usage{
 angstep2xy(angle, steplength, prevp1, prevp2)
 }
 \arguments{
-\item{angle}{The numeric value of a turning angle or a \code{\link{circular}}-objekt, either in [0, 2pi) or in [-pi, pi)}
+\item{angle}{\link[base]{numeric} value of the turn angle or a
+\code{\link[circular]{circular}} object, either in \eqn{[0, 2\pi)} or in \eqn{[-\pi, \pi)}}
 
-\item{steplength}{A numeric value giving the distance between the position and the previous one.}
+\item{steplength}{\link[base]{numeric} value giving the distance between the
+position and the previous one.}
 
-\item{prevp1}{A numeric vector holding x and y coordinates of the previous
-position.}
+\item{prevp1}{\link[base]{numeric} \link[base]{vector} holding the x and y
+coordinates of the previous position.}
 
-\item{prevp2}{A numeric vector holding x and y coordinates of the position
-before the previous one.}
+\item{prevp2}{\link[base]{numeric} \link[base]{vector} holding the x and y
+coordinates of the position before the previous one.}
 }
 \value{
-The function returns a numeric vector holding the x and y coordinates of the position
+The function returns a \link[base]{numeric} \link[base]{vector}
+holding the x and y coordinates of the position
 }
 \description{
-The xy-coordinates of a position in 2-D space is calcualted from the angle
-between that position and the 2 previous ones and the distance between that
-position and the previous one.
+The xy-coordinates of a position in 2-D space is calculated from the angle
+between that position and the 2 previous ones in the trajectory and the
+distance between that position and the previous one.
 }
 \examples{
- angstep2xy(1.5*pi, 2, c(1, 4), c(2, 7.5))
+ angstep2xy(1.5*pi, 2, prevp1 = c(1, 4), prevp2 = c(2, 7.5))
  angstep2xy(-0.5*pi, 2, c(1, 4), c(2, 7.5))
 }

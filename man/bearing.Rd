@@ -2,30 +2,29 @@
 % Please edit documentation in R/utils.R
 \name{bearing}
 \alias{bearing}
-\title{Compass bearing of a line between 2 points}
+\title{Compass Bearing of a Line Between 2 Points}
 \usage{
 bearing(point1, point2, fullcirc = TRUE)
 }
 \arguments{
-\item{point1}{A numeric vector holding x and y coordinates of the first
-point.}
+\item{point1}{\link[base]{numeric} \link[base]{vector} holding the
+x and y coordinates of the first point.}
 
-\item{point2}{A numeric vector holding x and y coordinates of the second
-point.}
+\item{point2}{\link[base]{numeric} \link[base]{vector} holding the
+x and y coordinates of the second point.}
 
-\item{fullcirc}{A logical value indicating whether output should be an angle
-on [0, 2pi) or [-pi, pi).}
+\item{fullcirc}{\link[base]{logical} value indicating whether the output
+should be an angle on \eqn{[0, 2\pi)} or \eqn{[-\pi, \pi)}.}
 }
 \value{
-If \code{fullcirc} is \code{FALSE}, the function returns a numeric
-  value (angle) from the interval [-pi, pi). \cr
-  If \code{fullcirc} is
-  \code{TRUE}, the function returns a numeric value (angle) from the interval
-  [0, 2pi).
+If \code{fullcirc = FALSE}, the function returns a \link[base]{numeric}
+  value (angle) from the interval \eqn{[-\pi, \pi)}. \cr
+  If \code{fullcirc = TRUE}, the function returns a numeric value \link[base]{numeric} from the interval
+  \eqn{[0, 2\pi)}.
 }
 \description{
-The angle between a line between 2 points in 2-D space and the line from
-(0,0) to (0,1) is calcualted. In other words, the compass bearing of a line
+The angle between a line between 2 points in Euclidean 2-D space and the line from
+(0,0) to (0,1) is calculated. In other words, the compass bearing of a line
 between 2 points where north is 0. Angles increase in clockwise direction.
 }
 \examples{

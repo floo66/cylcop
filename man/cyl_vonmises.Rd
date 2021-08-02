@@ -2,21 +2,37 @@
 % Please edit documentation in R/cyl_vonmises.R
 \name{cyl_vonmises}
 \alias{cyl_vonmises}
-\title{Construction of \code{cyl_vonmises} objects}
+\title{Construction of '\code{cyl_vonmises}' Objects}
 \usage{
 cyl_vonmises(mu = 0, kappa = 1, flip = FALSE)
 }
 \arguments{
-\item{mu}{A numeric value giving the mean of the vonMises function used to construct the copula.}
+\item{mu}{\link[base]{numeric} value giving the mean of the vonMises
+function used to construct the copula.}
 
-\item{kappa}{A numeric value giving the concentration of the vonMises function used to construct the copula.}
+\item{kappa}{\link[base]{numeric} value giving the concentration of the
+vonMises function used to construct the copula.}
 
-\item{flip}{A logical indicating whether the copula should be rotated 90 degrees to have negative correlation.}
+\item{flip}{\link[base]{logical} value indicating whether the copula
+should be rotated 90 degrees to capture negative correlation.}
 }
 \description{
-Construction of \code{cyl_vonmises} objects
+Constructs a circular-linear von Mises copula according to
+\insertCite{Johnson1978;textual}{cylcop} of class
+ '\code{\linkS4class{cyl_vonmises}}'.
 }
 \examples{
-cyl_vonmises(mu=pi, kappa=10, flip = TRUE)
+cop <- cyl_vonmises(mu=pi, kappa=10, flip = TRUE)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 
+cop <- cyl_vonmises(mu=0, kappa=8, flip = FALSE)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+
+}
+\references{
+\insertRef{Johnson1978}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
 }

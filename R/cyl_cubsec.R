@@ -3,23 +3,33 @@ NULL
 
 
 
-#' An S4 class of copulas with cubic sections
+#' An S4 Class of Bivariate Copulas with Cubic Sections
 #'
 #' This class contains bivariate circular-linear copulas with cubic sections in the linear dimension.
-#' They are periodic in the circular dimension, u, and symmetric with respect to u=0.5. I.e. there is
-#' symmetry between positive and negative angles.
+#' They are periodic in the circular dimension, u, and symmetric with respect to u=0.5. I.e.
+#' the can capture correlation in data where there is symmetry between positive and negative angles.
+#' These copulas are described by two parameters, \code{a} and \code{b}.
 #'
 #' @section Objects from the Class:
-#' Objects are created by \code{cyl_cubsec()}.
+#' Objects are created by \code{\link{cyl_cubsec}()}.
 #'
-#' @slot name A character string holding the name of the copula.
-#' @slot parameters A numeric vector holding the parameter values.
-#' @slot param.names A character vector holding the parameter names.
-#' @slot param.lowbnd A numeric vector holding the lower bounds of the parameters.
-#' @slot param.upbnd A numeric vector holding the upper bounds of the parameters.
+#' @slot name \link[base]{character} string holding the name of the copula.
+#' @slot parameters \link[base]{numeric} \link[base]{vector} holding the parameter values.
+#' @slot param.names \link[base]{character} \link[base]{vector} holding the
+#' parameter names.
+#' @slot param.lowbnd \link[base]{numeric} \link[base]{vector} holding the lower
+#'  bounds of the parameters.
+#' @slot param.upbnd \link[base]{numeric} \link[base]{vector} holding the upper
+#'  bounds of the parameters.
 #'
 #' @section Extends:
-#' Class \code{cyl_cubsec} extends class \code{cyl_copula}.
+#' Class '\code{cyl_cubsec}' extends class '\code{\linkS4class{cyl_copula}}'.
+#'
+#' @references \insertRef{Nelsen1997}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
 #'
 #' @export
 #'
@@ -27,15 +37,28 @@ setClass("cyl_cubsec", contains = "cyl_copula")
 
 
 
-#' Construction of \code{cyl_cubsec} objects
+#' Construction of '\code{cyl_cubsec}' Objects
 #'
-#' @param a The numeric value of the first parameter of the copula. It must be in [- 1 / (2 * pi)), 1 / (2 * pi))]
-#' @param b The numeric value of the second parameter of the copula. It must be in [- 1 / (2 * pi)), 1 / (2 * pi))]
+#' Constructs a circular-linear copula with cubic sections of class
+#'  '\code{\linkS4class{cyl_cubsec}}'.
+#'
+#' @param a \link[base]{numeric} value of the first parameter of the copula.
+#' It must be in \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.
+#' @param b \link[base]{numeric} value of the second parameter of the copula.
+#' It must be in \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.
 #'
 #' @export
 #'
 #' @examples
-#' cyl_cubsec(a = 0.1, b = -0.1)
+#' cop <- cyl_cubsec(a = 0.1, b = -0.1)
+#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#'
+#' @references \insertRef{Nelsen1997}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
 #'
 cyl_cubsec <- function(a = 1 / (2 * pi),
                        b = 1 / (2 * pi)) {
@@ -55,13 +78,14 @@ cyl_cubsec <- function(a = 1 / (2 * pi),
 
 
 #' Generate random samples
-#' @rdname Copula
+#' @rdname Cylcop
+# @describeIn cyl_cubsec-class Generate random samples.
 #' @export
-setMethod("rCopula", signature("numeric", "cyl_cubsec"), function(n, copula) {
+setMethod("rcylcop", signature("numeric", "cyl_cubsec"), function(n, copula) {
   u <- runif(n)
   w <- runif(n)
   mat <- matrix(ncol = 2, c(u, w))
-  v <- cylcop::cCopula(mat, copula, cond_on = 1, inverse = T)
+  v <- cylcop::ccylcop(mat, copula, cond_on = 1, inverse = T)
   cop_uv <- cbind(u, v)
   return(cop_uv)
 })
@@ -69,9 +93,10 @@ setMethod("rCopula", signature("numeric", "cyl_cubsec"), function(n, copula) {
 
 
 #' Calcualte density
-#' @rdname Copula
+#' @rdname Cylcop
+# @describeIn cyl_cubsec-class Calculate the density.
 #' @export
-setMethod("dCopula", signature("matrix", "cyl_cubsec"), function(u, copula) {
+setMethod("dcylcop", signature("matrix", "cyl_cubsec"), function(u, copula) {
   a <- copula@parameters[1]
   b <- copula@parameters[2]
   v <- u[, 2, drop = F]
@@ -91,9 +116,10 @@ setMethod("dCopula", signature("matrix", "cyl_cubsec"), function(u, copula) {
 
 
 #' Calcualte distribution
-#' @rdname Copula
+#' @rdname Cylcop
+# @describeIn cyl_cubsec-class Calculate the distribution.
 #' @export
-setMethod("pCopula", signature("matrix", "cyl_cubsec"), function(u, copula) {
+setMethod("pcylcop", signature("matrix", "cyl_cubsec"), function(u, copula) {
   a <- copula@parameters[1]
   b <- copula@parameters[2]
   v <- u[, 2, drop = F]
@@ -112,9 +138,10 @@ setMethod("pCopula", signature("matrix", "cyl_cubsec"), function(u, copula) {
 
 
 #' Condtional copula
-#' @rdname cCopula
+#' @rdname ccylcop
+# @describeIn cyl_cubsec-class Calculate the conditional copula.
 #' @export
-setMethod("cCopula", signature("cyl_cubsec"), function(u,
+setMethod("ccylcop", signature("cyl_cubsec"), function(u,
                                                        copula,
                                                        cond_on = 2,
                                                        inverse = F) {
@@ -240,7 +267,9 @@ setMethod("cCopula", signature("cyl_cubsec"), function(u,
 
 #-----Change attributes of existing cyl_cubsec object.-------------------------------------------
 #
+#'
 #' @rdname setCopParam
+# @describeIn cyl_cubsec-class Change attributes of existing object.
 #' @export
 setMethod("setCopParam", "cyl_cubsec", function(copula, param_val, param_name) {
   if (is.null(param_name))

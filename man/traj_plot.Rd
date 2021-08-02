@@ -2,16 +2,41 @@
 % Please edit documentation in R/plotting_functions.R
 \name{traj_plot}
 \alias{traj_plot}
-\title{Plot the trajectories locations in x-y space}
+\title{Plot a Trajectory in Euclidean Space}
 \usage{
 traj_plot(traj)
 }
 \arguments{
-\item{traj}{A data.frame containing the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.}
+\item{traj}{\link[base]{data.frame} containing the trajectory produced by e.g.
+\code{\link{make_traj}()}. It must contain
+ the columns \code{traj$pos_x} and \code{traj$pos_y}.}
 }
 \value{
-The plot
+A '\code{\link[ggplot2]{ggplot}}' object.
 }
 \description{
-Plot the trajectories locations in x-y space
+This function plots the locations of a trajectory. The first and last point are
+marked in red.
+}
+\examples{
+set.seed(123)
+
+traj <- make_traj(50,
+  copula = cyl_quadsec(0.1),
+  marginal_circ = "vonmises",
+  parameter_circ = list(0, 1),
+  marginal_lin = "weibull",
+  parameter_lin = list(shape=3)
+)
+plot1 <- traj_plot(traj)
+
+}
+\references{
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{\link{cop_scat_plot}()},
+\code{\link{circ_plot}()}, \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
 }

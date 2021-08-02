@@ -3,47 +3,89 @@
 \name{wrappedcauchy}
 \alias{wrappedcauchy}
 \alias{rwrappedcauchy}
-\alias{dwrappedcauchy}
 \alias{pwrappedcauchy}
+\alias{rdwrappedcauchy}
 \alias{qwrappedcauchy}
-\title{Density, distribution, random number generation and quantiles of the wrapped
-Cauchy distribution}
+\alias{dwrappedcauchy}
+\title{Density, Distribution, Quantiles and Random Number Generation for the Wrapped
+Cauchy Distribution}
 \usage{
 rwrappedcauchy(n, location = 0, scale = 1)
 
-dwrappedcauchy(theta, location = 0, scale = 1, K = 100, check_prec = F)
+dwrappedcauchy(theta, location = 0, scale = 1, K = 100, check_prec = FALSE)
 
-pwrappedcauchy(theta, location = 0, scale = 1, K = 100, check_prec = F)
+pwrappedcauchy(theta, location = 0, scale = 1, K = 100, check_prec = FALSE)
 
-qwrappedcauchy(p, location = 0, scale = 1, K = 100, check_prec = F)
+qwrappedcauchy(p, location = 0, scale = 1, K = 100, check_prec = FALSE)
 }
 \arguments{
-\item{n}{Number of random samples to be generated.}
+\item{n}{\link[base]{integer} value, the number of random samples to be
+generated with \code{rwrappedcauchy()}.}
 
-\item{location}{The numeric value of the mean of the distribution.}
+\item{location}{\link[base]{numeric} value, the mean of the distribution.}
 
-\item{scale}{The numeric value of the parameter tuning the spread of the
+\item{scale}{\link[base]{numeric} value, the parameter tuning the spread of the
 density.}
 
-\item{theta}{A numeric vector holding the angles at which to calculate the density or distribution.}
+\item{theta}{\link[base]{numeric} \link[base]{vector} giving the angles where
+the density or distribution function is evaluated.}
 
-\item{K}{The limit used to approximate the distribution.}
+\item{K}{\link[base]{integer} value, the number of "wraps" used in each direction
+to approximate the distribution.}
 
-\item{check_prec}{Logical, whether to check if precision of numerical approximation
-with the current parameters is higher than 99\%.}
+\item{check_prec}{\link[base]{logical}, whether to check if the precision of
+the numerical approximation with the current parameters is higher than 99\%.}
 
-\item{p}{vector of probabilities}
+\item{p}{\link[base]{numeric} \link[base]{vector} giving the probabilities where
+the quantile function is evaluated.}
+}
+\value{
+\code{dwrappedcauchy()}) and \code{pwrappedcauchy()}) give a
+\link[base]{vector} of length \code{length(theta)} containing
+the density or distribution function at the corresponding values of \code{theta}.
+\code{qwrappedcauchy()} gives a \link[base]{vector} of length \code{length(p)}
+containing the quantiles at the corresponding values of \code{p}.
+\code{rwrappedcauchy()} generates a \link[base]{vector} of length \code{n}
+containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.
 }
 \description{
-Distribution function and quantiles of the wrapped Cauchy distribution can
+The distribution function \code{pwrappedcauchy()} and quantiles
+ \code{qwrappedcauchy()}of the wrapped Cauchy distribution can
 not be obtained analytically. They are therefore missing in the
-\code{circular} package and are obtained here numerically.
-\code{rwrappedcauchy()} and \code{dwrappedcauchy()} don't need a numerical
-approximation and are just here for consistency in parametrization with the
-other wrappedcauchy functions. You could also convert scale to rho
-(rho=exp(-scale)) and use \code{circular::rwrappedcauchy()}. In fact, for
-\code{dwrappedcauchy()}, you usually SHOULD convert scale to rho
-(rho=exp(-scale)) and use \code{circular::dwrappedcauchy()} which does not
-make a numerical approximation and is faster than
+'\pkg{circular}' package and are obtained here numerically.
+Random number generation \code{rwrappedcauchy()} and density
+\code{dwrappedcauchy()} don't need a numerical
+approximation and are provided here just for consistency in parametrization
+ with the other wrapped Cauchy functions. One could also convert \code{scale} to \code{rho}
+(\code{rho = exp(-scale)}) and use \code{circular::\link[circular]{rwrappedcauchy}(rho)}.
+ In fact, for the density, one usually SHOULD convert \code{scale} to \code{rho}
+(\code{rho = exp(-scale)}) and use \code{circular::\link[circular]{dwrappedcauchy}(rho)}
+ which does not make a numerical approximation and is therefore faster than
 \code{cylcop::dwrappedcauchy()}.
+}
+\details{
+The density is calculated by wrapping the Cauchy distribution \eqn{K} times
+ around the circle in each direction and summing the density at each point of
+  the circle. E.g. the density of the wrapped Cauchy distribution
+  at angle \eqn{\theta} is calculated as  the sum of the Cauchy density at
+  \eqn{\theta+2 \pi k}, where the integer \eqn{k} goes from \eqn{-K} to \eqn{K}.
+  The distribution function is obtained similarly and the quantiles are calculated
+  by numerical inversion.
+}
+\examples{
+set.seed(123)
+
+rwrappedcauchy(10, location = 0, scale =3)
+
+dwrappedcauchy(c(0.1, pi), location = pi, scale =2)
+circular::dwrappedcauchy(circular::circular(c(0.1,pi)), mu = circular::circular(pi), rho =exp(-2))
+
+prob <- pwrappedcauchy(c(0.1, pi), location = pi, scale =2)
+prob
+qwrappedcauchy(prob, location = pi, scale =2)
+
+}
+\seealso{
+\code{circular::\link[circular]{dwrappedcauchy}()},
+\code{circular::\link[circular]{rwrappedcauchy}()}.
 }

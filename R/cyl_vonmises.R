@@ -2,25 +2,35 @@
 NULL
 
 
-#' An S4 class of bivariate vonMises copulas
+#' An S4 Class of Bivariate vonMises Copulas
 #'
-#' This class contains circular-linear copulas that are based on the approach by Johnson and
-#' Wehrly 1978 with a vonMises periodic function. They are periodic in the circular
-#' dimension, u, but not symmetric with respect to u=0.5. I.e. there is no
-#' symmetry between positive and negative angles.
+#' This class contains circular-linear copulas that are based on the approach by
+#' \insertCite{Johnson1978;textual}{cylcop} with a von Mises periodic function.
+#' They are periodic in the circular dimension, u, but not symmetric with
+#' respect to \eqn{u=0.5} i.e. there is no symmetry between positive and negative angles.
 #'
 #' @section Objects from the Class:
-#' Objects are created by \code{cyl_vonmises()}.
+#' Objects are created by \code{\link{cyl_vonmises}()}.
 #'
-#' @slot name A character string holding the name of the copula.
-#' @slot parameters A numeric vector holding the parameter values.
-#' @slot param.names A character vector holding the parameter names.
-#' @slot param.lowbnd A numeric vector holding the lower bounds of the parameters.
-#' @slot param.upbnd A numeric vector holding the upper bounds of the parameters.
-#' @slot flip A logical indicating whether the copula should be rotated 90 degrees to have negative correlation.
+#' @slot name \link[base]{character} string holding the name of the copula.
+#' @slot parameters \link[base]{numeric} \link[base]{vector} holding the parameter values.
+#' @slot param.names \link[base]{character} \link[base]{vector} holding the
+#' parameter names.
+#' @slot param.lowbnd \link[base]{numeric} \link[base]{vector} holding the lower
+#'  bounds of the parameters.
+#' @slot param.upbnd \link[base]{numeric} \link[base]{vector} holding the upper
+#'  bounds of the parameters.
+#' @slot flip \link[base]{logical} value indicating whether the copula should
+#' be rotated 90 degrees to capture negative correlation.
 #'
 #' @section Extends:
-#' Class \code{cyl_vonmises} extends class \code{cyl_copula}.
+#' Class '\code{cyl_vonmises}' extends class '\code{\linkS4class{cyl_copula}}'.
+#'
+#' @references \insertRef{Johnson1978}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
 #'
 #' @export
 #'
@@ -29,16 +39,32 @@ setClass("cyl_vonmises", contains = "cyl_copula", slots = "flip")
 
 
 
-#' Construction of \code{cyl_vonmises} objects
+#' Construction of '\code{cyl_vonmises}' Objects
 #'
-#' @param mu A numeric value giving the mean of the vonMises function used to construct the copula.
-#' @param kappa A numeric value giving the concentration of the vonMises function used to construct the copula.
-#' @param flip A logical indicating whether the copula should be rotated 90 degrees to have negative correlation.
+#' Constructs a circular-linear von Mises copula according to
+#' \insertCite{Johnson1978;textual}{cylcop} of class
+#'  '\code{\linkS4class{cyl_vonmises}}'.
+#' @param mu \link[base]{numeric} value giving the mean of the vonMises
+#' function used to construct the copula.
+#' @param kappa \link[base]{numeric} value giving the concentration of the
+#' vonMises function used to construct the copula.
+#' @param flip \link[base]{logical} value indicating whether the copula
+#' should be rotated 90 degrees to capture negative correlation.
 #'
 #' @export
 #'
 #' @examples
-#' cyl_vonmises(mu=pi, kappa=10, flip = TRUE)
+#' cop <- cyl_vonmises(mu=pi, kappa=10, flip = TRUE)
+#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'
+#' cop <- cyl_vonmises(mu=0, kappa=8, flip = FALSE)
+#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'
+#' @references \insertRef{Johnson1978}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
 #'
 cyl_vonmises <- function(mu = 0,
                          kappa = 1,
@@ -61,9 +87,10 @@ cyl_vonmises <- function(mu = 0,
 
 
 #' Generate random samples
-#' @rdname Copula
+#' @rdname Cylcop
+# @describeIn cyl_vonmises-class Generate random samples.
 #' @export
-setMethod("rCopula", signature("numeric", "cyl_vonmises"), function(n, copula) {
+setMethod("rcylcop", signature("numeric", "cyl_vonmises"), function(n, copula) {
   mu <- copula@parameters[1]
   kappa <- copula@parameters[2]
   u <- runif(n)
@@ -71,7 +98,7 @@ setMethod("rCopula", signature("numeric", "cyl_vonmises"), function(n, copula) {
   #Calcualte the inverse of the conditional distribution of V given u, C_u(v) and
   #evaluate it at w
 
-  v <- cylcop::cCopula(matrix(ncol=2,c(u,w)),copula,cond_on=1,inverse = T)
+  v <- cylcop::ccylcop(matrix(ncol=2,c(u,w)),copula,cond_on=1,inverse = T)
   if (copula@flip)
     u <- 1 - u
   cop_uv <- cbind(u, v)
@@ -81,9 +108,10 @@ setMethod("rCopula", signature("numeric", "cyl_vonmises"), function(n, copula) {
 
 
 #' Calcualte density
-#' @rdname Copula
+#' @rdname Cylcop
+# @describeIn cyl_vonmises-class Calculate the density.
 #' @export
-setMethod("dCopula", signature("matrix", "cyl_vonmises"), function(u, copula) {
+setMethod("dcylcop", signature("matrix", "cyl_vonmises"), function(u, copula) {
   mu <- copula@parameters[1]
   kappa <- copula@parameters[2]
   #drop=F, so it aslo works with single numbers
@@ -102,9 +130,10 @@ setMethod("dCopula", signature("matrix", "cyl_vonmises"), function(u, copula) {
 
 
 #' Calcualte distribution
-#' @rdname Copula
+#' @rdname Cylcop
+# @describeIn cyl_vonmises-class Calculate the distribution.
 #' @export
-setMethod("pCopula", signature("matrix", "cyl_vonmises"), function(u, copula) {
+setMethod("pcylcop", signature("matrix", "cyl_vonmises"), function(u, copula) {
   mu <- copula@parameters[1]
   kappa <- copula@parameters[2]
   v <- u[, 2, drop = F]
@@ -143,7 +172,7 @@ setMethod("pCopula", signature("matrix", "cyl_vonmises"), function(u, copula) {
   }
   else{
     #if the copula is flipped, instead of integrating from (0,0) to (u,v) we need to integrate from  (1-u,0) to (1,v).
-    #Use the C-volume of the unflipped copula for that, it recursively calls this pCopula function.
+    #Use the C-volume of the unflipped copula for that, it recursively calls this pcylcop function.
     unflipped <- copula
     unflipped@flip <- FALSE
     cdf <- prob(unflipped, l = c((1 - u), 0), u = c(1, v))
@@ -154,9 +183,10 @@ setMethod("pCopula", signature("matrix", "cyl_vonmises"), function(u, copula) {
 
 
 #' Condtional copula
-#' @rdname cCopula
+#' @rdname ccylcop
+# @describeIn cyl_vonmises-class Calculate the conditional copula.
 #' @export
-setMethod("cCopula", signature("cyl_vonmises"), function(u, copula, cond_on=2, inverse=F) {
+setMethod("ccylcop", signature("cyl_vonmises"), function(u, copula, cond_on=2, inverse=F) {
   u_orig <- matrix(ncol=2,u)
   mu <- copula@parameters[1]
   kappa <- copula@parameters[2]
@@ -226,6 +256,7 @@ setMethod("cCopula", signature("cyl_vonmises"), function(u, copula, cond_on=2, i
 #-----Change attributes of existing cyl_vonmises object.-------------------------------------------
 #
 #' @rdname setCopParam
+# @describeIn cyl_vonmises-class Change attributes of existing object.
 #' @export
 setMethod("setCopParam", "cyl_vonmises", function(copula, param_val, param_name) {
   if(is.null(param_name)) param_name<-copula@param.names

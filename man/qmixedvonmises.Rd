@@ -2,26 +2,46 @@
 % Please edit documentation in R/mixedvonmises.R
 \name{qmixedvonmises}
 \alias{qmixedvonmises}
-\title{Quantiles of the mixed vonMises distribution}
+\title{Quantiles of the Mixed von Mises Distribution}
 \usage{
 qmixedvonmises(p, mu1, mu2, kappa1, kappa2, prop)
 }
 \arguments{
-\item{p}{vector of probabilities}
+\item{p}{\link[base]{numeric} \link[base]{vector} giving the probabilities where
+the quantile function is evaluated.}
 
-\item{mu1}{mean of the first component}
+\item{mu1}{\link[base]{numeric} value, mean direction of the first component.}
 
-\item{mu2}{mean of the second component}
+\item{mu2}{\link[base]{numeric} value, mean direction of the second component.}
 
-\item{kappa1}{concentration parameter of the first component}
+\item{kappa1}{\link[base]{numeric} value, concentration parameter of the
+first component.}
 
-\item{kappa2}{concentration parameter of the first component}
+\item{kappa2}{\link[base]{numeric} value, concentration parameter of the
+second component.}
 
-\item{prop}{mixing proportion}
+\item{prop}{\link[base]{numeric} value, mixing proportion.}
 }
 \value{
-quantiles of the mixed vonMises distribution.
+a \link[base]{vector} of length \code{length(p)}, the
+quantiles of the mixed von Mises distribution.
 }
 \description{
-Quantiles of the mixed vonMises distribution
+The quantiles are numerically obtained from the distribution function using
+monotone cubic splines.
+}
+\examples{
+qmixedvonmises(p = c(0.1, 0.8),
+  mu1 = 0,
+  mu2 = pi,
+  kappa1 = 1,
+  kappa2 = 3,
+  prop = 0.4
+)
+
+}
+\seealso{
+\code{circular::\link[circular]{dmixedvonmises}()},
+\code{circular::\link[circular]{pmixedvonmises}()},
+\code{circular::\link[circular]{rmixedvonmises}()}.
 }

@@ -1,20 +1,19 @@
-#' Compass bearing of a line between 2 points
+#' Compass Bearing of a Line Between 2 Points
 #'
-#' The angle between a line between 2 points in 2-D space and the line from
-#' (0,0) to (0,1) is calcualted. In other words, the compass bearing of a line
+#' The angle between a line between 2 points in Euclidean 2-D space and the line from
+#' (0,0) to (0,1) is calculated. In other words, the compass bearing of a line
 #' between 2 points where north is 0. Angles increase in clockwise direction.
-#' @param point1 A numeric vector holding x and y coordinates of the first
-#'   point.
-#' @param point2 A numeric vector holding x and y coordinates of the second
-#'   point.
-#' @param fullcirc A logical value indicating whether output should be an angle
-#'   on [0, 2pi) or [-pi, pi).
+#' @param point1 \link[base]{numeric} \link[base]{vector} holding the
+#'  x and y coordinates of the first point.
+#' @param point2 \link[base]{numeric} \link[base]{vector} holding the
+#' x and y coordinates of the second point.
+#' @param fullcirc \link[base]{logical} value indicating whether the output
+#' should be an angle on \eqn{[0, 2\pi)} or \eqn{[-\pi, \pi)}.
 #'
-#' @return If \code{fullcirc} is \code{FALSE}, the function returns a numeric
-#'   value (angle) from the interval [-pi, pi). \cr
-#'   If \code{fullcirc} is
-#'   \code{TRUE}, the function returns a numeric value (angle) from the interval
-#'   [0, 2pi).
+#' @return If \code{fullcirc = FALSE}, the function returns a \link[base]{numeric}
+#'   value (angle) from the interval \eqn{[-\pi, \pi)}. \cr
+#'   If \code{fullcirc = TRUE}, the function returns a numeric value \link[base]{numeric} from the interval
+#'   \eqn{[0, 2\pi)}.
 #' @export
 #'
 #' @examples
@@ -41,27 +40,30 @@ bearing <- function(point1, point2, fullcirc = TRUE) {
 }
 
 
-#' Calculate new position form angle and steplength
+#' Calculate the Next Position in a Trajectory from a Turn Angle and a Step Length
 #'
-#' The xy-coordinates of a position in 2-D space is calcualted from the angle
-#' between that position and the 2 previous ones and the distance between that
+#' The xy-coordinates of a position in 2-D space is calculated from the angle
+#' between that position and the 2 previous ones in the trajectory and the
+#' distance between that position and the previous one.
+#'
+#' @param angle \link[base]{numeric} value of the turn angle or a
+#'  \code{\link[circular]{circular}} object, either in \eqn{[0, 2\pi)} or in \eqn{[-\pi, \pi)}
+#' @param steplength \link[base]{numeric} value giving the distance between the
 #' position and the previous one.
+#' @param prevp1 \link[base]{numeric} \link[base]{vector} holding the x and y
+#' coordinates of the previous position.
+#' @param prevp2 \link[base]{numeric} \link[base]{vector} holding the x and y
+#' coordinates of the position before the previous one.
 #'
-#' @param angle The numeric value of a turning angle or a \code{\link{circular}}-objekt, either in [0, 2pi) or in [-pi, pi)
-#' @param steplength A numeric value giving the distance between the position and the previous one.
-#' @param prevp1 A numeric vector holding x and y coordinates of the previous
-#'   position.
-#' @param prevp2 A numeric vector holding x and y coordinates of the position
-#' before the previous one.
-#'
-#' @return The function returns a numeric vector holding the x and y coordinates of the position
+#' @return The function returns a \link[base]{numeric} \link[base]{vector}
+#' holding the x and y coordinates of the position
 #' @export
 #'
 #' @examples
-#'  angstep2xy(1.5*pi, 2, c(1, 4), c(2, 7.5))
+#'  angstep2xy(1.5*pi, 2, prevp1 = c(1, 4), prevp2 = c(2, 7.5))
 #'  angstep2xy(-0.5*pi, 2, c(1, 4), c(2, 7.5))
 angstep2xy <- function(angle, steplength, prevp1, prevp2) {
-  #convert angle to [0, 2pi) if necessary
+  #convert angle to \eqn{[0, 2\pi)} if necessary
   angle <-
     tryCatch(
       half2full_circ(angle),
@@ -81,37 +83,49 @@ angstep2xy <- function(angle, steplength, prevp1, prevp2) {
 
 
 
-#' Convert angle from half circle to full circle
+#' Convert Angle from Half Circle to Full Circle
 #'
-#' Converts angle from the interval [-pi, pi) to [0, 2pi).
+#' Converts an angle from the half circle (i.e. in the interval \eqn{[-\pi, \pi)})
+#' to an angle on the full circle  (i.e. in the interval \eqn{[0, 2\pi)}).
 #'
-#' @param angle The numeric value of an angle or a \code{\link{circular}}-objekt in [-pi, pi).
+#' @param angle \link[base]{numeric} value of an angle or a
+#' \code{\link{circular}}-objekt in \eqn{[-\pi, \pi)}.
 #'
-#' @return The numeric value of the angle in [0, 2pi).
+#' @return The \link[base]{numeric} value of the angle in \eqn{[0, 2\pi)}.
 #' @export
 #'
 #' @examples
-#' half2full_circ(-0.5*pi)
+#' half2full_circ(-1 * pi) / pi
+#' half2full_circ(-0.5 * pi) / pi
+#' half2full_circ(-0 * pi) / pi
+#' half2full_circ(0.5 * pi) / pi
+#'
 half2full_circ <- function(angle) {
   (as.double(angle) + (2 * pi)) %% (2 * pi)
 }
 
-
-#' Convert angle from full circle to half circle
+#' Convert Angle from Full Circle to Half Circle
 #'
-#' Converts angle from the interval [0, 2pi) to [-pi, pi).
+#' Converts an angle from the full circle (i.e. in the interval \eqn{[0, 2\pi)})
+#' to an angle on the half circle  (i.e. in the interval \eqn{[-\pi, \pi)}).
 #'
-#' @param angle A numeric vector containing angles or \code{\link{circular}}-objects in [0, 2pi).
+#' @param angle \link[base]{numeric} value of an angle or a
+#' \code{\link{circular}}-objekt in \eqn{[0, 2\pi)}.
 #'
-#' @return A numeric vector containing the angles in [-pi, pi).
-#'
+#' @return The \link[base]{numeric} value of the angle in \eqn{[-\pi, \pi)}.
 #' @export
 #'
 #' @examples
-#' full2half_circ(1.5*pi)
+#' full2half_circ(0 * pi) / pi
+#' full2half_circ(0.5 * pi) / pi
+#' full2half_circ(1 * pi) / pi
+#' full2half_circ(1.5 * pi) / pi
+#' full2half_circ(2 * pi) / pi
+#'
+#'
 full2half_circ <- function(angle) {
   if (any(angle < 0)) {
-    stop(cylcop::error_sound(),
+    stop(error_sound(),
          "An angle is negative. Did you mean to convert half to full instead?")
   }
   angle <- as.double(angle %% (2 * pi)) %>%
@@ -120,20 +134,20 @@ full2half_circ <- function(angle) {
 }
 
 
-#' Print arguments of a function call
-#'
-#'
-#'
-#' @param fun The function.
-#' @param params A list of characters holding the arguments passed to that function (named or unnamed).
-#' @param start An integer value, indicating with which function argument printing starts.
-#' @param param_print An integer value, indicating how many arguments are printed.
-#'
-#' @return A string consisting of parameter names and values with wich \code{fun} was called
-#' @export
-#'
-#' @examples
-#' print_param(dnorm, list(sd=1),start=1)
+# Print arguments of a function call
+#
+#
+#
+# @param fun The function.
+# @param params A list of characters holding the arguments passed to that function (named or unnamed).
+# @param start An integer value, indicating with which function argument printing starts.
+# @param param_print An integer value, indicating how many arguments are printed.
+#
+# @return A string consisting of parameter names and values with wich \code{fun} was called
+# @export
+#
+# @examples
+# print_param(dnorm, list(sd=1),start=1)
 print_param <-
   function(fun,
            params = list(),
@@ -149,11 +163,11 @@ print_param <-
     }
     if (length(param_print) > length(args)) {
       stop("requested to print more parameters than function has arguments",
-           cylcop::error_sound())
+           error_sound())
     }
     if (length(params) > length(args)) {
       stop("specified more parameters than the function has arguments",
-           cylcop::error_sound())
+           error_sound())
     }
 
 
@@ -175,7 +189,7 @@ print_param <-
              !"" %in% names(params) && !is.null(names(params))) {
       for (i in 1:length(params)) {
         if (!names(params)[i] %in% names(args)) {
-          stop(cylcop::error_sound(),
+          stop(error_sound(),
                names(params)[i],
                " is not a valid argument name")
         }
@@ -186,7 +200,7 @@ print_param <-
       }
     }
     else if (length(params) != 0 && "" %in% names(params)) {
-      stop(cylcop::error_sound(),
+      stop(error_sound(),
            "either have all function arguments specified by name or none")
     }
 
@@ -204,16 +218,16 @@ print_param <-
     temp
   }
 
-#' Get univariate distributions
-#'
-#'
-#' @param marg_type A character string corresponding to the type of univariate distribution, e.g. "norm"
-#'
-#' @return Give A list of functions of a univariate distribution (random gneration, density, distribution, quantiles)
-#' @export
-#'
-#' @examples
-#' get_marg("norm")
+# Get univariate distributions
+#
+#
+# @param marg_type A character string corresponding to the type of univariate distribution, e.g. "norm"
+#
+# @return Give A list of functions of a univariate distribution (random gneration, density, distribution, quantiles)
+# @export
+#
+# @examples
+# get_marg("norm")
 get_marg <- function(marg_type) {
   if(marg_type=="exponential") marg_type <- "exp"
   if(marg_type=="gauss" || marg_type=="normal") marg_type <- "norm"
@@ -227,7 +241,7 @@ get_marg <- function(marg_type) {
     )
   }, error = function(e) {
     stop(
-      cylcop::error_sound(),
+      error_sound(),
       "*",
       marg_type,
       " e.g. d",
@@ -238,11 +252,15 @@ get_marg <- function(marg_type) {
 }
 
 
-#' Set options
+#' Set Package Options
 #'
+#' Currently the only option is to toggle verbosity on or off.
+#' @param silent \link[base]{logical}, suppress all sounds and messages.
 #'
-#' @param silent logical, suppress all sounds and messages
-#'
+#' @return No output, only side effects.
+#' @examples cylcop_set_option(silent = FALSE)
+#' @seealso \code{\link{cylcop_get_option}()}
+#' @aliases verbose, silent
 #' @export
 #'
 cylcop_set_option <- function(silent=FALSE){
@@ -251,13 +269,20 @@ cylcop_set_option <- function(silent=FALSE){
 
 
 
-#' Get options
+#' Get Package Options
 #'
-#' @param option character string, name of the option
+#' Currently the only option (\code{"silent"}) is to toggle verbosity on or off.
+#'
+#' @param option \link[base]{character} string, the name of the option.
 #'
 #' @return
-#' The value of option
+#' The \link[base]{numeric} value of option. If no argument is provided, a list
+#' of all options is printed.
+#' @examples cylcop_get_option("silent")
+#' cylcop_get_option()
+#' @seealso \code{\link{cylcop_set_option}()}
 #' @export
+#'
 #'
 cylcop_get_option <- function(option=NULL){
   if(is.null(option)){
@@ -273,17 +298,17 @@ cylcop_get_option <- function(option=NULL){
 
 #--------------Set sounds----------------
 #
-# Sound functions are commented out and sound-files not provided
+# Sound functions are commented out and sound-files not provided at the moment
 #
 
 
 
-#' Error sound
-#'
-#' @include aaaglobal.R
-#' @return Play the error sound
-#' @export
-#'
+# Error sound
+#
+# @include aaaglobal.R
+# @return Play the error sound
+# @export
+#
 error_sound <- function() {
   # if(cylcop.env$silent==F){
   #   decide <- runif(1)
@@ -298,12 +323,12 @@ error_sound <- function() {
   # else{}
 }
 
-#' Warning sound
-#'
-#' @include aaaglobal.R
-#' @return Play the warning sound
-#' @export
-#'
+# Warning sound
+#
+# @include aaaglobal.R
+# @return Play the warning sound
+# @export
+#
 warning_sound <- function() {
   # if(cylcop.env$silent==F){
   #   sound::play(sound::loadSample(system.file("extdata", "warning.wav", package = "cylcop")))
@@ -311,12 +336,12 @@ warning_sound <- function() {
   # else{}
 }
 
-#' Waiting sound
-#'
-#' @include aaaglobal.R
-#' @return Play the waiting sound
-#' @export
-#'
+# Waiting sound
+#
+# @include aaaglobal.R
+# @return Play the waiting sound
+# @export
+#
 waiting_sound <- function() {
   # if(cylcop.env$silent==F){
   #   sound::play(sound::loadSample(system.file("extdata", "waiting.wav", package = "cylcop")))
@@ -324,12 +349,12 @@ waiting_sound <- function() {
   # else{}
 }
 
-#' Done sound
-#'
-#' @include aaaglobal.R
-#' @return Play the done sound
-#' @export
-#'
+# Done sound
+#
+# @include aaaglobal.R
+# @return Play the done sound
+# @export
+#
 done_sound <- function() {
   # if(cylcop.env$silent==F){
   #   sound::play(sound::loadSample(system.file("extdata", "done.wav", package = "cylcop")))

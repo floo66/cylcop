@@ -8,7 +8,7 @@
 \alias{setCopParam,cyl_rect_combine-method}
 \alias{setCopParam,cyl_rot_combine-method}
 \alias{setCopParam,cyl_vonmises-method}
-\title{Change attributes of \code{cyl_copula} objects}
+\title{Change Attributes of '\code{cyl_copula}' Objects}
 \usage{
 setCopParam(copula, param_val, param_name = NULL, ...)
 
@@ -23,19 +23,39 @@ setCopParam(copula, param_val, param_name = NULL, ...)
 \S4method{setCopParam}{cyl_vonmises}(copula, param_val, param_name)
 }
 \arguments{
-\item{copula}{A \code{cyl_copula} object.}
+\item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'.}
 
-\item{param_val}{A numeric vector holding the values to which you want to
-change certain parameters stored in \code{copula@parameters}.}
+\item{param_val}{\link[base]{numeric} \link[base]{vector} holding the values to which the
+parameters given in \code{copula@parameters} should be changed.}
 
-\item{param_name}{A vector vector of character strings holding the names of the parameters to be
-changed.}
+\item{param_name}{\link[base]{vector} of \link[base]{character} strings holding the
+names of the parameters to be changed.}
 
-\item{...}{Additional arguments.}
+\item{...}{additional arguments.}
 }
 \value{
-A \code{cyl_copula}-object with the changed parameters.
+A '\code{\linkS4class{cyl_copula}}' object with the changed parameters.
 }
 \description{
-Change attributes of \code{cyl_copula} objects
+These methods can be used, e.g. in other functions, to give users limited access
+to the parameters of a copula.
+}
+\details{
+Note that for a rectangular patchwork copula
+('\code{\linkS4class{cyl_rect_combine}}')
+the attribute \code{rectangles_symmetric} cannot be changed by \code{setCopParam()},
+since rectangular patchwork copulas with symmetric rectangles are treated as
+distinct from rectangular patchwork copulas with potentially asymmetric rectangles.
+Therefore, when changing one of the bounds of the lower rectangle of such a copula,
+the corresponding bound of the upper rectangle is automatically changed as well
+(see examples).
+}
+\examples{
+cop <- cyl_rect_combine(copula::normalCopula(0.2),low_rect = c(0.1,0.4), up_rect="symmetric")
+cop
+cop <- setCopParam(cop, param_val = c(0.1, 0.3), param_name = c("rho.1", "low_rect2"))
+cop <- cyl_rect_combine(copula::normalCopula(0.2),low_rect = c(0.1,0.4), up_rect=c(0.6,0.9))
+cop
+cop <- setCopParam(cop, param_val = 0.3, param_name = "low_rect2")
+cop
 }

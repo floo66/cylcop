@@ -4,19 +4,15 @@
 \name{cylcop-package}
 \alias{cylcop}
 \alias{cylcop-package}
-\title{cylcop: Circular-Linear Copulae with Angular Symmetry for Movement Data}
+\title{cylcop: Circular-Linear Copulas with Angular Symmetry for Movement Data}
 \description{
-Circular-linear data arise e.g. when describing movement with
-    step lengths and turn angles, which are often correlated. This correlation 
-    can be modelled using copulae. Turn angles are usually symmetric, meaning 
-    that an animal has no inherent preference to turn left or right. 
-    This package, which extends the \code{copula}-package contains Classes (S4) 
-    of circular-linear, symmetric copulae, methods for density, (conditional) 
-    distribution, random number generation, bivariate dependence measures and
-    fitting parameters using maximum likelihood and other approaches. The 
-    package also contains many methods for plotting movement data and copulae.
-    Finally, we also provide an \href{https://cylcop.shinyapps.io/cylcop-graphs/}{app} that allows for interactive visualization 
-    and exploration of all copulae in this package.
+Classes (S4) of circular-linear, symmetric copulas with corresponding
+    methods, extending the 'copula' package. These copulas are especially useful
+    for modelling correlation in discrete-time movement data. Methods for density, 
+    (conditional) distribution, random number generation, bivariate dependence
+    measures and fitting parameters using maximum likelihood and other 
+    approaches. The package also contains methods for visualizing movement data
+    and copulas.
 }
 \author{
 \strong{Maintainer}: Florian Hodel \email{florian.hodel@yahoo.com} (\href{https://orcid.org/0000-0002-0099-1006}{ORCID})

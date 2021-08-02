@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_margin.R
 \name{fit_steplength}
 \alias{fit_steplength}
-\title{Fit linear univariate distribution}
+\title{Fit a Linear Univariate Distribution}
 \usage{
 fit_steplength(
   x,
@@ -13,24 +13,75 @@ fit_steplength(
 )
 }
 \arguments{
-\item{x}{A numeric vector of measurements of a linear random variable.}
+\item{x}{\link[base]{numeric} \link[base]{vector} of measurements of a linear
+random variable in \eqn{[0,\infty)}.}
 
-\item{parametric}{Either a character string describing what (continuous)
-distribution should be fitted or FALSE if a non-parametric estimation
-(kernel density) should be made.}
+\item{parametric}{either a \link[base]{character} string describing what distribution
+should be fitted (\code{"beta"}, \code{"cauchy"}, \code{"chi-squared"},
+\code{"exponential"}, \code{"gamma"}, \code{"lognormal"}, \code{"logistic"},
+\code{"normal"}, \code{"t"}, or \code{"weibull"}), or the \link[base]{logical}
+\code{FALSE} if a non-parametric estimation (kernel density) should be made.}
 
-\item{start}{OPTIONAL: A numeric vector holding the starting values  for the ML parameter estimation.}
+\item{start}{(optional, except when \code{parametric = "chi-squared"})
+named \link[base]{list} containing the parameters to be optimized with inital
+values.}
 
-\item{bandwidth}{The numeric value of for the kernel density bandwidth.
-Default is  \code{cylcop::opt_lin_bw(x, "adhoc")}.}
+\item{bandwidth}{\link[base]{numeric} value for the kernel density bandwidth.
+Default is  \code{cylcop::\link{opt_lin_bw}(x, "adhoc")}.}
 }
 \value{
-If a parametric estimate is made, a list containing the estimated parameters, their
-standard errors and the loglikelihood is returned.
-If a nonparametric estimate is made, the output comes from
-the function \code{GoFKernel::density.reflected()}.
+If a parametric estimate is made, a \link[base]{list} containing the
+estimated parameters, their standard errors and the log-likelihood is returned.
+If a non-parametric estimate is made, , the output is a list, and comes directly
+from the function \code{GoFKernel::\link[GoFKernel]{density.reflected}()} of the '\pkg{GoFKernel}'
+package.
 }
 \description{
 This function finds parameter estimates of the marginal linear
-distribution, or gives a kernel density estimate.
+distribution, or gives a kernel density estimate using
+a Gaussian smoothing kernel.
+}
+\examples{
+require(graphics)
+set.seed(123)
+
+silent_curr <- cylcop_get_option("silent")
+cylcop_set_option(silent = TRUE)
+
+n <- 10000
+
+x <- rweibull(n, shape = 10)
+
+dens_non_param <- fit_steplength(x = x, parametric = FALSE)
+weibull <- fit_steplength(x = x, parametric = "weibull")
+gamma <- fit_steplength(x = x, parametric = "gamma")
+chisq <- fit_steplength(x = x, parametric = "chi-squared", start = list(df = 1))
+
+true_dens <- dweibull(seq(0, max(x), length.out = 200),
+  shape = 10
+)
+dens_weibull <- dweibull(seq(0, max(x),length.out = 200),
+  shape = weibull$coef$shape,
+  scale = weibull$coef$scale
+)
+dens_gamma <- dgamma(seq(0, max(x),length.out = 200),
+  shape = gamma$coef$shape,
+  rate = gamma$coef$rate
+)
+dens_chisq <- dchisq(seq(0, max(x),length.out = 200),
+  df = chisq$coef$df
+)
+
+plot(seq(0,max(x),length.out = 200), true_dens, type = "l")
+lines(dens_non_param$x, dens_non_param$y, col = "red")
+lines(seq(0,max(x),length.out = 200), dens_weibull, col = "green")
+lines(seq(0,max(x),length.out = 200), dens_gamma, col = "blue")
+lines(seq(0,max(x),length.out = 200), dens_chisq, col = "cyan")
+
+cylcop_set_option(silent = silent_curr)
+
+}
+\seealso{
+\code{GoFKernel::\link[GoFKernel]{density.reflected}()},
+\code{\link{fit_angle}()}, \code{\link{opt_lin_bw}()}.
 }

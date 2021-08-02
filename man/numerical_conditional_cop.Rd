@@ -2,24 +2,40 @@
 % Please edit documentation in R/Ccond.R
 \name{numerical_conditional_cop}
 \alias{numerical_conditional_cop}
-\title{Numerically calculate the conditional copula}
+\title{Numerically Calculate the Conditional Copula}
 \usage{
 numerical_conditional_cop(u, copula, cond_on)
 }
 \arguments{
-\item{u}{Matrix of numeric values in I^2, containing as first collumn
-the circular (periodic) and as second the linear dimension.}
+\item{u}{\link[base]{matrix} or \link[base]{vector} of \link[base]{numeric}
+values in \eqn{I^2}, containing as first column
+ the circular (periodic) and as second the linear dimension.}
 
-\item{copula}{A \code{cyl_copula} or 2-dimensional \code{copula} object.}
+\item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'
+or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 
-\item{cond_on}{Column number of u on which the copula is conditioned. E.g if
-\code{cond_on=2}, the function calculates for each element in the first column of u
-the Copula conditional on the element in the second column.}
+\item{cond_on}{column number of \code{u} on which the copula is conditioned. E.g. if
+\code{cond_on = 2}, the function calculates for each element in the first column of u
+the copula conditional on the element in the second column.}
 }
 \value{
 A vector containing the values of the distribution of the copula at
-\code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}
+\code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
 }
 \description{
-Numerically calculate the conditional copula
+Numerically Calculate the Conditional Copula
+}
+\examples{
+cop <- cyl_quadsec(0.1)
+u <- cbind(c(0.3, 0.1), c(0.7, 0.3))
+numerical_conditional_cop(u = u, cop = cop, cond_on = 1)
+
+}
+\references{
+\insertRef{Hodelmethod}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+}
+\seealso{
+\code{\link{ccylcop}()}, \code{\link{numerical_inv_conditional_cop}()}.
 }

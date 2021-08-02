@@ -1,13 +1,54 @@
-#' Estimate a rank-based circular-linear correlation-coefficient-like parameter
+#' Estimate a Rank-Based Circular-Linear Correlation Coefficient
 #'
-#' The code is based on \insertCite{Mardia1976;textual}{cylcop}, \insertCite{Solow1988;textual}{cylcop}
-#' and \insertCite{Tu2015;textual}{cylcop}. The function returns a numeric value
-#' between 0 and 1, not -1 and 1, hence "correlation-coefficient-LIKE".
+#' The code is based on \insertCite{Mardia1976;textual}{cylcop},
+#' \insertCite{Solow1988;textual}{cylcop} and \insertCite{Tu2015;textual}{cylcop}.
+#' The function returns a numeric value between 0 and 1, not -1 and 1, positive
+#' and negative correlation cannot be discerned. Note also that the correlation
+#' coefficient is independent of the marginal distributions.
 #'
-#' @param theta A numeric vector of angles (measurements of a circular variable).
-#' @param x A numeric vector of steplengths (measurements of a linear variable).
+#' @param theta \link[base]{numeric} \link[base]{vector} of angles
+#' (measurements of a circular variable).
+#' @param x \link[base]{numeric} \link[base]{vector} of step lengths
+#' (measurements of a linear variable).
 #'
-#' @return A numeric value between 0 and 1
+#' @return A \link[base]{numeric} value between 0 and 1, the circular-linear
+#' correlation coefficient.
+#'
+#' @examples set.seed(123)
+#'
+#' cop <- cyl_quadsec(0.1)
+#'
+#' #draw samples and calculate the correlation coefficient
+#' sample <- rcylcop(100, cop)
+#' cor_cyl(theta = sample[,1], x = sample[,2])
+#'
+#' #the correlation coefficient is independent of the marginal distribution.
+#' sample <- make_traj(100,
+#'   cop,
+#'   marginal_circ = "vonmises",
+#'   parameter_circ = list(0, 1),
+#'   marginal_lin = "weibull",
+#'   parameter_lin = list(shape = 2)
+#' )
+#' cor_cyl(theta = sample$angle, x = sample$steplength)
+#' cor_cyl(theta = sample$cop_u, x = sample$cop_v)
+#'
+#' # Estimate correlation of samples drawn from circular-linear copulas with
+#' # perfect correlation
+#' cop <- cyl_rect_combine(copula::normalCopula(1))
+#' sample <- rcylcop(100, cop)
+#' cor_cyl(theta = sample[,1], x = sample[,2])
+#'
+#' @references \insertRef{Mardia1976}{cylcop}
+#'
+#' \insertRef{Solow1988}{cylcop}
+#'
+#' \insertRef{Tu2015}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
+#' @seealso \code{\link{mi_cyl}()}, \code{\link{optCor}()}.
+#'
 #' @export
 #'
 cor_cyl <- function(theta, x) {
@@ -43,29 +84,94 @@ cor_cyl <- function(theta, x) {
 
 
 
-#' Estimate the mutual information between a circular and a linear random
-#' variable
+#' Estimate the Mutual Information Between a Circular and a Linear Random
+#' Variable
 #'
 #' The mutual information can be normalized to lie between 0 ans 1
 #' by dividing by the product of the entropies of \code{x} and \code{theta}.
 #' Even if \code{x} and \code{theta} are perfectly correlated, the normalized
 #' mutual information will not be 1 if the underlying copula is periodic and
-#' symmetric. Therefore, we can set \code{symmetrize=T} to set all u-values of
-#' the empirical copula that are larger than 0.5 to 1-0.5. The mutual information
-#' is then calculated from those values and is exactly 1 in the case of
+#' symmetric. Therefore, we can set \code{symmetrize = TRUE} to set all u-values of
+#' the empirical copula that are larger than \eqn{0.5} to \eqn{1-0.5}. The mutual information
+#' is then calculated from those values and the is exactly 1 in the case of
 #' perfect correlation as captured by e.g.
-#' \code{cyl_rect_combine(normalCopula(1))}.
+#' \code{cyl_rect_combine(normalCopula(1))}. The estimate (output of
+#' \code{mi_cyl()}) will be less than one for numerical reasons. Note also that
+#' the mutual information is independent of the marginal distributions.
 #'
-#' @param theta A numeric vector of angles (measurements of a circular
+#' @param theta \link[base]{numeric} \link[base]{vector} of angles (measurements of a circular
 #'   variable).
-#' @param x A numeric vector of steplengths (measurements of a linear
+#' @param x \link[base]{numeric} \link[base]{vector} of step lengths (measurements of a linear
 #'   variable).
-#' @param normalize A logical value whether the mutual information should be
-#'   normalized to lie within [0,1].
-#' @param symmetrize A logical value whether it should be assumed that positive
+#' @param normalize \link[base]{logical} value whether the mutual information should be
+#'   normalized to lie within \eqn{[0,1]}.
+#' @param symmetrize \link[base]{logical} value whether it should be assumed that positive
 #'   and negative angles are equivalent.
 #'
-#' @return A numeric value, the mutual information between \code{theta} and \code{x}.
+#' @return A \link[base]{numeric} value, the mutual information between \code{theta} and \code{x}.
+#'
+#' @examples set.seed(123)
+#'
+#' cop <- cyl_quadsec(0.1)
+#'
+#' #draw samples and calculate the mutual information.
+#' sample <- rcylcop(100, cop)
+#' mi_cyl(theta = sample[,1],
+#'   x = sample[,2],
+#'   normalize = TRUE,
+#'   symmetrize = FALSE
+#' )
+#'
+#' #the correlation coefficient is independent of the marginal distribution.
+#' sample <- make_traj(100,
+#'   cop,
+#'   marginal_circ = "vonmises",
+#'   parameter_circ = list(0, 1),
+#'   marginal_lin = "weibull",
+#'   parameter_lin = list(shape = 2)
+#' )
+#' mi_cyl(theta = sample$angle,
+#'   x = sample$steplength,
+#'   normalize = TRUE,
+#'   symmetrize = FALSE)
+#' mi_cyl(theta = sample$cop_u,
+#'   x = sample$cop_v,
+#'   normalize = TRUE,
+#'   symmetrize = FALSE)
+#'
+#' # Estimate correlation of samples drawn from circular-linear copulas
+#' # with perfect correlation.
+#' cop <- cyl_rect_combine(copula::normalCopula(1))
+#' sample <- rcylcop(100, cop)
+#' # without normalization
+#' mi_cyl(theta = sample[,1],
+#'   x = sample[,2],
+#'   normalize = FALSE,
+#'   symmetrize = FALSE
+#' )
+#' #with normalization
+#' mi_cyl(theta = sample[,1],
+#'   x = sample[,2],
+#'   normalize = TRUE,
+#'   symmetrize = FALSE
+#' )
+#' #only with normaliztion and symmetrization do we get a value close to 1
+#' mi_cyl(theta = sample[,1],
+#'   x = sample[,2],
+#'   normalize = TRUE,
+#'   symmetrize = TRUE
+#' )
+#'
+#' @references \insertRef{Jian2011}{cylcop}
+#'
+#' \insertRef{Calsaverini2009}{cylcop}
+#'
+#' \insertRef{Tenzer2016}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
+#' @seealso \code{\link{cor_cyl}()}, \code{\link{optCor}()}.
+#'
 #' @export
 #'
 mi_cyl <- function(theta,

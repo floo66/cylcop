@@ -1,28 +1,84 @@
 
-#' Generate a trajectory
+#' Generate a Trajectory with Correlated Step Lengths and Turn Angles
 #'
-#' @param n Number of trajectory steps to generate.
-#' @param copula A \code{cyl_copula} object.
-#' @param marginal_circ A character string denoting the name of the circular
-#'   distribution. "vonmises","wrappedcauchy", "dens" (for kernel density
-#'   estimate), or "hnorm".
-#' @param parameter_circ A list of parameters of the circular marginal dsitribution as taken by the functions
-#'   \code{qvonmises()},\code{qwrappedcauchy()}, or \code{qhorm()}. For \code{marginal_circ = "dens"}, \code{parameter_circ} must be the density object,
-#'   which can be obtained using \code{fit_angle(...,parametric = FALSE)}.
-#' @param marginal_lin A character string denoting the name of the linear distribution. I.e. the name of its distribution function without the "p"
-#'   e.g. "norm" for normal distribution.
-#' @param parameter_lin  A list of parameters of the linear marginal distribution. For \code{marginal_lin = "dens"}, \code{parameter_lin} must be the density object,
-#'   which can be obtained using \code{fit_steplength(...,parametric = FALSE)}.
-#' @return A data.frame containing the trajectory.
+#' The function draws values from a circular-linear bivariate distribution of
+#' turn angles and step lengths specified by the marginal distributions and a
+#' circular-linear copula. Samples are drawn from the copula and then transformed
+#' using the quantile functions of the marginal distributions. From the start
+#' point (0,0) and the second (user specified)
+#' point, a trajectory is then built with these turn angles and step lengths.
+#'
+#' @param n \link[base]{integer}, number of trajectory steps to generate.
+#' @param copula '\code{\linkS4class{cyl_copula}}' object.
+#' @param marginal_circ \link[base]{character} string denoting the name of the circular
+#'   distribution. It can be \code{"vonmises"}, \code{"mixedvonmises"},
+#'   \code{"wrappedcauchy"}, or \code{"dens"} (for kernel density estimate).
+#' @param parameter_circ (named) \link[base]{list} of parameters of the circular
+#' marginal distribution as taken by the functions
+#' \code{\link[circular]{qvonmises}()}, \code{\link{qmixedvonmises}()},
+#' or \code{\link{qwrappedcauchy}()}. If \code{marginal_circ = "dens"},
+#' \code{parameter_circ} must be a named \link[base]{list}, containing information
+#' on the kernel density estimate, which can be obtained
+#' using \code{\link{fit_angle}(...,parametric = FALSE)}.
+#' @param marginal_lin \link[base]{character} string denoting the name of the
+#' linear distribution, i.e. the name of its distribution function without the "p",
+#'   e.g. "norm" for normal distribution, or \code{"dens"} (for kernel density estimate).
+#' @param parameter_lin  (named) \link[base]{list} of parameters of the linear
+#' marginal distribution. For \code{marginal_lin = "dens"}, \code{parameter_lin}
+#'  must be a named \link[base]{list}, containing information
+#' on the kernel density estimate, which can be obtained
+#' using \code{\link{fit_steplength}(...,parametric = FALSE)}.
+#' @param pos_2 \link[base]{numeric} \link[base]{vector} containing the coordinates
+#' of the second point in the trajectory. The first point is always at (0,0).
+#'
+#' @return A \link[base]{data.frame} containing the trajectory. It has 6 columns
+#' containing the x and y coordintates, the step lengths, the turn angles, and
+#' the values sampled from the copula.
+#'
+#' @examples require(circular)
+#' set.seed(123)
+#'
+#' traj <- make_traj(5,
+#'   copula = cyl_quadsec(0.1),
+#'   marginal_circ = "vonmises",
+#'   parameter_circ = list(0, 1),
+#'   marginal_lin = "weibull",
+#'   parameter_lin = list(shape=3)
+#' )
+#' traj
+#'
+#' angles <- circular::rmixedvonmises(100,
+#'   mu1 = circular::circular(0),
+#'   mu2 = circular::circular(pi),
+#'   kappa1 = 2,
+#'   kappa2 = 3,
+#'   prop = 0.4
+#' )
+#' angles <- full2half_circ(angles)
+#' bw <- opt_circ_bw(theta = angles,loss = "adhoc", kappa.est = "trigmoments")
+#' dens <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw)
+#' make_traj(5,
+#'   copula = cyl_quadsec(0.1),
+#'   marginal_circ = "dens",
+#'   parameter_circ = dens,
+#'   marginal_lin = "weibull",
+#'   parameter_lin = list(shape=3),
+#'   pos_2 = c(5,5)
+#' )
+#'
+#' @seealso \code{\link{fit_steplength}()}, \code{\link{fit_angle}()},
+#' \code{\link{traj_plot}()}, \code{\link{cop_scat_plot}()},
+#' \code{\link{scat_plot}()}, \code{\link{circ_plot}()}.
 #' @export
 #'
 make_traj <-
   function(n,
            copula,
-           marginal_circ = c("vonmises","wrappedcauchy", "mixedvonmises", "dens", "hnorm"),
-           parameter_circ = list(0, 1),
+           marginal_circ = c("vonmises","wrappedcauchy", "mixedvonmises", "dens"),
+           parameter_circ,
            marginal_lin,
-           parameter_lin = list()) {
+           parameter_lin,
+           pos_2 = c(1, 0)) {
 
     #-----checks preparations and get parameters-------------------------------------------
 
@@ -63,35 +119,14 @@ make_traj <-
                  rlang::abort(conditionMessage(w))
                })
 
-    #give warnings regarding approximations, with hnorm as marginal
-    if (any(is(copula) == "cyl_gauss") && marginal_circ != "hnorm") {
-      warning(cylcop::warning_sound(),
-              "gaussian copula only gives at least approximatley correct results when used with hnorm as
-        marginal circular distribution"
-      )
-    }
-    if (!any(is(copula) == "cyl_gauss") && marginal_circ == "hnorm") {
-      warning(cylcop::warning_sound(), "hnorm as marginal circular distribution only really makes sense with gauss copula")
-    }
-    if (marginal_circ == "hnorm") {
-      prob <- 1 - do.call(extraDistr::phnorm, c(pi, parameter_circ))
-      if (prob > 0.0001) {
-        warning(cylcop::warning_sound(),
-                "The probability to draw a value from hnorm that is larger than pi is ",
-                round(100 * prob, 5),
-                "%"
-        )
-      }
-    }
-
     #Give arbitrary first 2 positions and generate otherwise empty trajectory
     #prevp2 is position at step-2 and prevp1 is position at step-1
     prevp2 <- c(0, 0)
-    prevp1 <- c(1, 0)
+    prevp1 <- pos_2
     traj <-
       data.frame(
-        pos_x = c(0, 1, rep(NA, n - 2)),
-        pos_y = c(0, 0, rep(NA, n - 2)),
+        pos_x = c(0, pos_2[1], rep(NA, n - 2)),
+        pos_y = c(0, pos_2[2], rep(NA, n - 2)),
         steplength = c(NA, 1, rep(NA, n - 2)),
         angle = rep(NA, n),
         cop_v = rep(NA, n),
@@ -115,10 +150,10 @@ make_traj <-
     time <- 0
 
     for(i in 1:length(step_start)){
-      cop_sample <- rCopula((step_end[i]-step_start[i]+1), copula)
+      cop_sample <- rcylcop((step_end[i]-step_start[i]+1), copula)
       if(marginal_lin!="dens") {step_vec <- do.call(marg_lin$q, c(list(p=cop_sample[,2]), parameter_lin))}
       else{step_vec <- do.call(marg_lin$q,list(cop_sample[,2], parameter_lin))}
-      if(marginal_circ!="dens"){angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ))}
+      if(marginal_circ!="dens"){suppressWarnings(angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ)))}
       else{angle_vec <- do.call(marg_circ$q,list(cop_sample[,1], parameter_circ))}
       traj[step_start[i]:step_end[i],3] <- step_vec
       traj[step_start[i]:step_end[i],4] <- angle_vec
@@ -178,7 +213,7 @@ make_traj <-
         }
         if ((time / 1000 * n) > 20 && step_end[i] >= 1000){
           utils::setTxtProgressBar(pb, step_end[i])
-          if(i==which(step_end>=n/2)[1]) cylcop::waiting_sound()
+          if(i==which(step_end>=n/2)[1]) waiting_sound()
         }
       }
     }
@@ -186,7 +221,7 @@ make_traj <-
       #close progress bar
       if ((time / 1000 * n) > 20 && n >= 1000){
         close(pb)
-        cylcop::done_sound()
+        done_sound()
       }
     }
     return(traj)

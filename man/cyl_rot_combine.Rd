@@ -2,20 +2,34 @@
 % Please edit documentation in R/cyl_rot_combine.R
 \name{cyl_rot_combine}
 \alias{cyl_rot_combine}
-\title{Construction of \code{cyl_quadsec} objects}
+\title{Construction of '\code{cyl_rot_combine}' Objects}
 \usage{
 cyl_rot_combine(copula, shift = FALSE)
 }
 \arguments{
-\item{copula}{A linear-linear \code{Copula} object from the \code{copula}-package.}
+\item{copula}{linear-linear 2-dimensional '\code{\linkS4class{Copula}}'
+object of the package '\pkg{copula}'.}
 
-\item{shift}{A logical indicating whether the (u-periodic) copula shoud be shifted by 0.5 in u direction.}
+\item{shift}{\link[base]{logical} value indicating whether the (u-periodic)
+copula should be shifted by 0.5 in u direction.}
 }
 \description{
-Construction of \code{cyl_quadsec} objects
+Constructs a circular-linear copula of class
+'\code{\linkS4class{cyl_rot_combine}}' from linear combinations
+ of copulas.
 }
 \examples{
-cyl_rot_combine(copula = copula::frankCopula(param = 3), shift = TRUE)
-cyl_rot_combine(copula = copula::claytonCopula(param = 10), shift = FALSE)
+cop <- cyl_rot_combine(copula = copula::frankCopula(param = 3), shift = TRUE)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 
+cop <- cyl_rot_combine(copula = copula::claytonCopula(param = 10), shift = FALSE)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+
+}
+\references{
+\insertRef{Nelsen2006}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
 }

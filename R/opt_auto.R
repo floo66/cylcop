@@ -1,19 +1,38 @@
 
-#' Black-box to find best fitting copula
+#' Automatically Find the Best Fitting Copula
 #'
-#' The parameters of 15 different circular-linear copulas are fitted and sorted
+#' The parameters of 15 different circular-linear copulas are fitted to data
+#' and sorted
 #' according to AIC. For each copula, first, a starting value for the maximum
-#' likelihood estimation (MLE) is found using \code{cylcop::optCor()} or
-#' \code{cylcop::optTau()}. Then MLE with a "reasonable" setup is carried out.
-#' If MLE fails, parameters obtained with \code{cylcop::optCor()} or
-#' \code{cylcop::optTau()} are reported.
+#' likelihood estimation (MLE) is found using \code{\link{optCor}()}.
+#' Then MLE with a "reasonable" setup is carried out using \code{\link{optML}()}.
+#' If MLE fails, parameters obtained with \code{\link{optCor}()} are reported.
 #'
-#' @param theta A numeric vector of angles (measurements of a circular
-#'   variable).
-#' @param x A numeric vector of steplengths (measurements of a linear variable).
+#' @param theta \link[base]{numeric} \link[base]{vector} of angles
+#' (measurements of a circular variable).
+#' @param x \link[base]{numeric} \link[base]{vector} of step lengths
+#' (measurements of a linear variable).
 #'
 #' @return A list containing 3 lists: Descriptions of the copulae, the
-#' \code{cyl_copula}-objects with fitted parameters, the AIC.
+#' '\code{\linkS4class{cyl_copula}}' objects with fitted parameters, and the AIC.
+#' The lists are sorted by ascending AIC.
+#' If \code{\link{optML}()} has failed, the reported parameters are the ones with
+#' \code{\link{optCor}()} and the AIC is set to \code{NA}.
+#'
+#' @examples set.seed(123)
+#'
+#' #Optimal copula is independent of marginals
+#' data <- rcylcop(100,cyl_quadsec(0.1))
+#'
+#' #takes a few seconds to run
+#' #copula_lst <- opt_auto(theta = data[,1], x = data[,2])
+#'
+#' @seealso \code{\link{optCor}()}, \code{\link{optML}()}
+#'
+#' @references \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
 #' @export
 #'
 opt_auto <- function(theta, x) {
@@ -30,7 +49,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_vonmises(flip = F),
         theta = theta,
         x = x,
@@ -81,7 +100,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_vonmises(flip = T),
         theta = theta,
         x = x,
@@ -131,14 +150,14 @@ opt_auto <- function(theta, x) {
     message("Optimizing copula 3, cyl_quadsec")
   }
   start_val <- tryCatch(
-    cylcop::optCor(copula = cyl_quadsec(0),
+    optCor(copula = cyl_quadsec(0),
                    theta, x, method = "cor_cyl"),
     error = function(e) {
       return(FALSE)
     }
   )
   copula1 <- tryCatch(
-    cylcop::optML(
+    optML(
       copula = cyl_quadsec(),
       theta = theta,
       x = x,
@@ -154,7 +173,7 @@ opt_auto <- function(theta, x) {
     }
   )
   copula2 <- tryCatch(
-    cylcop::optML(
+    optML(
       copula = cyl_quadsec(),
       theta = theta,
       x = x,
@@ -198,7 +217,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_cubsec(),
         theta = theta,
         x = x,
@@ -212,7 +231,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_cubsec(),
         theta = theta,
         x = x,
@@ -245,7 +264,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_rot_combine(frankCopula(2), shift = F),
         theta,
         x,
@@ -257,7 +276,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rot_combine(frankCopula(2), shift = F),
         theta = theta,
         x = x,
@@ -292,7 +311,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_rot_combine(claytonCopula(2), shift = F),
         theta,
         x,
@@ -304,7 +323,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rot_combine(claytonCopula(2), shift = F),
         theta = theta,
         x = x,
@@ -346,7 +365,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_rot_combine(gumbelCopula(4), shift = F),
         theta,
         x,
@@ -358,7 +377,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rot_combine(gumbelCopula(4), shift = F),
         theta = theta,
         x = x,
@@ -394,7 +413,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_rot_combine(frankCopula(2), shift = T),
         theta,
         x,
@@ -406,7 +425,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rot_combine(frankCopula(2), shift = T),
         theta = theta,
         x = x,
@@ -441,7 +460,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_rot_combine(claytonCopula(2), shift = T),
         theta,
         x,
@@ -453,7 +472,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rot_combine(claytonCopula(2), shift = T),
         theta = theta,
         x = x,
@@ -496,7 +515,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      cylcop::optCor(
+      optCor(
         copula = cyl_rot_combine(gumbelCopula(4), shift = T),
         theta,
         x,
@@ -508,7 +527,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rot_combine(gumbelCopula(4), shift = T),
         theta = theta,
         x = x,
@@ -547,7 +566,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      suppressWarnings(cylcop::optTau(
+      suppressWarnings(optTau(
         copula = cyl_rect_combine(
           copula = frankCopula(2),
           low_rect = c(0, 0.5),
@@ -565,7 +584,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rect_combine(
           copula = frankCopula(param = 2),
           low_rect = c(0, 0.5),
@@ -610,7 +629,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      suppressWarnings(cylcop::optTau(
+      suppressWarnings(optTau(
         copula = cyl_rect_combine(
           copula = claytonCopula(2),
           low_rect = c(0, 0.5),
@@ -625,7 +644,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rect_combine(
           copula = claytonCopula(param = 2),
           low_rect = c(0, 0.5),
@@ -676,7 +695,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      suppressWarnings(cylcop::optTau(
+      suppressWarnings(optTau(
         copula = cyl_rect_combine(
           copula = gumbelCopula(2),
           low_rect = c(0, 0.5),
@@ -690,7 +709,7 @@ opt_auto <- function(theta, x) {
       }
     )
   copula <- tryCatch(
-    cylcop::optML(
+    optML(
       copula = cyl_rect_combine(
         copula = gumbelCopula(param = 2),
         low_rect = c(0, 0.5),
@@ -736,7 +755,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      suppressWarnings(cylcop::optTau(
+      suppressWarnings(optTau(
         copula = cyl_rect_combine(
           copula = claytonCopula(2),
           low_rect = c(0, 0.5),
@@ -752,7 +771,7 @@ opt_auto <- function(theta, x) {
     )
   copula <-
     tryCatch(
-      cylcop::optML(
+      optML(
         copula = cyl_rect_combine(
           copula = claytonCopula(param = 2),
           low_rect = c(0, 0.5),
@@ -805,7 +824,7 @@ opt_auto <- function(theta, x) {
   }
   start_val <-
     tryCatch(
-      suppressWarnings(cylcop::optTau(
+      suppressWarnings(optTau(
         copula = cyl_rect_combine(
           copula = gumbelCopula(2),
           low_rect = c(0, 0.5),
@@ -821,7 +840,7 @@ opt_auto <- function(theta, x) {
     )
 
   copula <- tryCatch(
-    cylcop::optML(
+    optML(
       copula = cyl_rect_combine(
         copula = gumbelCopula(param = 2),
         low_rect = c(0, 0.5),
@@ -866,7 +885,7 @@ opt_auto <- function(theta, x) {
   cylcop.env$silent <- original_silent
 
   if (any(is.infinite(unlist(AIC_lst)))) {
-    warning(cylcop::warning_sound(),
+    warning(warning_sound(),
             "For at least one copula, MLE did not converge!")
   }
 

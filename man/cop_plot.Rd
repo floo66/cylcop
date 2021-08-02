@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting_functions.R
 \name{cop_plot}
 \alias{cop_plot}
-\title{Make surface plot or heatmap of cdf or pdf of a copula}
+\title{Surface Plot or Heat Map of the Distribution or the Density of a Copula}
 \usage{
 cop_plot(
   copula,
@@ -13,22 +13,52 @@ cop_plot(
 )
 }
 \arguments{
-\item{copula}{A \code{cyl_copula} object.}
+\item{copula}{'\code{\linkS4class{cyl_copula}}' or a '\code{\linkS4class{Copula}}' object
+from the package '\pkg{copula}'.}
 
-\item{type}{A string of characters, either "pdf or "cdf".}
+\item{type}{\link[base]{character} string describing what is plotted,
+either \code{"pdf"} or \code{"cdf"}.}
 
-\item{plot_type}{A string of characters. Available plot types are:
-"rgl": surface plot,
-"plotly": interactive surface plot, or
-"ggplot": heatmap}
+\item{plot_type}{\link[base]{character} string describing what type of plot
+is produced. Available plot types are:
+  \code{"rgl"}: surface plot,
+  \code{"plotly"}: interactive surface plot, or
+  \code{"ggplot"}: heatmap}
 
-\item{resolution}{A numerical value. The density or distribution will be calculated at \code{resolution^2} points.}
+\item{resolution}{\link[base]{numeric} value. The density or distribution
+will be calculated at \code{resolution^2} points.}
 
-\item{n_gridlines}{A numerical value giving the number of gridlines drawn in u and v direction.}
+\item{n_gridlines}{\link[base]{numeric} value giving the number of grid
+lines drawn in u and v direction.}
 }
 \value{
-The plot.
+Depending on \code{plot_type}, a '\code{\link[ggplot2]{ggplot}}' object
+is returned, or a '\pkg{plotly}' visualization or '\pkg{rgl}' plot is produced.
 }
 \description{
-Make surface plot or heatmap of cdf or pdf of a copula
+This function plots the distribution or the density of a copula. It can produce
+a surface plot using either functions from the '\pkg{rgl}' or from the
+'\pkg{plotly}' package, or it can produce a heat map using functions from
+'\pkg{ggplot2}'.
+}
+\examples{
+cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot")
+cop_plot(copula::frankCopula(2), type="cdf", plot_type="ggplot")
+cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot", resolution = 5)
+
+#opens a new window
+cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl")
+cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl", n_gridlines = 60)
+
+cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="plotly", n_gridlines = 20)
+
+}
+\references{
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
+\code{\link{circ_plot}()}, \code{\link{scat_plot}()}.
 }

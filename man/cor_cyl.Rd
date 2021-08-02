@@ -2,20 +2,64 @@
 % Please edit documentation in R/correlation.R
 \name{cor_cyl}
 \alias{cor_cyl}
-\title{Estimate a rank-based circular-linear correlation-coefficient-like parameter}
+\title{Estimate a Rank-Based Circular-Linear Correlation Coefficient}
 \usage{
 cor_cyl(theta, x)
 }
 \arguments{
-\item{theta}{A numeric vector of angles (measurements of a circular variable).}
+\item{theta}{\link[base]{numeric} \link[base]{vector} of angles
+(measurements of a circular variable).}
 
-\item{x}{A numeric vector of steplengths (measurements of a linear variable).}
+\item{x}{\link[base]{numeric} \link[base]{vector} of step lengths
+(measurements of a linear variable).}
 }
 \value{
-A numeric value between 0 and 1
+A \link[base]{numeric} value between 0 and 1, the circular-linear
+correlation coefficient.
 }
 \description{
-The code is based on \insertCite{Mardia1976;textual}{cylcop}, \insertCite{Solow1988;textual}{cylcop}
-and \insertCite{Tu2015;textual}{cylcop}. The function returns a numeric value
-between 0 and 1, not -1 and 1, hence "correlation-coefficient-LIKE".
+The code is based on \insertCite{Mardia1976;textual}{cylcop},
+\insertCite{Solow1988;textual}{cylcop} and \insertCite{Tu2015;textual}{cylcop}.
+The function returns a numeric value between 0 and 1, not -1 and 1, positive
+and negative correlation cannot be discerned. Note also that the correlation
+coefficient is independent of the marginal distributions.
+}
+\examples{
+set.seed(123)
+
+cop <- cyl_quadsec(0.1)
+
+#draw samples and calculate the correlation coefficient
+sample <- rcylcop(100, cop)
+cor_cyl(theta = sample[,1], x = sample[,2])
+
+#the correlation coefficient is independent of the marginal distribution.
+sample <- make_traj(100,
+  cop,
+  marginal_circ = "vonmises",
+  parameter_circ = list(0, 1),
+  marginal_lin = "weibull",
+  parameter_lin = list(shape = 2)
+)
+cor_cyl(theta = sample$angle, x = sample$steplength)
+cor_cyl(theta = sample$cop_u, x = sample$cop_v)
+
+# Estimate correlation of samples drawn from circular-linear copulas with
+# perfect correlation
+cop <- cyl_rect_combine(copula::normalCopula(1))
+sample <- rcylcop(100, cop)
+cor_cyl(theta = sample[,1], x = sample[,2])
+
+}
+\references{
+\insertRef{Mardia1976}{cylcop}
+
+\insertRef{Solow1988}{cylcop}
+
+\insertRef{Tu2015}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{\link{mi_cyl}()}, \code{\link{optCor}()}.
 }

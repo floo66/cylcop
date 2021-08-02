@@ -2,18 +2,30 @@
 NULL
 
 
-#'Numerically calculate the conditional copula
+#' Numerically Calculate the Conditional Copula
 #'
-#' @param u Matrix of numeric values in I^2, containing as first collumn
+#' @param u \link[base]{matrix} or \link[base]{vector} of \link[base]{numeric}
+#' values in \eqn{I^2}, containing as first column
 #'  the circular (periodic) and as second the linear dimension.
-#' @param copula A \code{cyl_copula} or 2-dimensional \code{copula} object.
-#' @param cond_on Column number of u on which the copula is conditioned. E.g if
-#' \code{cond_on=2}, the function calculates for each element in the first column of u
-#' the Copula conditional on the element in the second column.
+#' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'
+#' or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).
+#' @param cond_on column number of \code{u} on which the copula is conditioned. E.g. if
+#' \code{cond_on = 2}, the function calculates for each element in the first column of u
+#' the copula conditional on the element in the second column.
 #'
-#' @return
-#' A vector containing the values of the distribution of the copula at
-#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}
+#' @return A vector containing the values of the distribution of the copula at
+#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+#'
+#' @examples cop <- cyl_quadsec(0.1)
+#' u <- cbind(c(0.3, 0.1), c(0.7, 0.3))
+#' numerical_conditional_cop(u = u, cop = cop, cond_on = 1)
+#'
+#' @references \insertRef{Hodelmethod}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' @seealso \code{\link{ccylcop}()}, \code{\link{numerical_inv_conditional_cop}()}.
+#'
 #' @export
 #'
 numerical_conditional_cop <- function(u, copula, cond_on){
@@ -23,7 +35,7 @@ numerical_conditional_cop <- function(u, copula, cond_on){
   if(cond_on==2){
     Ccond <- map2_dbl(u, v, function(u, v) {
       integrand <- function(x) {
-        cylcop::dCopula(c(x[1], v), copula)
+        dcylcop(c(x[1], v), copula)
       }
       cond <-
         stats::integrate(f = Vectorize(integrand),
@@ -35,7 +47,7 @@ numerical_conditional_cop <- function(u, copula, cond_on){
   else if(cond_on==1){
     Ccond <- map2_dbl(u, v, function(u, v) {
       integrand <- function(y) {
-        cylcop::dCopula(c(u, y[1]), copula)
+        dcylcop(c(u, y[1]), copula)
       }
       cond <-
         stats::integrate(f = Vectorize(integrand),
@@ -50,16 +62,30 @@ numerical_conditional_cop <- function(u, copula, cond_on){
 
 #'Numerically calculate the inverse of the conditional copula
 #'
-#' @param u Matrix of numeric values in I^2, containing as first collumn
+#' @param u \link[base]{matrix} or \link[base]{vector} of \link[base]{numeric}
+#' values in \eqn{I^2}, containing as first column
 #'  the circular (periodic) and as second the linear dimension.
-#' @param copula A \code{cyl_copula} or 2-dimensional \code{copula} object.
-#' @param cond_on Column number of u on which the copula is conditioned. E.g if
-#' \code{cond_on=2}, the function calculates for each element in the first column of u
-#' the inverse of the Copula conditional on the element in the second column.
+#'
+#' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'
+#' or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).
+#' @param cond_on column number of \code{u} on which the copula is conditioned. E.g if
+#' \code{cond_on = 2}, the function calculates for each element in the first column
+#' of u the inverse of the Copula conditional on the element in the second column.
 #'
 #' @return
 #' A vector containing the values of the inverse distribution of the copula at
-#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}
+#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+#'
+#' @examples cop <- cyl_quadsec(0.1)
+#' u <- cbind(c(0.3, 0.1), c(0.7, 0.3))
+#' numerical_inv_conditional_cop(u = u, cop = cop, cond_on = 1)
+#'
+#' @references \insertRef{Hodelmethod}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' @seealso \code{\link{ccylcop}()}, \code{\link{numerical_conditional_cop}()}.
+#'
 #' @export
 #'
 numerical_inv_conditional_cop <- function(u, copula, cond_on){
@@ -74,7 +100,7 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
     for (i in 1:length) {
       cond_func_v <- function(u){
         integrand <- function(x) {
-          cylcop::dCopula(c(x[1], v[i,]), copula)
+          dcylcop(c(x[1], v[i,]), copula)
         }
         cond <-
           stats::integrate(f = Vectorize(integrand),
@@ -93,7 +119,7 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
     for (i in 1:length) {
       cond_func_u <- function(v){
         integrand <- function(y) {
-          cylcop::dCopula(c(u[i,], y[1]), copula)
+          dcylcop(c(u[i,], y[1]), copula)
         }
         cond <-
           stats::integrate(f = Vectorize(integrand),
@@ -113,12 +139,12 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
 }
 
 
-#-----Calculate the conditional copula of a copula-object.-------------------------------------------
+#-----Calculate the conditional copula of a Copula-object.-------------------------------------------
 #
-#' @rdname cCopula
+#' @rdname ccylcop
 #' @export
-setMethod("cCopula", "Copula", function(u, copula, cond_on, inverse) {
-  if(dim(copula)!=2) stop("cylcop::cCopula() works only for copulas of dimension 2. For other copula-objects, try copula::cCopula().")
+setMethod("ccylcop", "Copula", function(u, copula, cond_on, inverse) {
+  if(dim(copula)!=2) stop("cylcop::ccylcop() works only for copulas of dimension 2. For other copula-objects, try copula::cCopula().")
 
   if(cond_on==2){
     u_swap <- matrix(ncol=2,c(u[,2],u[,1]))

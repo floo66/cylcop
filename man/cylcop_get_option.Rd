@@ -2,16 +2,24 @@
 % Please edit documentation in R/utils.R
 \name{cylcop_get_option}
 \alias{cylcop_get_option}
-\title{Get options}
+\title{Get Package Options}
 \usage{
 cylcop_get_option(option = NULL)
 }
 \arguments{
-\item{option}{character string, name of the option}
+\item{option}{\link[base]{character} string, the name of the option.}
 }
 \value{
-The value of option
+The \link[base]{numeric} value of option. If no argument is provided, a list
+of all options is printed.
 }
 \description{
-Get options
+Currently the only option (\code{"silent"}) is to toggle verbosity on or off.
+}
+\examples{
+cylcop_get_option("silent")
+cylcop_get_option()
+}
+\seealso{
+\code{\link{cylcop_set_option}()}
 }

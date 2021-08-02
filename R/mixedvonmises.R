@@ -1,13 +1,35 @@
-#' Quantiles of the mixed vonMises distribution
+#' Quantiles of the Mixed von Mises Distribution
 #'
-#' @param p vector of probabilities
-#' @param mu1 mean of the first component
-#' @param mu2 mean of the second component
-#' @param kappa1 concentration parameter of the first component
-#' @param kappa2 concentration parameter of the first component
-#' @param prop mixing proportion
+#' The quantiles are numerically obtained from the distribution function using
+#' monotone cubic splines.
 #'
-#' @return quantiles of the mixed vonMises distribution.
+#' @param p \link[base]{numeric} \link[base]{vector} giving the probabilities where
+#' the quantile function is evaluated.
+#' @param mu1 \link[base]{numeric} value, mean direction of the first component.
+#' @param mu2 \link[base]{numeric} value, mean direction of the second component.
+#' @param kappa1 \link[base]{numeric} value, concentration parameter of the
+#' first component.
+#' @param kappa2 \link[base]{numeric} value, concentration parameter of the
+#' second component.
+#' @param prop \link[base]{numeric} value, mixing proportion.
+#'
+#' @return a \link[base]{vector} of length \code{length(p)}, the
+#' quantiles of the mixed von Mises distribution.
+#'
+#' @examples
+#' qmixedvonmises(p = c(0.1, 0.8),
+#'   mu1 = 0,
+#'   mu2 = pi,
+#'   kappa1 = 1,
+#'   kappa2 = 3,
+#'   prop = 0.4
+#' )
+#'
+#' @seealso
+#' \code{circular::\link[circular]{dmixedvonmises}()},
+#' \code{circular::\link[circular]{pmixedvonmises}()},
+#' \code{circular::\link[circular]{rmixedvonmises}()}.
+#'
 #' @export
 #'
 qmixedvonmises <- function(p, mu1, mu2, kappa1, kappa2, prop) {
@@ -52,19 +74,48 @@ qmixedvonmises <- function(p, mu1, mu2, kappa1, kappa2, prop) {
 
 cylcop_mixedvonmises.env <- new.env(parent = emptyenv())
 
-#' mixed von Mises Maximum Likelihood Estimates
+#' Mixed von Mises Maximum Likelihood Estimates
 #'
-#'Computes the maximum likelihood estimates for the parameters of a von Mises distribution:
-#'the mean directions, the concentration parameters, and the proportion of the 2 distributions.
-#'
-#' @details Code is a simplified version of \code{movMF::movMF()} with the added
-#' feature of optionally fixed mean directions, see references.
-#' @param theta vector of angles
-#' @param mu (optional) vector holding the 2 mean directions (angles). If not specified
+#' Computes the maximum likelihood estimates for the parameters of a mixed
+#' von Mises distribution: the mean directions, the concentration parameters,
+#' and the proportion of the 2 distributions. The code is a simplified version of
+#'  \code{movMF::\link[movMF]{movMF}()} with the added
+#' feature of optionally fixed mean directions \insertCite{Hornik2014}{cylcop}.
+#' @param theta \link[base]{numeric} \link[base]{vector} of angles.
+#' @param mu (optional) \link[base]{numeric} \link[base]{vector} of length 2
+#'  holding the 2 mean directions (angles). If not specified
 #' the mean directions are estimated.
 #'
-#' @return A list containing the optimized parameters \code{mu}, \code{kappa}, and \code{prop}.
-#' @references Hornik, K. and Grun, B. (2014). movMF: An R Package for Fitting Mixtures of von Mises-Fisher Distributions. _J. Stat. Softw., 58(10)_, 164-168.
+#' @details The function complements the '\pkg{circular}' package, which
+#' provides functions to make maximum likelihood estimates of e.g. von Mises
+#' (\code{circular::\link[circular]{mle.vonmises}()}), or wrapped Cauchy distributions
+#' (\code{circular::\link[circular]{mle.wrappedcauchy}()})
+#'
+#' @return A list containing the optimized parameters \code{mu1}, \code{mu2},
+#' \code{kappa1}, \code{kappa2} and \code{prop}.
+#'
+#' @examples set.seed(123)
+#'
+#' n <- 1000
+#' angles <- circular::rmixedvonmises(n,
+#'   mu1 = circular::circular(0),
+#'   mu2 = circular::circular(pi),
+#'   kappa1 = 2,
+#'   kappa2 = 1,
+#'   prop = 0.4
+#' )
+#' angles <- as.double(angles)
+#' mle.mixedvonmises(theta = angles)
+#' mle.mixedvonmises(theta = angles, mu = c(0, pi))
+#'
+#' @references \insertRef{Hornik2014}{cylcop}.
+#'
+#' @seealso
+#' \code{movMF::\link[movMF]{movMF}()},
+#' \code{circular::\link[circular]{mle.vonmises}()},
+#' \code{circular::\link[circular]{dmixedvonmises}()},
+#' \code{\link{qmixedvonmises}()}.
+#'
 #'
 #' @export
 #'
@@ -74,11 +125,11 @@ mle.mixedvonmises <-  function(theta, mu=NULL)  {
   }
 
   #convert angles to points on unit circle
-  x <- cbind(cos(cylcop::half2full_circ(theta)), sin(cylcop::half2full_circ(theta)))
+  x <- cbind(cos(half2full_circ(theta)), sin(half2full_circ(theta)))
   if(!is.null(mu)){
     mu_circ<-matrix(nrow=2,ncol=2)
-    mu_circ[1,] <- cbind(cos(cylcop::half2full_circ(mu[1])), sin(cylcop::half2full_circ(mu[1])))
-    mu_circ[2,] <- cbind(cos(cylcop::half2full_circ(mu[2])), sin(cylcop::half2full_circ(mu[2])))
+    mu_circ[1,] <- cbind(cos(half2full_circ(mu[1])), sin(half2full_circ(mu[1])))
+    mu_circ[2,] <- cbind(cos(half2full_circ(mu[2])), sin(half2full_circ(mu[2])))
   }
   #number of components in mixture
   k<-2
@@ -147,7 +198,8 @@ mle.mixedvonmises <-  function(theta, mu=NULL)  {
 
 
 
-#-------utility functions copied without modification from package movMF version 0.2-3, movMF.R----------------
+#-------utility functions copied without modification from package movMF version
+#-------0.2-3, movMF.R----------------
 cadd <- function(A, x){
   A + rep.int(x, rep.int(nrow(A), ncol(A)))
 }
@@ -314,7 +366,8 @@ lH <-function(kappa, nu){
   y
 }
 
-#-------utility functions adapted, but modified from package movMF version 0.2-3, movMF.R----------------
+#-------utility functions adapted, but modified from package movMF version 0.2-3,
+#--------movMF.R----------------
 
 ## Utility functions for computing H and log(H).
 

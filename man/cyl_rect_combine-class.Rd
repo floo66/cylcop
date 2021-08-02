@@ -3,62 +3,76 @@
 \docType{class}
 \name{cyl_rect_combine-class}
 \alias{cyl_rect_combine-class}
-\title{An S4 class of circular-linear copulae generated from rectangular patches.}
+\title{An S4 Class of Circular-Linear Copulas Generated from a Rectangular Patchwork}
 \description{
-This class contains bivariate circular-linear copulae generated from
-linear-linear bivariate \code{Copula} objects of the \code{copula}-package or circular-linear
-copulae of class \code{cyl_copula}. 2 non-overlapping rectangles are laid over the unit
-square, both have width 1 in v-direction. In the area covered by the first rectangle,
-the one covered by the second and the area not covered by any rectangle all have different copulae.
-Rectangle 2 contains the same copula as rectangle 1, but 90 degrees rotated. The copula regions
-are combined in a way that the overall result on the entire unit square is lso a copula.
-See text for more rigorous explantion.
+This class contains bivariate circular-linear copulas generated from
+linear-linear bivariate '\code{\linkS4class{Copula}}' objects of the package
+'\pkg{copula}' or circular-linear copulas of class '\code{\linkS4class{cyl_copula}}'.
+2 non-overlapping rectangles are laid over the unit square, both have width
+1 in v-direction. In the area covered by the first rectangle, the copula is
+derived from a linear-linear bivariate '\code{\linkS4class{Copula}}' object.
+Rectangle 2 contains the same copula as rectangle 1, but 90 degrees rotated.
+In the area not covered by the rectangles, the "background", the copula is
+derived from a circular-linear '\code{\linkS4class{cyl_copula}}' object.
+The copula regions are combined in a way that the overall result on the entire
+unit square is also a copula.
 }
 \details{
-With appropriate choices of the rectangles (again, see text) this results in copulae
+With appropriate choices of the rectangles this results in copulas
 that are periodic in u-direction (and not in v-direction) and therefore are
-circular-linear.
+circular-linear. When the 2 rectangles are mirror images with
+respect to \eqn{u=0.5}, the resulting overall copula is symmetric with respect
+to \eqn{u=0.5}, i.e. there is symmetry between positive and negative angles.
 
-When the 2 rectangles are each other's mirror image with respect to u=0.5,
-the resulting overall copula is symmetric with respect to u=0.5. I.e. there is
-symmetry between positive and negative angles.
+Note that as "background copula", we can also chose a linear-linear copula,
+the overall result will then, however, not be a symmetric circular linear copula.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{name}}{A character string holding the name of the copula.}
+\item{\code{name}}{\link[base]{character} string holding the name of the copula.}
 
-\item{\code{parameters}}{A numeric vector holding the parameter values.}
+\item{\code{parameters}}{\link[base]{numeric} \link[base]{vector} holding the parameter values.}
 
-\item{\code{param.names}}{A character vector holding the parameter names.}
+\item{\code{param.names}}{\link[base]{character} \link[base]{vector} the parameter names.}
 
-\item{\code{param.lowbnd}}{A numeric vector holding the lower bounds of the
+\item{\code{param.lowbnd}}{\link[base]{numeric} \link[base]{vector} holding the lower bounds of the
 parameters.}
 
-\item{\code{param.upbnd}}{A numeric vector holding the upper bounds of the
+\item{\code{param.upbnd}}{\link[base]{numeric} \link[base]{vector} holding the upper bounds of the
 parameters.}
 
-\item{\code{sym.cop}}{A \code{cyl_vonmises} or \code{Copula} object. The copula in
-the rectangles.}
+\item{\code{sym.cop}}{'\code{\linkS4class{Copula}}' object of the package
+'\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object. The copula in
+  the rectangles.}
 
-\item{\code{background.cop}}{A \code{cyl_copula} or \code{Copula} object. The copula
-where no rectangles overlay the unit square.}
+\item{\code{background.cop}}{'\code{\linkS4class{cyl_vonmises}}' or
+'\code{\linkS4class{Copula}}' object of the package '\pkg{copula}'
+(does not lead to an overall symmetric circular-linear copula). The copula
+  where no rectangles overlay the unit square.}
 
-\item{\code{flip_up}}{Logical value indicating whether the copula (\code{sym.cop}) is
+\item{\code{flip_up}}{\link[base]{logical} value indicating whether the copula (\code{sym.cop}) is
 rotated 90 degrees in the upper or lower rectangle.}
 
-\item{\code{sym_rect}}{Logical value indicating whether the upper rectangle was
+\item{\code{sym_rect}}{\link[base]{logical} value indicating whether the upper rectangle was
 forced to be a mirror image of the lower one with respect to u=0.5 at the
 construction of the object.}
 }}
 
 \section{Objects from the Class}{
  Objects are created by
-  \code{cyl_rect_combine()}.
+  \code{\link{cyl_rect_combine}()}.
 }
 
 \section{Extends}{
 
-Class \code{cyl_rect_combine} extends class \code{cyl_copula}.
+Class '\code{cyl_rect_combine}' extends class '\code{\linkS4class{Copula}}'.
 }
 
+\references{
+\insertRef{Durante2009}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}

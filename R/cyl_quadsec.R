@@ -3,23 +3,35 @@ NULL
 
 
 
-#' An S4 class of copulae with quadratic sections
+#' An S4 Class of Bivariate Copulas with Quadratic Sections
 #'
-#' This class contains bivariate circular-linear copulae with quadratic sections in the linear dimension.
-#' They are periodic in the circular dimension, u, and symmetric with respect to u=0.5. I.e. there is
-#' symmetry between positive and negative angles.
+#' This class contains bivariate circular-linear copulas with quadratic sections
+#'  in the linear dimension. They are periodic in the circular dimension, u,
+#'  and symmetric with respect to u=0.5. I.e the can capture correlation in data
+#'  where there is symmetry between positive and negative angles. These copulas
+#'  are described by one parameter, \code{a}.
 #'
 #' @section Objects from the Class:
-#' Objects are created by \code{cyl_quadsec()}.
+#' Objects are created by \code{\link{cyl_quadsec}()}.
 #'
-#' @slot name A character string holding the name of the copula.
-#' @slot parameters A numeric vector holding the parameter values.
-#' @slot param.names A character vector holding the parameter names.
-#' @slot param.lowbnd A numeric vector holding the lower bounds of the parameters.
-#' @slot param.upbnd A numeric vector holding the upper bounds of the parameters.
+#' @slot name \link[base]{character} string holding the name of the copula.
+#' @slot parameters \link[base]{numeric} \link[base]{vector} holding the
+#' parameter value.
+#' @slot param.names \link[base]{character} \link[base]{vector} holding the
+#' parameter name.
+#' @slot param.lowbnd \link[base]{numeric} \link[base]{vector} holding the lower
+#'  bound of the parameter.
+#' @slot param.upbnd \link[base]{numeric} \link[base]{vector} holding the upper
+#'  bound of the parameter.
 #'
 #' @section Extends:
-#' Class \code{cyl_quadsec} extends class \code{cyl_copula}.
+#' Class '\code{cyl_quadsec}' extends class '\code{\linkS4class{cyl_copula}}'.
+#'
+#' @references \insertRef{Quesada-Molina1995}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
 #'
 #' @export
 #'
@@ -27,14 +39,25 @@ setClass("cyl_quadsec", contains = "cyl_copula")
 
 
 
-#' Construction of \code{cyl_quadsec} objects
+#' Construction of '\code{cyl_quadsec}' Objects
 #'
-#' @param a The numeric value of the parameter of the copula. It must be in [- 1 / (2 * pi)), 1 / (2 * pi))]
+#' Constructs a circular-linear copula with cubic sections of class
+#'  '\code{\linkS4class{cyl_quadsec}}'.
+#'
+#' @param a \link[base]{numeric} value of the parameter of the copula. It must be in
+#' \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.
 #'
 #' @export
 #'
 #' @examples
-#' cyl_quadsec(a = 0.1)
+#' cop <- cyl_quadsec(a = 0.1)
+#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#'
+#' @references \insertRef{Quesada-Molina1995}{cylcop}
+#'
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
 #'
 cyl_quadsec <- function(a = 1 / (2 * pi)) {
 
@@ -53,10 +76,11 @@ cyl_quadsec <- function(a = 1 / (2 * pi)) {
 
 
 
-#' Generate random samples
-#' @rdname Copula
+#' Generate Random Samples
+#' @rdname Cylcop
+# @describeIn cyl_quadsec-class Generate random samples.
 #' @export
-setMethod("rCopula", signature("numeric", "cyl_quadsec"), function(n, copula) {
+setMethod("rcylcop", signature("numeric", "cyl_quadsec"), function(n, copula) {
   a <- copula@parameters[1]
   u <- runif(n)
   w <- runif(n)
@@ -69,7 +93,7 @@ setMethod("rCopula", signature("numeric", "cyl_quadsec"), function(n, copula) {
   #evaluate it at w
   else{
     mat <- matrix(ncol=2,c(u,w))
-    v <- cylcop::cCopula(mat,copula,cond_on=1, inverse=T)
+    v <- cylcop::ccylcop(mat,copula,cond_on=1, inverse=T)
     cop_uv <- cbind(u, v)
   }
   return(cop_uv)
@@ -77,10 +101,11 @@ setMethod("rCopula", signature("numeric", "cyl_quadsec"), function(n, copula) {
 
 
 
-#' Calcualte density
-#' @rdname Copula
+#' Calculate Density
+#' @rdname Cylcop
+# @describeIn cyl_quadsec-class Calculate the density.
 #' @export
-setMethod("dCopula", signature("matrix", "cyl_quadsec"), function(u, copula) {
+setMethod("dcylcop", signature("matrix", "cyl_quadsec"), function(u, copula) {
 
   a <- copula@parameters[1]
   v <- u[, 2, drop = F]
@@ -94,10 +119,11 @@ setMethod("dCopula", signature("matrix", "cyl_quadsec"), function(u, copula) {
 
 
 
-#' Calcualte distribution
-#' @rdname Copula
+#' Calculate Distribution
+#' @rdname Cylcop
+# @describeIn cyl_quadsec-class Calculate the distribution.
 #' @export
-setMethod("pCopula", signature("matrix", "cyl_quadsec"), function(u, copula) {
+setMethod("pcylcop", signature("matrix", "cyl_quadsec"), function(u, copula) {
   a <- copula@parameters[1]
   v <- u[, 2, drop = F]
   u <- u[, 1, drop = F]
@@ -109,9 +135,10 @@ setMethod("pCopula", signature("matrix", "cyl_quadsec"), function(u, copula) {
 })
 
 #' Condtional copula
-#' @rdname cCopula
+#' @rdname ccylcop
+# @describeIn cyl_quadsec-class Calculate the conditional copula.
 #' @export
-setMethod("cCopula", signature("cyl_quadsec"), function(u, copula, cond_on=2, inverse=F) {
+setMethod("ccylcop", signature("cyl_quadsec"), function(u, copula, cond_on=2, inverse=F) {
   a <- copula@parameters[1]
   u_orig <- matrix(ncol=2,u)
   length <- nrow(u)
@@ -145,6 +172,7 @@ setMethod("cCopula", signature("cyl_quadsec"), function(u, copula, cond_on=2, in
 #-----Change attributes of existing cyl_quadsec object.-------------------------------------------
 #
 #' @rdname setCopParam
+# @describeIn cyl_quadsec-class Change attributes of existing object.
 #' @export
 setMethod("setCopParam", "cyl_quadsec", function(copula, param_val, param_name) {
   if(is.null(param_name)) param_name<-copula@param.names

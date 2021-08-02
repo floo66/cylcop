@@ -3,33 +3,44 @@
 \docType{class}
 \name{cyl_cubsec-class}
 \alias{cyl_cubsec-class}
-\title{An S4 class of copulas with cubic sections}
+\title{An S4 Class of Bivariate Copulas with Cubic Sections}
 \description{
 This class contains bivariate circular-linear copulas with cubic sections in the linear dimension.
-They are periodic in the circular dimension, u, and symmetric with respect to u=0.5. I.e. there is
-symmetry between positive and negative angles.
+They are periodic in the circular dimension, u, and symmetric with respect to u=0.5. I.e.
+the can capture correlation in data where there is symmetry between positive and negative angles.
+These copulas are described by two parameters, \code{a} and \code{b}.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{name}}{A character string holding the name of the copula.}
+\item{\code{name}}{\link[base]{character} string holding the name of the copula.}
 
-\item{\code{parameters}}{A numeric vector holding the parameter values.}
+\item{\code{parameters}}{\link[base]{numeric} \link[base]{vector} holding the parameter values.}
 
-\item{\code{param.names}}{A character vector holding the parameter names.}
+\item{\code{param.names}}{\link[base]{character} \link[base]{vector} holding the
+parameter names.}
 
-\item{\code{param.lowbnd}}{A numeric vector holding the lower bounds of the parameters.}
+\item{\code{param.lowbnd}}{\link[base]{numeric} \link[base]{vector} holding the lower
+bounds of the parameters.}
 
-\item{\code{param.upbnd}}{A numeric vector holding the upper bounds of the parameters.}
+\item{\code{param.upbnd}}{\link[base]{numeric} \link[base]{vector} holding the upper
+bounds of the parameters.}
 }}
 
 \section{Objects from the Class}{
 
-Objects are created by \code{cyl_cubsec()}.
+Objects are created by \code{\link{cyl_cubsec}()}.
 }
 
 \section{Extends}{
 
-Class \code{cyl_cubsec} extends class \code{cyl_copula}.
+Class '\code{cyl_cubsec}' extends class '\code{\linkS4class{cyl_copula}}'.
 }
 
+\references{
+\insertRef{Nelsen1997}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}

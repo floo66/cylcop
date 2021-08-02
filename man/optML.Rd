@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_cop_mle.R
 \name{optML}
 \alias{optML}
-\title{Estimate cyl_copula parameters according to maximum likelihood}
+\title{Estimate Parameters of a Circular-Linear Copula According to Maximum Likelihood}
 \usage{
 optML(
   copula,
@@ -14,42 +14,77 @@ optML(
   upper = NULL,
   optim.method = "L-BFGS-B",
   optim.control = list(maxit = 100),
-  estimate.variance = F,
-  traceOpt = F
+  estimate.variance = FALSE,
+  traceOpt = FALSE
 )
 }
 \arguments{
-\item{copula}{A \code{cyl_copula} object.}
+\item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'.}
 
-\item{theta}{A numeric vector of angles (measurements of a circular
-variable).}
+\item{theta}{\link[base]{numeric} \link[base]{vector} of angles
+(measurements of a circular variable).}
 
-\item{x}{A numeric vector of steplengths (measurements of a linear variable).}
+\item{x}{\link[base]{numeric} \link[base]{vector} of step lengths
+(measurements of a linear variable).}
 
-\item{parameters}{A vector of character strings holding the names of the parameters to be optimized.
-These can be any parameters in \code{copula@parameters}.}
+\item{parameters}{\link[base]{vector} of \link[base]{character} strings
+holding the names of the parameters to be optimized.
+  These can be any parameters in \code{copula@parameters}.}
 
-\item{start}{A vector of staring values of the parameters.}
+\item{start}{\link[base]{vector} of staring values of the parameters.}
 
-\item{lower}{OPTIONAL: A vector of lower bounds of the parameters.}
+\item{lower}{OPTIONAL: \link[base]{vector} of lower bounds of the parameters.}
 
-\item{upper}{OPTIONAL: A vector of upper bounds of the parameters.}
+\item{upper}{OPTIONAL: \link[base]{vector} of upper bounds of the parameters.}
 
-\item{optim.method}{optimizer used in \code{optim()}, can be
-"Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", or "Brent"}
+\item{optim.method}{\link[base]{character} string, optimizer used in
+\code{\link[stats]{optim}()}, can be
+ \code{"Nelder-Mead"}, \code{"BFGS"}, \code{"CG"}, \code{"L-BFGS-B"},
+ \code{"SANN"}, or \code{"Brent"}.}
 
-\item{optim.control}{A list of additional controls passed to \code{optim()}.}
+\item{optim.control}{\link[base]{list} of additional controls passed to
+\code{\link[stats]{optim}()}.}
 
-\item{estimate.variance}{A logical valu, denoting whether to include an
+\item{estimate.variance}{\link[base]{logical} value, denoting whether to include an
 estimate of the variance (NOT YET IMPLEMENTED).}
 
-\item{traceOpt}{A logical value, denoting whether to print information regarding
+\item{traceOpt}{\link[base]{logical} value, whether to print information regarding
 convergence, current values, etc. during the optimization process.}
 }
 \value{
-A list containing the same type of \code{cyl_copula} object as \code{copula},
- but with optimized parameters, the log likelihood and the AIC.
+A list of length 3 containing the same type of '\code{\linkS4class{cyl_copula}}'
+ object as \code{copula}, but with optimized parameters, the log-likelihood
+ and the AIC.
 }
 \description{
-The code of this function is based on \code{copula::fitCopula()}.
+The code of this function is based on \code{copula::\link[copula]{fitCopula}()}.
+A circular-linear copula is fit to a set of bivariate observations.
+}
+\examples{
+set.seed(123)
+
+#optimization of copula is independent of the marginals
+sample <- rcylcop(100,cyl_quadsec(0.1))
+optML(copula = cyl_quadsec(),
+  theta = sample[,1],
+  x = sample[,2],
+  parameters = "a",
+  start = 0
+)
+optML(copula = cyl_rect_combine(copula::frankCopula()),
+  theta = sample[,1],
+  x = sample[,2],
+  parameters = "alpha",
+  start = 1
+)
+
+}
+\references{
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{copula::\link[copula]{fitCopula}()}, \code{\link{optCor}()},
+ \code{\link{optML}()}, \code{\link{opt_auto}()}.
 }

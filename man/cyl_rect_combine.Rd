@@ -2,7 +2,7 @@
 % Please edit documentation in R/cyl_rect_combine.R
 \name{cyl_rect_combine}
 \alias{cyl_rect_combine}
-\title{Construction of \code{cyl_rect_combine} objects}
+\title{Construction of '\code{cyl_rect_combine}' Objects}
 \usage{
 cyl_rect_combine(
   copula,
@@ -13,28 +13,62 @@ cyl_rect_combine(
 )
 }
 \arguments{
-\item{copula}{A \code{cyl_vonmises} or \code{Copula} object. The copula in
-the rectangles.}
+\item{copula}{'\code{\linkS4class{Copula}}' object of the package
+'\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object, the copula in
+  the rectangles.}
 
-\item{background}{A \code{cyl_copula} or \code{Copula} object. The copula
-where no rectangles overlay the unit square.}
+\item{background}{'\code{\linkS4class{cyl_vonmises}}' or
+'\code{\linkS4class{Copula}}' object of the package '\pkg{copula}'
+(does not lead to an overall symmetric circular-linear copula), the copula
+  where no rectangles overlay the unit square.}
 
-\item{low_rect}{A numeric vector containing the lower and upper edge
-(u-value) of the lower rectangle.}
+\item{low_rect}{\link[base]{numeric} \link[base]{vector} containing the
+lower and upper edge (u-value) of the lower rectangle.}
 
-\item{up_rect}{A numeric vector containing the lower and upper edge (u-value)
-of the upper rectangle,  or the character string "symmetric" if it should be the mirror image
-(with respect to u=0.5) of the lower rectangle.}
+\item{up_rect}{\link[base]{numeric} \link[base]{vector} containing the lower
+and upper edge (u-value) of the upper rectangle, or the character string
+"symmetric" if it should be the mirror image (with respect to u=0.5) of the lower rectangle.}
 
-\item{flip_up}{Logical value indicating whether the copula (\code{sym.cop})
-is rotated 90 degrees in the upper or lower rectangle}
+\item{flip_up}{\link[base]{logical} value indicating whether the copula (\code{sym.cop})
+is rotated 90 degrees in the upper (\code{flip_up = TRUE}) or lower rectangle.}
 }
 \description{
-Construction of \code{cyl_rect_combine} objects
+Constructs a circular-linear copula of class
+'\code{\linkS4class{cyl_rect_combine}}' from a rectangular patchwork of copulas.
 }
 \examples{
-cyl_rect_combine(copula = copula::frankCopula(param = 3), background =
-cylcop::cyl_vonmises(), low_rect = c(0.1,0.4), up_rect = "symmetric", flip_up
-= TRUE)
 
+#symmetric rectangles spanning entire unit square
+cop <- cyl_rect_combine(copula::frankCopula(2))
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+
+#symmetric rectangles, independence copula as background
+cop <- cyl_rect_combine(copula::frankCopula(2),
+  low_rect = c(0, 0.3),
+  up_rect = "symmetric",
+  flip_up = FALSE
+)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+
+#symmetric rectangles, cy_quadsec-copula as background
+cop <- cyl_rect_combine(copula::normalCopula(0.3),
+  low_rect = c(0.1, 0.4),
+  up_rect = "symmetric",
+  background = cyl_quadsec(-0.1)
+)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+
+#asymmetric rectangles, von Mises copula as background.
+#!!Not a symmetric circular linear copula!!
+cop <- cyl_rect_combine(copula::normalCopula(0.3), low_rect = c(0.1, 0.4),
+up_rect = c(0.5, 0.7), background = cyl_vonmises(mu = pi, kappa = 0.3))
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+
+}
+\references{
+\insertRef{Durante2009}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
 }

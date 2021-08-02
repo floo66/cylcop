@@ -3,39 +3,52 @@
 \docType{class}
 \name{cyl_rot_combine-class}
 \alias{cyl_rot_combine-class}
-\title{An S4 class of circular-linear copulas from linear combinations of linear-linear copulas}
+\title{An S4 Class of Circular-Linear Copulas generated from Linear Combinations
+ of Copulas}
 \description{
-This class contains bivariate circular-linear copulas generated from
-linear-linear bivariate copulas of the \code{copula}-package by taking the
-arithmetic mean of the original copula and the 90 deg rotated copula. This
-results in copulas that are periodic in the circular dimension, u, and
-symmetric with respect to u=0.5, i.e. positive and negative angles.
+This class contains bivariate circular-linear copulas, generated from
+linear-linear bivariate '\code{\linkS4class{Copula}}' objects of the package
+'\pkg{copula}', by taking the arithmetic mean of the original copula and
+the 90 deg rotated copula. This results in copulas that are periodic in the
+circular dimension, u, and symmetric with respect to \eqn{u=0.5}, i.e. positive
+and negative angles.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{name}}{A character string holding the name of the copula.}
+\item{\code{name}}{\link[base]{character} string holding the name of the copula.}
 
-\item{\code{parameters}}{A numeric vector holding the parameter values.}
+\item{\code{parameters}}{\link[base]{numeric} \link[base]{vector} holding the parameter values.}
 
-\item{\code{param.names}}{A character vector holding the parameter names.}
+\item{\code{param.names}}{\link[base]{character} \link[base]{vector} the parameter names.}
 
-\item{\code{param.lowbnd}}{A numeric vector holding the lower bounds of the parameters.}
+\item{\code{param.lowbnd}}{\link[base]{numeric} \link[base]{vector} holding the lower bounds of the
+parameters.}
 
-\item{\code{param.upbnd}}{A numeric vector holding the upper bounds of the parameters.}
+\item{\code{param.upbnd}}{\link[base]{numeric} \link[base]{vector} holding the upper bounds of the
+parameters.}
 
-\item{\code{orig.cop}}{A linear-linear \code{Copula} object from the \code{copula}-package.}
+\item{\code{orig.cop}}{linear-linear 2-dimensional '\code{\linkS4class{Copula}}'
+object of the package '\pkg{copula}'.}
 
-\item{\code{shift}}{A logical indicating whether the (u-periodic) copula shoud be shifted by 0.5 in u direction.}
+\item{\code{shift}}{\link[base]{logical} value indicating whether the (u-periodic)
+copula should be shifted by 0.5 in u direction.}
 }}
 
 \section{Objects from the Class}{
 
-Objects are created by \code{cyl_rot_combine()}.
+Objects are created by    \code{\link{cyl_rot_combine}()}.
 }
 
 \section{Extends}{
 
-Class \code{cyl_rot_combine} extends class \code{cyl_copula}.
+Class '\code{cyl_rot_combine}' extends class '\code{\linkS4class{Copula}}'.
 }
 
+\references{
+\insertRef{Nelsen2006}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}

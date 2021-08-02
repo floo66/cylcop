@@ -2,13 +2,24 @@
 % Please edit documentation in R/utils.R
 \name{cylcop_set_option}
 \alias{cylcop_set_option}
-\title{Set options}
+\alias{verbose,}
+\alias{silent}
+\title{Set Package Options}
 \usage{
 cylcop_set_option(silent = FALSE)
 }
 \arguments{
-\item{silent}{logical, suppress all sounds and messages}
+\item{silent}{\link[base]{logical}, suppress all sounds and messages.}
+}
+\value{
+No output, only side effects.
 }
 \description{
-Set options
+Currently the only option is to toggle verbosity on or off.
+}
+\examples{
+cylcop_set_option(silent = FALSE)
+}
+\seealso{
+\code{\link{cylcop_get_option}()}
 }

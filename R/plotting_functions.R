@@ -1,10 +1,34 @@
-
-#' Make scatterplot of turning angles ans steplengths
+#' Scatterplot of Turn Angles ans Step Lengths
 #'
-#' @param traj A data.frame containing the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
-#' @param periodic A logical value denoting whether the plot should be periodically extended past -pi and pi.
+#' This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
+#' the turn angles and step lengths.
+#' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
+#' \code{\link{make_traj}()}. It must contain
+#'  the columns \code{traj$angle} and \code{traj$steplength}.
+#' @param periodic \link[base]{logical} value denoting whether the plot should
+#' be periodically extended past -pi and pi.
 #'
-#' @return The scatterplot
+#' @return A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
+#'
+#' @examples set.seed(123)
+#'
+#' traj <- make_traj(100,
+#'   copula = cyl_quadsec(0.1),
+#'   marginal_circ = "vonmises",
+#'   parameter_circ = list(0, 1),
+#'   marginal_lin = "weibull",
+#'   parameter_lin = list(shape=3)
+#' )
+#' plot1 <- scat_plot(traj)
+#' plot2 <- scat_plot(traj, periodic = TRUE)
+#'
+#' @references \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
+#' @seealso \code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
+#' \code{\link{circ_plot}()}, \code{\link{cop_plot}()}.
+#'
 #' @export
 #'
 scat_plot <- function(traj, periodic = FALSE) {
@@ -167,11 +191,35 @@ scat_plot <- function(traj, periodic = FALSE) {
 }
 
 
-#' Plot the trajectories locations in x-y space
+#' Plot a Trajectory in Euclidean Space
 #'
-#' @param traj A data.frame containing the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
+#' This function plots the locations of a trajectory. The first and last point are
+#' marked in red.
 #'
-#' @return The plot
+#' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
+#' \code{\link{make_traj}()}. It must contain
+#'  the columns \code{traj$pos_x} and \code{traj$pos_y}.
+#'
+#' @return A '\code{\link[ggplot2]{ggplot}}' object.
+#'
+#' @examples set.seed(123)
+#'
+#' traj <- make_traj(50,
+#'   copula = cyl_quadsec(0.1),
+#'   marginal_circ = "vonmises",
+#'   parameter_circ = list(0, 1),
+#'   marginal_lin = "weibull",
+#'   parameter_lin = list(shape=3)
+#' )
+#' plot1 <- traj_plot(traj)
+#'
+#' @references \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
+#' @seealso \code{\link{cop_scat_plot}()},
+#' \code{\link{circ_plot}()}, \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
+#'
 #' @export
 #'
 traj_plot <- function(traj) {
@@ -200,11 +248,33 @@ traj_plot <- function(traj) {
 
 
 
-#' Make circular scatterplot of turning angles an steplengths
+#' Circular Scatterplot of Turn Angles and Step Lengths
 #'
-#' @param traj A data.framecontaining the trajectory. Must contain collumns \code{traj$angle} and \code{traj$steplength}.
+#' This function produces a circular scatterplot with the step lengths plotted
+#' as distance from the center of a circle and the turn angles as angles
+#' (polar coordinates).
 #'
-#' @return the plot.
+#' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
+#' \code{\link{make_traj}()}. It must contain
+#'  the columns \code{traj$angle} and \code{traj$steplength}.
+#'
+#' @return A '\code{\link[ggplot2]{ggplot}}' object.
+#'
+#' @examples set.seed(123)
+#'
+#' traj <- make_traj(100,
+#'   copula = cyl_quadsec(0.1),
+#'   marginal_circ = "vonmises",
+#'   parameter_circ = list(0, 1),
+#'   marginal_lin = "weibull", list(shape=3)
+#' )
+#' plot1 <- circ_plot(traj)
+#'
+#' @references \insertRef{Hodelmethod}{cylcop}
+#'
+#' @seealso \code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
+#' \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
+#'
 #' @export
 #'
 circ_plot <- function(traj) {
@@ -237,8 +307,9 @@ circ_plot <- function(traj) {
     as.data.frame()
 
   #set positions of angle labels
+  max_rad <- max(y_breaks)
   angle_label_pos <-  cbind(x = x_breaks,
-                            y = ceiling(c(5,5,5,3,4,4,4,3)+marginal_angle_dens$y[map(x_breaks,~which.min(abs(marginal_angle_dens$x-.x)))%>%unlist()])) %>%
+                            y = c(1.2, 1.2, 1.2, 1.15, 1.2, 1.2, 1.2, 1.15)*marginal_angle_dens$y[map(x_breaks,~which.min(abs(marginal_angle_dens$x-.x)))%>%unlist()]) %>%
     as.data.frame()
 
   #convert to cartesian coordinates to determine plot-margins
@@ -291,7 +362,7 @@ circ_plot <- function(traj) {
       axis.text = element_blank(),
       axis.ticks.y = element_blank(),
       axis.text.y = element_blank(),
-      plot.margin = unit(c(-10-5*top_correction, -10-5*right_correction, -10-5*bottom_correction, -10-5*left_correction), "pt")
+     # plot.margin = unit(c(-10-5*top_correction, -10-5*right_correction, -10-5*bottom_correction, -10-5*left_correction), "pt")
     ),
 
     geom_segment(
@@ -369,30 +440,55 @@ circ_plot <- function(traj) {
 }
 
 
-#' Make scatterplot of copula values
+#' Scatterplot of Copula Values
+#'
+#' This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
+#' a sample from a copula. Either a sample is provided as input, or a sample of
+#' 10000 points is drawn from a copula to quickly visualize it.
 #'
 #' @param input Either
-#' a data.frame containing the trajectory. Must contain collumns
-#' \code{traj$cop_u} and \code{traj$cop_v}\\
-#' or\\
-#' a \code{copula} object or \code{cyl_copula} object.
+#' a \link[base]{data.frame} containing the trajectory produced by e.g.
+#' \code{\link{make_traj}()}, which must contain columns
+#' \code{traj$cop_u} and \code{traj$cop_v},
+#' or a '\code{\linkS4class{cyl_copula}}' object or a '\code{\linkS4class{Copula}}' object
+#' of the package '\pkg{copula}'.
 #'
-#' @return The scatterplot.
+#' @return A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
+#'
+#' @examples set.seed(123)
+#'
+#' traj <- make_traj(100,
+#'   copula = cyl_quadsec(0.1),
+#'   marginal_circ = "vonmises",
+#'   parameter_circ = list(0, 1),
+#'   marginal_lin = "weibull",
+#'   parameter_lin = list(shape=3)
+#' )
+#' cop_scat_plot(traj)
+#' cop_scat_plot(cyl_quadsec(0.1))
+#'
+#' @references \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
+#' @seealso \code{\link{traj_plot}()},
+#' \code{\link{circ_plot}()}, \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
+#'
 #' @export
 #'
 cop_scat_plot <- function(input) {
 
   if ((any(is(input) == "cyl_copula"))||(any(is(input) == "Copula"))){
-    sample <- rCopula(10000,input)
+    sample <- rcylcop(10000,input)
     traj <- data.frame(cop_u=sample[,1], cop_v=sample[,2])
   } else if (is.data.frame(input)){
     if(!all(c("cop_u","cop_v") %in% colnames(input))){
-      stop(cylcop::error_sound(), "trajectory must contain the columns 'cop_u' and 'cop_v'")
+      stop(error_sound(), "trajectory must contain the columns 'cop_u' and 'cop_v'")
     }
     traj <- input
   }
   else{
-    stop(cylcop::error_sound(), "Provide either a (cyl_)copula object or a trajectory data.frame")
+    stop(error_sound(), "Provide either a (cyl_)copula object or a trajectory data.frame")
   }
 
   plot_theme <- list(
@@ -420,17 +516,48 @@ cop_scat_plot <- function(input) {
 
 
 
-#' Make surface plot or heatmap of cdf or pdf of a copula
+#' Surface Plot or Heat Map of the Distribution or the Density of a Copula
 #'
-#' @param copula A \code{cyl_copula} object.
-#' @param type A string of characters, either "pdf or "cdf".
-#' @param plot_type A string of characters. Available plot types are:
-#'   "rgl": surface plot,
-#'   "plotly": interactive surface plot, or
-#'   "ggplot": heatmap
-#' @param resolution A numerical value. The density or distribution will be calculated at \code{resolution^2} points.
-#' @param n_gridlines A numerical value giving the number of gridlines drawn in u and v direction.
-#' @return The plot.
+#' This function plots the distribution or the density of a copula. It can produce
+#' a surface plot using either functions from the '\pkg{rgl}' or from the
+#' '\pkg{plotly}' package, or it can produce a heat map using functions from
+#' '\pkg{ggplot2}'.
+#'
+#' @param copula '\code{\linkS4class{cyl_copula}}' or a '\code{\linkS4class{Copula}}' object
+#' from the package '\pkg{copula}'.
+#' @param type \link[base]{character} string describing what is plotted,
+#' either \code{"pdf"} or \code{"cdf"}.
+#' @param plot_type \link[base]{character} string describing what type of plot
+#' is produced. Available plot types are:
+#'   \code{"rgl"}: surface plot,
+#'   \code{"plotly"}: interactive surface plot, or
+#'   \code{"ggplot"}: heatmap
+#' @param resolution \link[base]{numeric} value. The density or distribution
+#' will be calculated at \code{resolution^2} points.
+#' @param n_gridlines \link[base]{numeric} value giving the number of grid
+#' lines drawn in u and v direction.
+#'
+#' @return Depending on \code{plot_type}, a '\code{\link[ggplot2]{ggplot}}' object
+#' is returned, or a '\pkg{plotly}' visualization or '\pkg{rgl}' plot is produced.
+#'
+#' @examples
+#' cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot")
+#' cop_plot(copula::frankCopula(2), type="cdf", plot_type="ggplot")
+#' cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot", resolution = 5)
+#'
+#' #opens a new window
+#' cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl")
+#' cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl", n_gridlines = 60)
+#'
+#' cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="plotly", n_gridlines = 20)
+#'
+#' @references \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
+#' @seealso \code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
+#' \code{\link{circ_plot}()}, \code{\link{scat_plot}()}.
+#'
 #' @export
 #'
 cop_plot <- function(copula,
@@ -442,23 +569,23 @@ cop_plot <- function(copula,
 #check input
 
    if (type == "pdf")
-    fun <- dCopula
+    fun <- dcylcop
   else if (type == "cdf")
-    fun <- pCopula
+    fun <- pcylcop
   else
-    stop(cylcop::error_sound(), "Type must be either cdf or pdf")
+    stop(error_sound(), "Type must be either cdf or pdf")
 
   if (!any(is(copula) == "cyl_copula") &&
       !any(is(copula) == "Copula")) {
     stop(
-      cylcop::error_sound(),
-      "copula must be a cyl_copula-object or a copula-object from the 'copkla'-package"
+      error_sound(),
+      "copula must be a cyl_copula-object or a copula-object from the 'copula'-package"
     )
   }
 
   if (plot_type != "rgl" &&
       plot_type != "plotly" && plot_type != "ggplot") {
-    stop(cylcop::error_sound(), "plot_type must be rgl, plotly or ggplot")
+    stop(error_sound(), "plot_type must be rgl, plotly or ggplot")
   }
   if(cylcop.env$silent==F)  printCop(copula)
 
@@ -468,7 +595,7 @@ cop_plot <- function(copula,
   u <- seq(0, 1, length.out = resolution)
   v <- seq(0, 1, length.out = resolution)
 
-  #only necessary when we use the dCopula generic of the copula package and not our own dCopula generic
+  #only necessary when we use the copula::dCopula generic of the copula package and not our own dcylcop generic
   # u[1] <- 0.00000001
   # u[length(u)] <- 0.99999999
   # v[1] <- 0.00000001
@@ -476,7 +603,7 @@ cop_plot <- function(copula,
 
   u_grid <- seq(0, 1, length.out = n_gridlines)
   v_grid <- seq(0, 1, length.out = n_gridlines)
-  #only necessary when we use the dCopula generic of the copula package and not our own dCopula generic
+  #only necessary when we use the copula::dCopula generic of the copula package and not our own dcylcop generic
   # u_grid[1] <- 0.00000001
   # u_grid[length(u_grid)] <- 0.99999999
   # v_grid[1] <- 0.00000001
@@ -517,12 +644,12 @@ cop_plot <- function(copula,
       outp[((i-1)*resolution+1):(i*resolution)] <- fun(mat[((i-1)*resolution+1):(i*resolution),],copula)
       if (time > 10 && cylcop.env$silent==F){
         utils::setTxtProgressBar(pb, i)
-        if(i==resolution/2) cylcop::waiting_sound()
+        if(i==resolution/2) waiting_sound()
       }
     }
     if (time > 10 && cylcop.env$silent==F){
       close(pb)
-      cylcop::done_sound()
+      done_sound()
     }
 
     quant_995 <- quantile(outp,probs = 0.995)
@@ -530,7 +657,7 @@ cop_plot <- function(copula,
     if(max_outp>(2*quant_995)){
       outp[which(outp>quant_995)] <- quant_995
       warning(
-        cylcop:: warning_sound(),
+        warning_sound(),
         paste0("Maximum of ", type, " is ", round(max_outp,2),
                "; for better visulatization,\n values larger than ",
                round(quant_995,2), " (99.5 percentile) are cut off.")
@@ -710,7 +837,7 @@ cop_plot <- function(copula,
           z = mat,
           showscale = F,
           colorscale = col,
-          opacity = 0.9,
+          opacity = 1,
           lighting = list(ambient = 0.9, specular = 0)
         ) %>%
         plotly::layout(
@@ -732,6 +859,12 @@ cop_plot <- function(copula,
 
 
       # Add gridlines
+      # there is an issue with plotly that it produces a warning when we add_trace.
+      # suppressWarnings does not work, for this reason, turn warnings off temporarily
+
+      warn_curr <- options()$warn
+      options(warn = -1)
+
       if(n_gridlines>0){
         for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
           p <-
@@ -743,9 +876,48 @@ cop_plot <- function(copula,
               z = ~ zg,
               type = 'scatter3d',
               mode = 'lines',
-              opacity = 0.95,
+              opacity = 1,
+              line = list(
+                width = 0.5,
+                color = "white",
+                reverscale = FALSE
+              )
+            )
+          }
+        for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
+          p <-
+            add_trace(
+              p,
+              data = gridlines_y[i:(i + n_gridlines - 1), ],
+              x = ~ vg,
+              y = ~ ug,
+              z = ~ zg,
+              type = 'scatter3d',
+              mode = 'lines',
+              opacity = 1,
               line = list(
                 width = 0.9,
+                color = "white",
+                reverscale = FALSE
+              )
+            )
+        }
+
+        gridlines_x$zg <- gridlines_x$zg - 0.02
+        gridlines_y$zg <- gridlines_y$zg - 0.02
+        for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
+          p <-
+            add_trace(
+              p,
+              data = gridlines_x[i:(i + n_gridlines - 1), ],
+              x = ~ vg,
+              y = ~ ug,
+              z = ~ zg,
+              type = 'scatter3d',
+              mode = 'lines',
+              opacity = 1,
+              line = list(
+                width = 0.5,
                 color = "white",
                 reverscale = FALSE
               )
@@ -761,7 +933,7 @@ cop_plot <- function(copula,
               z = ~ zg,
               type = 'scatter3d',
               mode = 'lines',
-              opacity = 0.95,
+              opacity = 1,
               line = list(
                 width = 0.9,
                 color = "white",
@@ -770,7 +942,12 @@ cop_plot <- function(copula,
             )
         }
       }
-      p %>% plotly::layout(showlegend = FALSE)
+
+      #turn warnings back to original state
+
+      p <- p %>% plotly::layout(showlegend = FALSE)
+      options(warn = warn_curr)
+      suppressWarnings(print(p))
     }
   }
 
@@ -787,7 +964,7 @@ cop_plot <- function(copula,
     if(max_outp>(2*quant_995)){
       outp$z[which(outp$z>quant_995)] <- quant_995
       warning(
-        cylcop:: warning_sound(),
+        warning_sound(),
         paste0("Maximum of ", type, " is ", round(max_outp,2),
                "; for better visulatization,\n values larger than ",
                round(quant_995,2), " (99.5 percentile) are cut off.")

@@ -3,36 +3,47 @@
 \docType{class}
 \name{cyl_vonmises-class}
 \alias{cyl_vonmises-class}
-\title{An S4 class of bivariate vonMises copulas}
+\title{An S4 Class of Bivariate vonMises Copulas}
 \description{
-This class contains circular-linear copulas that are based on the approach by Johnson and
-Wehrly 1978 with a vonMises periodic function. They are periodic in the circular
-dimension, u, but not symmetric with respect to u=0.5. I.e. there is no
-symmetry between positive and negative angles.
+This class contains circular-linear copulas that are based on the approach by
+\insertCite{Johnson1978;textual}{cylcop} with a von Mises periodic function.
+They are periodic in the circular dimension, u, but not symmetric with
+respect to \eqn{u=0.5} i.e. there is no symmetry between positive and negative angles.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{name}}{A character string holding the name of the copula.}
+\item{\code{name}}{\link[base]{character} string holding the name of the copula.}
 
-\item{\code{parameters}}{A numeric vector holding the parameter values.}
+\item{\code{parameters}}{\link[base]{numeric} \link[base]{vector} holding the parameter values.}
 
-\item{\code{param.names}}{A character vector holding the parameter names.}
+\item{\code{param.names}}{\link[base]{character} \link[base]{vector} holding the
+parameter names.}
 
-\item{\code{param.lowbnd}}{A numeric vector holding the lower bounds of the parameters.}
+\item{\code{param.lowbnd}}{\link[base]{numeric} \link[base]{vector} holding the lower
+bounds of the parameters.}
 
-\item{\code{param.upbnd}}{A numeric vector holding the upper bounds of the parameters.}
+\item{\code{param.upbnd}}{\link[base]{numeric} \link[base]{vector} holding the upper
+bounds of the parameters.}
 
-\item{\code{flip}}{A logical indicating whether the copula should be rotated 90 degrees to have negative correlation.}
+\item{\code{flip}}{\link[base]{logical} value indicating whether the copula should
+be rotated 90 degrees to capture negative correlation.}
 }}
 
 \section{Objects from the Class}{
 
-Objects are created by \code{cyl_vonmises()}.
+Objects are created by \code{\link{cyl_vonmises}()}.
 }
 
 \section{Extends}{
 
-Class \code{cyl_vonmises} extends class \code{cyl_copula}.
+Class '\code{cyl_vonmises}' extends class '\code{\linkS4class{cyl_copula}}'.
 }
 
+\references{
+\insertRef{Johnson1978}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}

@@ -1,15 +1,57 @@
-#' Density, distribution, random number generation and quantiles for a kernel density estimate
+#' Density, Distribution, Random Number Generation and Quantiles of Kernel Density Estimates
 #'
-#' @param density A list containing information about the kernel density
-#'   estimate. The structure of the list must be as returned by \code{fit_angle()} or
-#'   \code{fit_steplength()}.
-#' @param n Number of random samples to be generated.
+#' Calculate the density (\code{ddens()}), the distribution (\code{pdens()}),
+#'  the quantiles (\code{qdens()}) and generate random
+#' samples (\code{rdens()}) of a kernel density estimate as returned by
+#' \code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.
+#'
+#' @param density \link[base]{list} containing information about the kernel density
+#'   estimate. The structure of the list must be as returned by
+#'   \code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.
+#' @param x \link[base]{numeric} \link[base]{vector} giving the points where
+#' the density or distribution function is evaluated.
+#' @param p \link[base]{numeric} \link[base]{vector} giving the probabilities where
+#' the quantile function is evaluated.
+#' @param n \link[base]{integer} value, the number of random samples to be
+#' generated with \code{rdens()}.
+#'
+#' @returns
+#' \code{ddens()} and \code{pdens()} give a \link[base]{vector} of length \code{length(x)} containing
+#' the density or distribution function at the corresponding values of \code{x}.
+#' \code{qdens()} gives a \link[base]{vector} of length \code{length(p)} containing
+#' the quantiles at the corresponding values of \code{p}. The function \code{rdens()}
+#' generates a \link[base]{vector} of length \code{n} containing the random samples.
+#'
+#' @examples set.seed(123)
+#'
+#' steps <- rweibull(10, shape=3)
+#' dens <- fit_steplength(x = steps, parametric = FALSE)
+#' ddens(c(0.1,0.3), dens)
+#' pdens(c(0.1,0.3), dens)
+#' qdens(c(0.1,0.3), dens)
+#' rdens(4, dens)
+#'
+#' @seealso \code{\link{fit_angle}()}, \code{\link{fit_steplength}()},
+#' \code{\link{fit_steplength}()}.
+#'
 #' @name dens
+#' @aliases ddens pdens qdens rdens
+#'
+#
+NULL
+
+
+
+
+
+# Density of Kernel Density Estimate
+#'
+#' @rdname dens
 #' @export
 #'
 rdens <- function(n, density) {
   # Draw a points from the domain of the KDE
-  sample(as.double(density$x),
+  sample <- sample(as.double(density$x),
          n,
          replace = TRUE,
          prob = density$y)
@@ -17,7 +59,7 @@ rdens <- function(n, density) {
   #Now draw from the kernel distributions at these points,
   #with kappa (for vonmises) or sd (for Gaussian) equal to the bandwidth
   kernel<-get_marg(density$kernel)
-  map(sample, ~kernel$r(1,sample,dens$bw))
+  map(sample, ~kernel$r(1,sample,dens$bw)) %>% unlist()
 }
 
 
@@ -25,8 +67,6 @@ rdens <- function(n, density) {
 # Probability density from a kernel density estimate
 #
 #' @rdname dens
-#' @param x A numeric vector of measurements.
-#'
 #' @export
 #'
 ddens <- function(x, density) {
@@ -37,9 +77,8 @@ ddens <- function(x, density) {
 
 
 # Distribution function from a kernel density estimate
-#
-#' @rdname dens
 #'
+#' @rdname dens
 #' @export
 #'
 pdens <- function(x, density) {
@@ -67,10 +106,8 @@ pdens <- function(x, density) {
 
 
 # Quantiles of a kernel density estimate
-#
-#' @rdname dens
-#' @param p A numeric vector of probabilities.
 #'
+#' @rdname dens
 #' @export
 #'
 qdens <- function(p, density) {
@@ -100,7 +137,7 @@ qdens <- function(p, density) {
     #add one more x-value, its cdf is 1
     density$x<-c(density$x,2*density$x[length(density$x)]-density$x[length(density$x)-1])
 
-    #linear interpolation, faster than precise calcualtion, see pdens()
+    #linear interpolation, faster than precise calculation, see pdens()
     q_interpol <- stats::approxfun(c(cdf(l), cdf(r)),c(density$x[l+1],density$x[r+1]))
     return(q_interpol(p))
   }

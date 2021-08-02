@@ -1,28 +1,61 @@
 
 
-#' Estimate cyl_copula parameters according to maximum likelihood
+#' Estimate Parameters of a Circular-Linear Copula According to Maximum Likelihood
 #'
-#' The code of this function is based on \code{copula::fitCopula()}.
+#' The code of this function is based on \code{copula::\link[copula]{fitCopula}()}.
+#' A circular-linear copula is fit to a set of bivariate observations.
 #'
-#' @param copula A \code{cyl_copula} object.
-#' @param theta A numeric vector of angles (measurements of a circular
-#'   variable).
-#' @param x A numeric vector of steplengths (measurements of a linear variable).
-#' @param parameters A vector of character strings holding the names of the parameters to be optimized.
+#' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'.
+#' @param theta \link[base]{numeric} \link[base]{vector} of angles
+#' (measurements of a circular variable).
+#' @param x \link[base]{numeric} \link[base]{vector} of step lengths
+#' (measurements of a linear variable).
+#' @param parameters \link[base]{vector} of \link[base]{character} strings
+#' holding the names of the parameters to be optimized.
 #'   These can be any parameters in \code{copula@@parameters}.
-#' @param start A vector of staring values of the parameters.
-#' @param lower OPTIONAL: A vector of lower bounds of the parameters.
-#' @param upper OPTIONAL: A vector of upper bounds of the parameters.
-#' @param optim.method optimizer used in \code{optim()}, can be
-#'   "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", or "Brent"
-#' @param optim.control A list of additional controls passed to \code{optim()}.
-#' @param estimate.variance A logical valu, denoting whether to include an
+#' @param start \link[base]{vector} of staring values of the parameters.
+#' @param lower OPTIONAL: \link[base]{vector} of lower bounds of the parameters.
+#' @param upper OPTIONAL: \link[base]{vector} of upper bounds of the parameters.
+#' @param optim.method \link[base]{character} string, optimizer used in
+#' \code{\link[stats]{optim}()}, can be
+#'  \code{"Nelder-Mead"}, \code{"BFGS"}, \code{"CG"}, \code{"L-BFGS-B"},
+#'  \code{"SANN"}, or \code{"Brent"}.
+#' @param optim.control \link[base]{list} of additional controls passed to
+#' \code{\link[stats]{optim}()}.
+#' @param estimate.variance \link[base]{logical} value, denoting whether to include an
 #'   estimate of the variance (NOT YET IMPLEMENTED).
-#' @param traceOpt A logical value, denoting whether to print information regarding
+#' @param traceOpt \link[base]{logical} value, whether to print information regarding
 #'   convergence, current values, etc. during the optimization process.
 #'
-#' @return A list containing the same type of \code{cyl_copula} object as \code{copula},
-#'  but with optimized parameters, the log likelihood and the AIC.
+#' @return A list of length 3 containing the same type of '\code{\linkS4class{cyl_copula}}'
+#'  object as \code{copula}, but with optimized parameters, the log-likelihood
+#'  and the AIC.
+#'
+#' @examples set.seed(123)
+#'
+#' #optimization of copula is independent of the marginals
+#' sample <- rcylcop(100,cyl_quadsec(0.1))
+#' optML(copula = cyl_quadsec(),
+#'   theta = sample[,1],
+#'   x = sample[,2],
+#'   parameters = "a",
+#'   start = 0
+#' )
+#' optML(copula = cyl_rect_combine(copula::frankCopula()),
+#'   theta = sample[,1],
+#'   x = sample[,2],
+#'   parameters = "alpha",
+#'   start = 1
+#' )
+#'
+#' @seealso \code{copula::\link[copula]{fitCopula}()}, \code{\link{optCor}()},
+#'  \code{\link{optML}()}, \code{\link{opt_auto}()}.
+#'
+#' @references
+#' \insertRef{Hodelappl}{cylcop}
+#'
+#' \insertRef{Hodelmethod}{cylcop}
+#'
 #' @export
 #'
 optML <-  function(copula,
@@ -34,8 +67,8 @@ optML <-  function(copula,
                    upper = NULL,
                    optim.method = "L-BFGS-B",
                    optim.control = list(maxit = 100),
-                   estimate.variance = F,
-                   traceOpt = F) {
+                   estimate.variance = FALSE,
+                   traceOpt = FALSE) {
 # Check input and prepare data
   checked <-
     prep_n_check_ML(copula, theta, x, parameters, start, lower, upper)
@@ -62,22 +95,22 @@ optML <-  function(copula,
 
 
 
-#' Check input and prepare data for MLE
-#'
-#' @param copula A \code{cyl_copula} object.
-#' @param theta A numeric vector of angles (measurements of a circular
-#'   variable).
-#' @param x A numeric vector of steplengths (measurements of a linear variable).
-#' @param param_name A vector of character strings holding the names of the parameters to be optimized.
-#'   These can be any parameters in \code{copula@@parameters}.
-#' @param start A vector of staring values of the parameters.
-#' @param lower OPTIONAL: A vector of lower bounds of the parameters.
-#' @param upper OPTIONAL: A vector of upper bounds of the parameters.
-#'
-#' @return The function returns a list containing the empirical copula of the data and
-#' reasonable upper and lower bounds (if not specified in the input). It also checks the input.
-#' @export
-#'
+# Check input and prepare data for MLE
+#
+# @param copula A \code{cyl_copula} object.
+# @param theta A numeric vector of angles (measurements of a circular
+#   variable).
+# @param x A numeric vector of steplengths (measurements of a linear variable).
+# @param param_name A vector of character strings holding the names of the parameters to be optimized.
+#   These can be any parameters in \code{copula@@parameters}.
+# @param start A vector of staring values of the parameters.
+# @param lower OPTIONAL: A vector of lower bounds of the parameters.
+# @param upper OPTIONAL: A vector of upper bounds of the parameters.
+#
+# @return The function returns a list containing the empirical copula of the data and
+# reasonable upper and lower bounds (if not specified in the input). It also checks the input.
+# @export
+#
 prep_n_check_ML <-
   function(copula,
            theta,
@@ -99,7 +132,7 @@ prep_n_check_ML <-
       tryCatch(
         param_num_checked(copula, param_val = start, param_name = param_name),
         error = function(e) {
-          cylcop::error_sound()
+          error_sound()
           cat("among the 'start' values: ")
           rlang::abort(conditionMessage(e))
         }
@@ -116,7 +149,7 @@ prep_n_check_ML <-
         tryCatch(
           param_num_checked(copula, param_val = lower, param_name = param_name),
           error = function(e) {
-            cylcop::error_sound()
+            error_sound()
             cat("among the 'lower' values: ")
             rlang::abort(conditionMessage(e))
           }
@@ -135,7 +168,7 @@ prep_n_check_ML <-
         tryCatch(
           param_num_checked(copula, param_val = upper, param_name = param_name),
           error = function(e) {
-            cylcop::error_sound()
+            error_sound()
             cat("among the 'upper' values: ")
             rlang::abort(conditionMessage(e))
           }
@@ -147,27 +180,27 @@ prep_n_check_ML <-
 
 
 
-#' Carry out MLE of copula parameters
-#'
-#' @param copula A \code{cyl_copula} object.
-#' @param emp_cop A numeric matrix with 2 columns holding the empirical copula values.
-#' @param param_name A vector of character strings holding the names of the parameters to be optimized.
-#'   These can be any parameters in \code{copula@@parameters}.
-#' @param start A vector of staring values of the parameters.
-#' @param lower A vector of lower bounds of the parameters.
-#' @param upper A vector of upper bounds of the parameters.
-#' @param optim.method optimizer used in \code{optim()}, can be
-#'   "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", or "Brent"
-#' @param optim.control A list of additional controls passed to \code{optim()}.
-#' @param estimate.variance A logical value, denoting whether to include an
-#'   estimate of the variance (NOT YET IMPLEMENTED).
-#' @param traceOpt A logical value, denoting whether to print information regarding
-#'   convergence, current values, etc. during the optimization process.
-#'
-#' @return A list containing the same type of \code{cyl_copula} object as \code{copula},
-#'  but with optimized parameters, the log likelihood and the AIC.
-#' @export
-#'
+# Carry out MLE of copula parameters
+#
+# @param copula A \code{cyl_copula} object.
+# @param emp_cop A numeric matrix with 2 columns holding the empirical copula values.
+# @param param_name A vector of character strings holding the names of the parameters to be optimized.
+#   These can be any parameters in \code{copula@@parameters}.
+# @param start A vector of staring values of the parameters.
+# @param lower A vector of lower bounds of the parameters.
+# @param upper A vector of upper bounds of the parameters.
+# @param optim.method optimizer used in \code{optim()}, can be
+#   "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", or "Brent"
+# @param optim.control A list of additional controls passed to \code{optim()}.
+# @param estimate.variance A logical value, denoting whether to include an
+#  estimate of the variance (NOT YET IMPLEMENTED).
+# @param traceOpt A logical value, denoting whether to print information regarding
+#   convergence, current values, etc. during the optimization process.
+#
+# @return A list containing the same type of \code{cyl_copula} object as \code{copula},
+#  but with optimized parameters, the log likelihood and the AIC.
+# @export
+#
 fit_LL <-
   function(copula,
            emp_cop,
@@ -209,14 +242,14 @@ fit_LL <-
           setCopParam(copula, param_val = param, param_name = param_name),
           OOB_too_large = function(e) {
             warning(
-              cylcop:: warning_sound(),
+              warning_sound(),
               "a parameter has become larger than its upper bound,\nLogLik set to -Inf"
             )
             return(FALSE)
           },
           OOB_too_small = function(e) {
             warning(
-              cylcop:: warning_sound(),
+              warning_sound(),
               "a parameter has become smaller than its lower bound,\nLogLik set to -Inf"
             )
             return(FALSE)
@@ -230,7 +263,7 @@ fit_LL <-
         LL <- -Inf
       }
       else{
-        LL <- sum(log(cylcop::dCopula(emp_cop, copula = copula)))
+        LL <- sum(log(dcylcop(emp_cop, copula = copula)))
         if (is.na(LL))
           LL <- -Inf
       }
@@ -287,7 +320,7 @@ fit_LL <-
 
     if (fit[["convergence"]] != 0) {
       warning(
-        cylcop:: warning_sound(),
+        warning_sound(),
         "Possible convergence problem: optim() gave code=",
         fit$convergence,
         "\n",
@@ -304,7 +337,7 @@ fit_LL <-
     }
     if (loglik > 10 ^ 10 || loglik < -10^10) {
       warning(
-        cylcop:: warning_sound(),
+        warning_sound(),
         "Optimization seems to have gone wrong. logL is very large. Try one of these:\n",
         warn_tips
       )

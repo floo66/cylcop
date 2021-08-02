@@ -2,17 +2,27 @@
 % Please edit documentation in R/cyl_quadsec.R
 \name{cyl_quadsec}
 \alias{cyl_quadsec}
-\title{Construction of \code{cyl_quadsec} objects}
+\title{Construction of '\code{cyl_quadsec}' Objects}
 \usage{
 cyl_quadsec(a = 1/(2 * pi))
 }
 \arguments{
-\item{a}{The numeric value of the parameter of the copula. It must be in [- 1 / (2 * pi)), 1 / (2 * pi))]}
+\item{a}{\link[base]{numeric} value of the parameter of the copula. It must be in
+\eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.}
 }
 \description{
-Construction of \code{cyl_quadsec} objects
+Constructs a circular-linear copula with cubic sections of class
+ '\code{\linkS4class{cyl_quadsec}}'.
 }
 \examples{
-cyl_quadsec(a = 0.1)
+cop <- cyl_quadsec(a = 0.1)
+cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
 
+}
+\references{
+\insertRef{Quesada-Molina1995}{cylcop}
+
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_margin.R
 \name{fit_angle}
 \alias{fit_angle}
-\title{Fit circular univariate distribution}
+\title{Fit a Circular Univariate Distribution}
 \usage{
 fit_angle(
   theta,
@@ -12,24 +12,100 @@ fit_angle(
 )
 }
 \arguments{
-\item{theta}{A numeric vector of angles in [-pi, pi).}
+\item{theta}{\link[base]{numeric} \link[base]{vector} of angles in \eqn{[-\pi, \pi)}.}
 
-\item{parametric}{Either a character string describing what distribution
-should be fitted "vonmises", "wrappedcauchy", "mixedvonmises", or FALSE if a non-parametric
+\item{parametric}{either a \link[base]{character} string describing what distribution
+should be fitted (\code{"vonmises"}, \code{"wrappedcauchy"}, or
+\code{"mixedvonmises"}), or the \link[base]{logical} \code{FALSE} if a non-parametric
 estimation (kernel density) should be made.}
 
-\item{bandwidth}{If \code{parametric=F} The numeric value of the kernel density bandwidth.
-Default is  \code{cylcop::opt_circ_bw(theta, "adhoc")}.}
+\item{bandwidth}{If \code{parametric = FALSE}, the numeric value of the kernel density bandwidth.
+Default is \code{cylcop::\link{opt_circ_bw}(theta, "adhoc")}.}
 
-\item{mu}{(optional) Fixed mean direction of parametric distribution}
+\item{mu}{(optional) \link[base]{numeric} \link[base]{vector}, fixed mean direction(s) of the
+parametric distribution.}
 }
 \value{
-If a parametric estimate is made, a list containing the estimated parameters, their
-standard errors and the loglikelihood is returned.
-If a nonparametric estimate is made, the output comes from
-the funtion \code{circular::density.circular()}.
+If a parametric estimate is made, a \link[base]{list}
+ containing the estimated parameters, their
+standard errors and the log-likelihood is returned.
+If a non-parametric estimate is made, the output is a list and comes directly
+from the function \code{circular::\link[circular]{density.circular}()} of the '\pkg{circular}'
+package.
 }
 \description{
 This function finds parameter estimates of the marginal circular
-distribution, or gives a kernel density estimate.
+distribution (with potentially fixed mean), or gives a kernel density estimate using
+a von Mises smoothing kernel.
+}
+\examples{
+require(circular)
+require(graphics)
+set.seed(123)
+
+silent_curr <- cylcop_get_option("silent")
+cylcop_set_option(silent = TRUE)
+
+n <- 100  #n (number of samples) is set small for performance. Increase n to
+# a value larger than 1000 to see the effects of multimodality
+
+angles <- circular::rmixedvonmises(n,
+  mu1 = circular::circular(0),
+  mu2 = circular::circular(pi),
+  kappa1 = 2,
+  kappa2 = 1,
+  prop = 0.5
+)
+angles <- as.double(angles)
+
+bw <- opt_circ_bw(theta = angles,
+  loss="adhoc",
+  kappa.est = "trigmoments"
+)
+dens_non_param <- fit_angle(theta = angles,
+  parametric = FALSE,
+  bandwidth = bw
+)
+
+param_estimate <- fit_angle(theta = angles,
+  parametric = "mixedvonmises"
+)
+param_estimate_fixed_mean <- fit_angle(theta = angles,
+  parametric = "mixedvonmises",
+  mu = c(0, pi)
+)
+
+true_dens <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
+  mu1 = circular(0),
+  mu2 = circular(pi),
+  kappa1 = 2,
+  kappa2 = 1,
+  prop = 0.5
+)
+dens_estimate <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
+  mu1 = circular::circular(param_estimate$coef$mu1),
+  mu2 = circular::circular(param_estimate$coef$mu2),
+  kappa1 = param_estimate$coef$kappa1,
+  kappa2 = param_estimate$coef$kappa2,
+  prop = param_estimate$coef$prop
+)
+dens_estimate_fixed_mean <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
+  mu1 = circular(param_estimate_fixed_mean$coef$mu1),
+  mu2 = circular(param_estimate_fixed_mean$coef$mu2),
+  kappa1 = param_estimate_fixed_mean$coef$kappa1,
+  kappa2 = param_estimate_fixed_mean$coef$kappa2,
+  prop = param_estimate_fixed_mean$coef$prop
+)
+
+plot(seq(-pi, pi, 0.001), true_dens, type = "l")
+lines(as.double(dens_non_param$x), as.double(dens_non_param$y), col = "red")
+lines(seq(-pi, pi, 0.001), dens_estimate, , col = "green")
+lines(seq(-pi, pi, 0.001), dens_estimate_fixed_mean, , col = "blue")
+
+cylcop_set_option(silent = silent_curr)
+
+}
+\seealso{
+\code{circular::\link[circular]{density.circular}()},
+\code{\link{fit_angle}()}, \code{\link{opt_circ_bw}()}.
 }

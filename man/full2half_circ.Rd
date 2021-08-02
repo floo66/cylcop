@@ -2,19 +2,27 @@
 % Please edit documentation in R/utils.R
 \name{full2half_circ}
 \alias{full2half_circ}
-\title{Convert angle from full circle to half circle}
+\title{Convert Angle from Full Circle to Half Circle}
 \usage{
 full2half_circ(angle)
 }
 \arguments{
-\item{angle}{A numeric vector containing angles or \code{\link{circular}}-objects in [0, 2pi).}
+\item{angle}{\link[base]{numeric} value of an angle or a
+\code{\link{circular}}-objekt in \eqn{[0, 2\pi)}.}
 }
 \value{
-A numeric vector containing the angles in [-pi, pi).
+The \link[base]{numeric} value of the angle in \eqn{[-\pi, \pi)}.
 }
 \description{
-Converts angle from the interval [0, 2pi) to [-pi, pi).
+Converts an angle from the full circle (i.e. in the interval \eqn{[0, 2\pi)})
+to an angle on the half circle  (i.e. in the interval \eqn{[-\pi, \pi)}).
 }
 \examples{
-full2half_circ(1.5*pi)
+full2half_circ(0 * pi) / pi
+full2half_circ(0.5 * pi) / pi
+full2half_circ(1 * pi) / pi
+full2half_circ(1.5 * pi) / pi
+full2half_circ(2 * pi) / pi
+
+
 }

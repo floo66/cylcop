@@ -2,11 +2,11 @@
 % Please edit documentation in R/density.R
 \name{dens}
 \alias{dens}
-\alias{rdens}
 \alias{ddens}
 \alias{pdens}
 \alias{qdens}
-\title{Density, distribution, random number generation and quantiles for a kernel density estimate}
+\alias{rdens}
+\title{Density, Distribution, Random Number Generation and Quantiles of Kernel Density Estimates}
 \usage{
 rdens(n, density)
 
@@ -17,16 +17,44 @@ pdens(x, density)
 qdens(p, density)
 }
 \arguments{
-\item{n}{Number of random samples to be generated.}
+\item{n}{\link[base]{integer} value, the number of random samples to be
+generated with \code{rdens()}.}
 
-\item{density}{A list containing information about the kernel density
-estimate. The structure of the list must be as returned by \code{fit_angle()} or
-\code{fit_steplength()}.}
+\item{density}{\link[base]{list} containing information about the kernel density
+estimate. The structure of the list must be as returned by
+\code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.}
 
-\item{x}{A numeric vector of measurements.}
+\item{x}{\link[base]{numeric} \link[base]{vector} giving the points where
+the density or distribution function is evaluated.}
 
-\item{p}{A numeric vector of probabilities.}
+\item{p}{\link[base]{numeric} \link[base]{vector} giving the probabilities where
+the quantile function is evaluated.}
+}
+\value{
+\code{ddens()} and \code{pdens()} give a \link[base]{vector} of length \code{length(x)} containing
+the density or distribution function at the corresponding values of \code{x}.
+\code{qdens()} gives a \link[base]{vector} of length \code{length(p)} containing
+the quantiles at the corresponding values of \code{p}. The function \code{rdens()}
+generates a \link[base]{vector} of length \code{n} containing the random samples.
 }
 \description{
-Density, distribution, random number generation and quantiles for a kernel density estimate
+Calculate the density (\code{ddens()}), the distribution (\code{pdens()}),
+ the quantiles (\code{qdens()}) and generate random
+samples (\code{rdens()}) of a kernel density estimate as returned by
+\code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.
+}
+\examples{
+set.seed(123)
+
+steps <- rweibull(10, shape=3)
+dens <- fit_steplength(x = steps, parametric = FALSE)
+ddens(c(0.1,0.3), dens)
+pdens(c(0.1,0.3), dens)
+qdens(c(0.1,0.3), dens)
+rdens(4, dens)
+
+}
+\seealso{
+\code{\link{fit_angle}()}, \code{\link{fit_steplength}()},
+\code{\link{fit_steplength}()}.
 }

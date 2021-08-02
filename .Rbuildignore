@@ -1,2 +1,5 @@
 ^cylcop\.Rproj$
 ^\.Rproj\.user$
+^README\.Rmd$
+^cran-comments\.md$
+^LICENSE\.md$

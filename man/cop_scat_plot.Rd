@@ -2,20 +2,46 @@
 % Please edit documentation in R/plotting_functions.R
 \name{cop_scat_plot}
 \alias{cop_scat_plot}
-\title{Make scatterplot of copula values}
+\title{Scatterplot of Copula Values}
 \usage{
 cop_scat_plot(input)
 }
 \arguments{
 \item{input}{Either
-a data.frame containing the trajectory. Must contain collumns
-\code{traj$cop_u} and \code{traj$cop_v}\\
-or\\
-a \code{copula} object or \code{cyl_copula} object.}
+a \link[base]{data.frame} containing the trajectory produced by e.g.
+\code{\link{make_traj}()}, which must contain columns
+\code{traj$cop_u} and \code{traj$cop_v},
+or a '\code{\linkS4class{cyl_copula}}' object or a '\code{\linkS4class{Copula}}' object
+of the package '\pkg{copula}'.}
 }
 \value{
-The scatterplot.
+A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 }
 \description{
-Make scatterplot of copula values
+This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
+a sample from a copula. Either a sample is provided as input, or a sample of
+10000 points is drawn from a copula to quickly visualize it.
+}
+\examples{
+set.seed(123)
+
+traj <- make_traj(100,
+  copula = cyl_quadsec(0.1),
+  marginal_circ = "vonmises",
+  parameter_circ = list(0, 1),
+  marginal_lin = "weibull",
+  parameter_lin = list(shape=3)
+)
+cop_scat_plot(traj)
+cop_scat_plot(cyl_quadsec(0.1))
+
+}
+\references{
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{\link{traj_plot}()},
+\code{\link{circ_plot}()}, \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
 }

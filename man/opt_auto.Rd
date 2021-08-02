@@ -2,25 +2,47 @@
 % Please edit documentation in R/opt_auto.R
 \name{opt_auto}
 \alias{opt_auto}
-\title{Black-box to find best fitting copula}
+\title{Automatically Find the Best Fitting Copula}
 \usage{
 opt_auto(theta, x)
 }
 \arguments{
-\item{theta}{A numeric vector of angles (measurements of a circular
-variable).}
+\item{theta}{\link[base]{numeric} \link[base]{vector} of angles
+(measurements of a circular variable).}
 
-\item{x}{A numeric vector of steplengths (measurements of a linear variable).}
+\item{x}{\link[base]{numeric} \link[base]{vector} of step lengths
+(measurements of a linear variable).}
 }
 \value{
 A list containing 3 lists: Descriptions of the copulae, the
-\code{cyl_copula}-objects with fitted parameters, the AIC.
+'\code{\linkS4class{cyl_copula}}' objects with fitted parameters, and the AIC.
+The lists are sorted by ascending AIC.
+If \code{\link{optML}()} has failed, the reported parameters are the ones with
+\code{\link{optCor}()} and the AIC is set to \code{NA}.
 }
 \description{
-The parameters of 15 different circular-linear copulas are fitted and sorted
+The parameters of 15 different circular-linear copulas are fitted to data
+and sorted
 according to AIC. For each copula, first, a starting value for the maximum
-likelihood estimation (MLE) is found using \code{cylcop::optCor()} or
-\code{cylcop::optTau()}. Then MLE with a "reasonable" setup is carried out.
-If MLE fails, parameters obtained with \code{cylcop::optCor()} or
-\code{cylcop::optTau()} are reported.
+likelihood estimation (MLE) is found using \code{\link{optCor}()}.
+Then MLE with a "reasonable" setup is carried out using \code{\link{optML}()}.
+If MLE fails, parameters obtained with \code{\link{optCor}()} are reported.
+}
+\examples{
+set.seed(123)
+
+#Optimal copula is independent of marginals
+data <- rcylcop(100,cyl_quadsec(0.1))
+
+#takes a few seconds to run
+#copula_lst <- opt_auto(theta = data[,1], x = data[,2])
+
+}
+\references{
+\insertRef{Hodelappl}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{\link{optCor}()}, \code{\link{optML}()}
 }

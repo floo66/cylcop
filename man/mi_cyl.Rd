@@ -2,35 +2,103 @@
 % Please edit documentation in R/correlation.R
 \name{mi_cyl}
 \alias{mi_cyl}
-\title{Estimate the mutual information between a circular and a linear random
-variable}
+\title{Estimate the Mutual Information Between a Circular and a Linear Random
+Variable}
 \usage{
 mi_cyl(theta, x, normalize = T, symmetrize = F)
 }
 \arguments{
-\item{theta}{A numeric vector of angles (measurements of a circular
+\item{theta}{\link[base]{numeric} \link[base]{vector} of angles (measurements of a circular
 variable).}
 
-\item{x}{A numeric vector of steplengths (measurements of a linear
+\item{x}{\link[base]{numeric} \link[base]{vector} of step lengths (measurements of a linear
 variable).}
 
-\item{normalize}{A logical value whether the mutual information should be
-normalized to lie within [0,1].}
+\item{normalize}{\link[base]{logical} value whether the mutual information should be
+normalized to lie within \eqn{[0,1]}.}
 
-\item{symmetrize}{A logical value whether it should be assumed that positive
+\item{symmetrize}{\link[base]{logical} value whether it should be assumed that positive
 and negative angles are equivalent.}
 }
 \value{
-A numeric value, the mutual information between \code{theta} and \code{x}.
+A \link[base]{numeric} value, the mutual information between \code{theta} and \code{x}.
 }
 \description{
 The mutual information can be normalized to lie between 0 ans 1
 by dividing by the product of the entropies of \code{x} and \code{theta}.
 Even if \code{x} and \code{theta} are perfectly correlated, the normalized
 mutual information will not be 1 if the underlying copula is periodic and
-symmetric. Therefore, we can set \code{symmetrize=T} to set all u-values of
-the empirical copula that are larger than 0.5 to 1-0.5. The mutual information
-is then calculated from those values and is exactly 1 in the case of
+symmetric. Therefore, we can set \code{symmetrize = TRUE} to set all u-values of
+the empirical copula that are larger than \eqn{0.5} to \eqn{1-0.5}. The mutual information
+is then calculated from those values and the is exactly 1 in the case of
 perfect correlation as captured by e.g.
-\code{cyl_rect_combine(normalCopula(1))}.
+\code{cyl_rect_combine(normalCopula(1))}. The estimate (output of
+\code{mi_cyl()}) will be less than one for numerical reasons. Note also that
+the mutual information is independent of the marginal distributions.
+}
+\examples{
+set.seed(123)
+
+cop <- cyl_quadsec(0.1)
+
+#draw samples and calculate the mutual information.
+sample <- rcylcop(100, cop)
+mi_cyl(theta = sample[,1],
+  x = sample[,2],
+  normalize = TRUE,
+  symmetrize = FALSE
+)
+
+#the correlation coefficient is independent of the marginal distribution.
+sample <- make_traj(100,
+  cop,
+  marginal_circ = "vonmises",
+  parameter_circ = list(0, 1),
+  marginal_lin = "weibull",
+  parameter_lin = list(shape = 2)
+)
+mi_cyl(theta = sample$angle,
+  x = sample$steplength,
+  normalize = TRUE,
+  symmetrize = FALSE)
+mi_cyl(theta = sample$cop_u,
+  x = sample$cop_v,
+  normalize = TRUE,
+  symmetrize = FALSE)
+
+# Estimate correlation of samples drawn from circular-linear copulas
+# with perfect correlation.
+cop <- cyl_rect_combine(copula::normalCopula(1))
+sample <- rcylcop(100, cop)
+# without normalization
+mi_cyl(theta = sample[,1],
+  x = sample[,2],
+  normalize = FALSE,
+  symmetrize = FALSE
+)
+#with normalization
+mi_cyl(theta = sample[,1],
+  x = sample[,2],
+  normalize = TRUE,
+  symmetrize = FALSE
+)
+#only with normaliztion and symmetrization do we get a value close to 1
+mi_cyl(theta = sample[,1],
+  x = sample[,2],
+  normalize = TRUE,
+  symmetrize = TRUE
+)
+
+}
+\references{
+\insertRef{Jian2011}{cylcop}
+
+\insertRef{Calsaverini2009}{cylcop}
+
+\insertRef{Tenzer2016}{cylcop}
+
+\insertRef{Hodelmethod}{cylcop}
+}
+\seealso{
+\code{\link{cor_cyl}()}, \code{\link{optCor}()}.
 }
