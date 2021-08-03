@@ -1,6 +1,8 @@
 ## Resubmission
 This is a resubmission. In this version I have:
-* Changed one url
+* Changed one url. https://www.jstor.org/stable/2335637/ --> https://doi.org/10.2307/2335637. So sorry for the issues with this! With 
+jstor-urls, I always get the note below which masks any other problems with the
+url.
 
 ## Test environments
 * local R installation, R 4.0.5
@@ -9,4 +11,10 @@ This is a resubmission. In this version I have:
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
+
+* Found the following (possibly) invalid URLs:
+     URL: https://doi.org/10.2307/2335637
+       From: man/cor_cyl.Rd
+       Status: 403
+       Message: Forbidden
