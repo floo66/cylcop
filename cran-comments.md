@@ -1,7 +1,6 @@
 ## Resubmission
 This is a resubmission. In this version I have:
-* Changed some urls to avoid redirection.
-* Corrected some references.
+* Changed one url
 
 ## Test environments
 * local R installation, R 4.0.5
