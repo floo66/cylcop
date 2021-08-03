@@ -1,8 +1,8 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 * Changed one url. https://www.jstor.org/stable/2335637/ --> https://doi.org/10.2307/2335637. So sorry for the issues with this! With 
-jstor-urls, I always get the note below which masks any other problems with the
-url.
+jstor-urls, I always get the note below which appears to mask any other problems
+with the url.
 
 ## Test environments
 * local R installation, R 4.0.5
