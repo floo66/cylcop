@@ -166,8 +166,6 @@ cor_cyl <- function(theta, x) {
 #'
 #' \insertRef{Calsaverini2009}{cylcop}
 #'
-#' \insertRef{Tenzer2016}{cylcop}
-#'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
 #' @seealso \code{\link{cor_cyl}()}, \code{\link{optCor}()}.

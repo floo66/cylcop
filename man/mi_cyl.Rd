@@ -95,8 +95,6 @@ mi_cyl(theta = sample[,1],
 
 \insertRef{Calsaverini2009}{cylcop}
 
-\insertRef{Tenzer2016}{cylcop}
-
 \insertRef{Hodelmethod}{cylcop}
 }
 \seealso{

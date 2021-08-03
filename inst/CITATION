@@ -7,12 +7,12 @@ bibentry(bibtype = "Article",
   journal      = "bioRxiv",
   year         = "2021",
   doi          = "10.1101/2021.07.14.452253",
-  url          = "https://www.biorxiv.org/content/early/2021/07/14/2021.07.14.452253",
+  url          = "https://www.biorxiv.org/content/10.1101/2021.07.14.452253v1/",
   textVersion  =
   paste("Florian H. Hodel, John R. Fieberg (2021).",
         "Cylcop: An R Package for Circular-Linear Copulae with Angular Symmetry.",
         "bioRxiv, 2021, doi:10.1101/2021.07.14.452253.",
-        "URL https://www.biorxiv.org/content/early/2021/07/14/2021.07.14.452253.")
+        "URL https://www.biorxiv.org/content/10.1101/2021.07.14.452253v1/.")
 )
 
 bibentry(bibtype = "Article",
@@ -22,10 +22,10 @@ bibentry(bibtype = "Article",
   journal      = "bioRxiv",
   year         = "2021",
   doi          = "10.1101/2021.07.14.452404",
-  url          = "https://www.biorxiv.org/content/early/2021/07/14/2021.07.14.452404",
+  url          = "https://www.biorxiv.org/content/10.1101/2021.07.14.452404v1/",
   textVersion  =
   paste("Florian H. Hodel, John R. Fieberg (2021).",
         "Circular-Linear Copulae for Animal Movement Data.",
         "bioRxiv, 2021, doi:10.1101/2021.07.14.452404.",
-        "URL https://www.biorxiv.org/content/early/2021/07/14/2021.07.14.452404.")
+        "URL https://www.biorxiv.org/content/10.1101/2021.07.14.452404v1/.")
 )
