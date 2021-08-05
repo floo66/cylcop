@@ -16,6 +16,10 @@
 \arguments{
 \item{object}{\R object of class '\code{\linkS4class{cyl_copula}}'.}
 }
+\value{
+An invisible \code{NULL}. As side effect, information on \code{object} is
+printed.
+}
 \description{
 Methods for function \code{\link[methods]{show}()} in package \pkg{cylcop}
 }

@@ -426,8 +426,8 @@ setMethod("optCor", "cyl_rect_combine", function(copula,
   else{
     ind <- 1
     if(any(is(copula@sym.cop)=="cyl_vonmises")) ind <- 2
-  ind <- intersect(which(stringr::str_starts(copula@param.names,"bg_",negate = T)),
-              which(stringr::str_ends(copula@param.names,"rect.",negate = T)))[ind]
+  ind <- intersect(which(stringr::str_starts(copula@param.names,"bg_",negate = TRUE)),
+              which(stringr::str_ends(copula@param.names,"rect.",negate = TRUE)))[ind]
   min <- max(0,copula@param.lowbnd[ind])
   if (is.null(acc))
     acc <- 0.5
@@ -466,7 +466,7 @@ setMethod("optCor", "cyl_rect_combine", function(copula,
 
   a <-
     search_cor(copula, data, method, acc, n, min, max, param_name)
-  if(cylcop.env$silent==F){
+  if(cylcop.env$silent==FALSE){
     message(param_name, "approx. ", a,"\n")}
   }
 

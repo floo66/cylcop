@@ -835,7 +835,7 @@ cop_plot <- function(copula,
           x = u,
           y = v,
           z = mat,
-          showscale = F,
+          showscale = FALSE,
           colorscale = col,
           opacity = 1,
           lighting = list(ambient = 0.9, specular = 0)
@@ -859,12 +859,6 @@ cop_plot <- function(copula,
 
 
       # Add gridlines
-      # there is an issue with plotly that it produces a warning when we add_trace.
-      # suppressWarnings does not work, for this reason, turn warnings off temporarily
-
-      warn_curr <- options()$warn
-      options(warn = -1)
-
       if(n_gridlines>0){
         for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
           p <-
@@ -946,7 +940,6 @@ cop_plot <- function(copula,
       #turn warnings back to original state
 
       p <- p %>% plotly::layout(showlegend = FALSE)
-      options(warn = warn_curr)
       suppressWarnings(print(p))
     }
   }

@@ -13,6 +13,9 @@ It must be in \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.}
 \item{b}{\link[base]{numeric} value of the second parameter of the copula.
 It must be in \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.}
 }
+\value{
+An \R object of class '\code{\linkS4class{cyl_cubsec}}'.
+}
 \description{
 Constructs a circular-linear copula with cubic sections of class
  '\code{\linkS4class{cyl_cubsec}}'.

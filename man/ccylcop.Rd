@@ -11,19 +11,19 @@
 \alias{ccylcop,cyl_vonmises-method}
 \title{Conditional Distributions of Circular-Linear Copulas}
 \usage{
-ccylcop(u, copula, cond_on = 2, inverse = F, ...)
+ccylcop(u, copula, cond_on = 2, inverse = FALSE, ...)
 
 \S4method{ccylcop}{Copula}(u, copula, cond_on, inverse)
 
-\S4method{ccylcop}{cyl_cubsec}(u, copula, cond_on = 2, inverse = F)
+\S4method{ccylcop}{cyl_cubsec}(u, copula, cond_on = 2, inverse = FALSE)
 
-\S4method{ccylcop}{cyl_quadsec}(u, copula, cond_on = 2, inverse = F)
+\S4method{ccylcop}{cyl_quadsec}(u, copula, cond_on = 2, inverse = FALSE)
 
-\S4method{ccylcop}{cyl_rect_combine}(u, copula, cond_on = 2, inverse = F)
+\S4method{ccylcop}{cyl_rect_combine}(u, copula, cond_on = 2, inverse = FALSE)
 
-\S4method{ccylcop}{cyl_rot_combine}(u, copula, cond_on = 2, inverse = F)
+\S4method{ccylcop}{cyl_rot_combine}(u, copula, cond_on = 2, inverse = FALSE)
 
-\S4method{ccylcop}{cyl_vonmises}(u, copula, cond_on = 2, inverse = F)
+\S4method{ccylcop}{cyl_vonmises}(u, copula, cond_on = 2, inverse = FALSE)
 }
 \arguments{
 \item{u}{\link[base]{matrix} (or \link[base]{vector}) of \link[base]{numeric}

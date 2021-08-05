@@ -31,11 +31,11 @@ If MLE fails, parameters obtained with \code{\link{optCor}()} are reported.
 \examples{
 set.seed(123)
 
-#Optimal copula is independent of marginals
+#Optimal copula is independent of marginals.
 data <- rcylcop(100,cyl_quadsec(0.1))
 
-#takes a few seconds to run
-#copula_lst <- opt_auto(theta = data[,1], x = data[,2])
+#This takes a few seconds to run.
+\donttest{copula_lst <- opt_auto(theta = data[,1], x = data[,2])}
 
 }
 \references{

@@ -174,8 +174,8 @@ cor_cyl <- function(theta, x) {
 #'
 mi_cyl <- function(theta,
                       x,
-                      normalize = T,
-                      symmetrize = F) {
+                      normalize = TRUE,
+                      symmetrize = FALSE) {
   data <- data.frame(theta, x) %>% na.omit()
 
   #calculate empirical copula

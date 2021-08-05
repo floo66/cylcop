@@ -51,6 +51,8 @@ setClass("cyl_vonmises", contains = "cyl_copula", slots = "flip")
 #' @param flip \link[base]{logical} value indicating whether the copula
 #' should be rotated 90 degrees to capture negative correlation.
 #'
+#' @return An \R object of class '\code{\linkS4class{cyl_vonmises}}'.
+#'
 #' @export
 #'
 #' @examples
@@ -98,7 +100,7 @@ setMethod("rcylcop", signature("numeric", "cyl_vonmises"), function(n, copula) {
   #Calcualte the inverse of the conditional distribution of V given u, C_u(v) and
   #evaluate it at w
 
-  v <- cylcop::ccylcop(matrix(ncol=2,c(u,w)),copula,cond_on=1,inverse = T)
+  v <- cylcop::ccylcop(matrix(ncol=2,c(u,w)),copula,cond_on=1,inverse = TRUE)
   if (copula@flip)
     u <- 1 - u
   cop_uv <- cbind(u, v)
@@ -186,7 +188,10 @@ setMethod("pcylcop", signature("matrix", "cyl_vonmises"), function(u, copula) {
 #' @rdname ccylcop
 # @describeIn cyl_vonmises-class Calculate the conditional copula.
 #' @export
-setMethod("ccylcop", signature("cyl_vonmises"), function(u, copula, cond_on=2, inverse=F) {
+setMethod("ccylcop", signature("cyl_vonmises"), function(u,
+                                                         copula,
+                                                         cond_on = 2,
+                                                         inverse = FALSE) {
   u_orig <- matrix(ncol=2,u)
   mu <- copula@parameters[1]
   kappa <- copula@parameters[2]

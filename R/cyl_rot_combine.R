@@ -55,6 +55,8 @@ setClass("cyl_rot_combine",
 #' @param shift \link[base]{logical} value indicating whether the (u-periodic)
 #' copula should be shifted by 0.5 in u direction.
 #'
+#' @return An \R object of class '\code{\linkS4class{cyl_rot_combine}}'.
+#'
 #' @export
 #'
 #' @examples
@@ -214,7 +216,10 @@ setMethod("pcylcop", signature("matrix", "cyl_rot_combine"), function(u, copula)
 #' @rdname ccylcop
 # @describeIn cyl_rot_combine-class Calculate the conditional copula.
 #' @export
-setMethod("ccylcop", signature("cyl_rot_combine"), function(u, copula, cond_on=2, inverse=F) {
+setMethod("ccylcop", signature("cyl_rot_combine"), function(u,
+                                                            copula,
+                                                            cond_on = 2,
+                                                            inverse = FALSE) {
   u_orig <- matrix(ncol=2,u)
   length <- nrow(u)
   v <- u_orig[, 2, drop = F]

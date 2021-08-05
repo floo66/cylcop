@@ -10,6 +10,9 @@ cyl_quadsec(a = 1/(2 * pi))
 \item{a}{\link[base]{numeric} value of the parameter of the copula. It must be in
 \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.}
 }
+\value{
+An \R object of class '\code{\linkS4class{cyl_quadsec}}'.
+}
 \description{
 Constructs a circular-linear copula with cubic sections of class
  '\code{\linkS4class{cyl_quadsec}}'.

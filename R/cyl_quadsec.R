@@ -47,6 +47,8 @@ setClass("cyl_quadsec", contains = "cyl_copula")
 #' @param a \link[base]{numeric} value of the parameter of the copula. It must be in
 #' \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.
 #'
+#' @return An \R object of class '\code{\linkS4class{cyl_quadsec}}'.
+#'
 #' @export
 #'
 #' @examples
@@ -138,7 +140,10 @@ setMethod("pcylcop", signature("matrix", "cyl_quadsec"), function(u, copula) {
 #' @rdname ccylcop
 # @describeIn cyl_quadsec-class Calculate the conditional copula.
 #' @export
-setMethod("ccylcop", signature("cyl_quadsec"), function(u, copula, cond_on=2, inverse=F) {
+setMethod("ccylcop", signature("cyl_quadsec"), function(u,
+                                                        copula,
+                                                        cond_on = 2,
+                                                        inverse = FALSE) {
   a <- copula@parameters[1]
   u_orig <- matrix(ncol=2,u)
   length <- nrow(u)

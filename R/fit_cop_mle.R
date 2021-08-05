@@ -314,7 +314,7 @@ fit_LL <-
         "\tFor this to work properly, you need to play around with the starting temperature\n",
         "\tand the number of function evaluations at each temperature,\n",
         "\tparameters 'temp' and 'tmax' (both default 10) in 'optim.control='.\n",
-        "- If no convergence with SANN, observe optimization process (traceOpt = T)\n",
+        "- If no convergence with SANN, observe optimization process (traceOpt = TRUE)\n",
         "\tto see in what direction it is going and get an idea for starting values."
       )
 

@@ -32,6 +32,9 @@ and upper edge (u-value) of the upper rectangle, or the character string
 \item{flip_up}{\link[base]{logical} value indicating whether the copula (\code{sym.cop})
 is rotated 90 degrees in the upper (\code{flip_up = TRUE}) or lower rectangle.}
 }
+\value{
+An \R object of class '\code{\linkS4class{cyl_rect_combine}}'.
+}
 \description{
 Constructs a circular-linear copula of class
 '\code{\linkS4class{cyl_rect_combine}}' from a rectangular patchwork of copulas.

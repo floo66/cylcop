@@ -47,6 +47,8 @@ setClass("cyl_cubsec", contains = "cyl_copula")
 #' @param b \link[base]{numeric} value of the second parameter of the copula.
 #' It must be in \eqn{[- 1 / (2 \pi)), 1 / (2 \pi))]}.
 #'
+#' @return An \R object of class '\code{\linkS4class{cyl_cubsec}}'.
+#'
 #' @export
 #'
 #' @examples
@@ -85,7 +87,7 @@ setMethod("rcylcop", signature("numeric", "cyl_cubsec"), function(n, copula) {
   u <- runif(n)
   w <- runif(n)
   mat <- matrix(ncol = 2, c(u, w))
-  v <- cylcop::ccylcop(mat, copula, cond_on = 1, inverse = T)
+  v <- cylcop::ccylcop(mat, copula, cond_on = 1, inverse = TRUE)
   cop_uv <- cbind(u, v)
   return(cop_uv)
 })
@@ -144,7 +146,7 @@ setMethod("pcylcop", signature("matrix", "cyl_cubsec"), function(u, copula) {
 setMethod("ccylcop", signature("cyl_cubsec"), function(u,
                                                        copula,
                                                        cond_on = 2,
-                                                       inverse = F) {
+                                                       inverse = FALSE) {
   a <- copula@parameters[1]
   b <- copula@parameters[2]
   u_orig <- matrix(ncol = 2, u)
@@ -160,7 +162,7 @@ setMethod("ccylcop", signature("cyl_cubsec"), function(u,
         u + (-alpha + beta) * (1 - v) * v + (1 - v) * (alpha * (1 - v) + beta *
                                                          v) - v * (alpha * (1 - v) + beta * v)
     }
-    if (inverse == T) {
+    if (inverse == TRUE) {
       result <-  numerical_inv_conditional_cop(u_orig, copula, cond_on = 2)
     }
   }
@@ -172,7 +174,7 @@ setMethod("ccylcop", signature("cyl_cubsec"), function(u,
         v + v * alpha_prime + v ^ 2 * (beta_prime - 2 * alpha_prime) +
         v ^ 3 * (alpha_prime - beta_prime)
     }
-    if (inverse == T) {
+    if (inverse == TRUE) {
       if (abs(a + b) < 0.001) {
         #numerical instability in the analytical solution, use numeric approximation instead
         result <-

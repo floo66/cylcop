@@ -13,6 +13,9 @@
 
 \item{...}{additional arguments passed to \code{\link[base]{plot}()}.}
 }
+\value{
+An invisible \code{NULL}. As side effect, a plot is produced.
+}
 \description{
 Methods for \code{\link[base]{plot}()} to draw a scatter plot of a
 random sample from bivariate distributions from package \pkg{cylcop}.

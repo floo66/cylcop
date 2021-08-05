@@ -13,6 +13,9 @@ object of the package '\pkg{copula}'.}
 \item{shift}{\link[base]{logical} value indicating whether the (u-periodic)
 copula should be shifted by 0.5 in u direction.}
 }
+\value{
+An \R object of class '\code{\linkS4class{cyl_rot_combine}}'.
+}
 \description{
 Constructs a circular-linear copula of class
 '\code{\linkS4class{cyl_rot_combine}}' from linear combinations

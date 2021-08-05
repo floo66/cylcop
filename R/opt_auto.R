@@ -21,11 +21,11 @@
 #'
 #' @examples set.seed(123)
 #'
-#' #Optimal copula is independent of marginals
+#' #Optimal copula is independent of marginals.
 #' data <- rcylcop(100,cyl_quadsec(0.1))
 #'
-#' #takes a few seconds to run
-#' #copula_lst <- opt_auto(theta = data[,1], x = data[,2])
+#' #This takes a few seconds to run.
+#' \donttest{copula_lst <- opt_auto(theta = data[,1], x = data[,2])}
 #'
 #' @seealso \code{\link{optCor}()}, \code{\link{optML}()}
 #'
@@ -50,7 +50,7 @@ opt_auto <- function(theta, x) {
   start_val <-
     tryCatch(
       optCor(
-        copula = cyl_vonmises(flip = F),
+        copula = cyl_vonmises(flip = FALSE),
         theta = theta,
         x = x,
         method = "cor_cyl",
@@ -64,7 +64,7 @@ opt_auto <- function(theta, x) {
   copula <-
     tryCatch(
       optML(
-        copula = cyl_vonmises(flip = F),
+        copula = cyl_vonmises(flip = FALSE),
         theta = theta,
         x = x,
         parameters = c("kappa", "mu"),
@@ -101,7 +101,7 @@ opt_auto <- function(theta, x) {
   start_val <-
     tryCatch(
       optCor(
-        copula = cyl_vonmises(flip = T),
+        copula = cyl_vonmises(flip = TRUE),
         theta = theta,
         x = x,
         method = "cor_cyl",
@@ -115,7 +115,7 @@ opt_auto <- function(theta, x) {
   copula <-
     tryCatch(
       optML(
-        copula = cyl_vonmises(flip = T),
+        copula = cyl_vonmises(flip = TRUE),
         theta = theta,
         x = x,
         parameters = c("kappa", "mu"),
@@ -137,7 +137,7 @@ opt_auto <- function(theta, x) {
     } else{
       copula_lst[[2]] <- cyl_vonmises(mu = 0,
                                       kappa = start_val,
-                                      flip = T)
+                                      flip = TRUE)
     }
     AIC_lst[[2]] <- Inf
   } else{
@@ -265,7 +265,7 @@ opt_auto <- function(theta, x) {
   start_val <-
     tryCatch(
       optCor(
-        copula = cyl_rot_combine(frankCopula(2), shift = F),
+        copula = cyl_rot_combine(frankCopula(2), shift = FALSE),
         theta,
         x,
         method = "mi_cyl"
@@ -277,7 +277,7 @@ opt_auto <- function(theta, x) {
   copula <-
     tryCatch(
       optML(
-        copula = cyl_rot_combine(frankCopula(2), shift = F),
+        copula = cyl_rot_combine(frankCopula(2), shift = FALSE),
         theta = theta,
         x = x,
         parameters = c("alpha"),
@@ -414,7 +414,7 @@ opt_auto <- function(theta, x) {
   start_val <-
     tryCatch(
       optCor(
-        copula = cyl_rot_combine(frankCopula(2), shift = T),
+        copula = cyl_rot_combine(frankCopula(2), shift = TRUE),
         theta,
         x,
         method = "mi_cyl"
@@ -426,7 +426,7 @@ opt_auto <- function(theta, x) {
   copula <-
     tryCatch(
       optML(
-        copula = cyl_rot_combine(frankCopula(2), shift = T),
+        copula = cyl_rot_combine(frankCopula(2), shift = TRUE),
         theta = theta,
         x = x,
         parameters = c("alpha"),
@@ -445,7 +445,7 @@ opt_auto <- function(theta, x) {
       copula_lst[[8]] <- "ERROR"
     } else{
       copula_lst[[8]] <-
-        cyl_rot_combine(frankCopula(start_val), shift = T)
+        cyl_rot_combine(frankCopula(start_val), shift = TRUE)
     }
     AIC_lst[[8]] <- Inf
   } else{
@@ -461,7 +461,7 @@ opt_auto <- function(theta, x) {
   start_val <-
     tryCatch(
       optCor(
-        copula = cyl_rot_combine(claytonCopula(2), shift = T),
+        copula = cyl_rot_combine(claytonCopula(2), shift = TRUE),
         theta,
         x,
         method = "mi_cyl"
@@ -473,7 +473,7 @@ opt_auto <- function(theta, x) {
   copula <-
     tryCatch(
       optML(
-        copula = cyl_rot_combine(claytonCopula(2), shift = T),
+        copula = cyl_rot_combine(claytonCopula(2), shift = TRUE),
         theta = theta,
         x = x,
         parameters = c("alpha"),
@@ -493,7 +493,7 @@ opt_auto <- function(theta, x) {
       copula_lst[[9]] <- "ERROR"
     } else{
       copula_lst[[9]] <-
-        cyl_rot_combine(claytonCopula(start_val), shift = T)
+        cyl_rot_combine(claytonCopula(start_val), shift = TRUE)
     }
     AIC_lst[[9]] <- Inf
   } else{
@@ -516,7 +516,7 @@ opt_auto <- function(theta, x) {
   start_val <-
     tryCatch(
       optCor(
-        copula = cyl_rot_combine(gumbelCopula(4), shift = T),
+        copula = cyl_rot_combine(gumbelCopula(4), shift = TRUE),
         theta,
         x,
         method = "mi_cyl"
@@ -528,7 +528,7 @@ opt_auto <- function(theta, x) {
   copula <-
     tryCatch(
       optML(
-        copula = cyl_rot_combine(gumbelCopula(4), shift = T),
+        copula = cyl_rot_combine(gumbelCopula(4), shift = TRUE),
         theta = theta,
         x = x,
         parameters = c("alpha"),
@@ -549,7 +549,7 @@ opt_auto <- function(theta, x) {
       copula_lst[[10]] <- "ERROR"
     } else{
       copula_lst[[10]] <-
-        cyl_rot_combine(gumbelCopula(start_val), shift = T)
+        cyl_rot_combine(gumbelCopula(start_val), shift = TRUE)
     }
     AIC_lst[[10]] <- Inf
   } else{

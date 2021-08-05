@@ -5,7 +5,7 @@
 \title{Estimate the Mutual Information Between a Circular and a Linear Random
 Variable}
 \usage{
-mi_cyl(theta, x, normalize = T, symmetrize = F)
+mi_cyl(theta, x, normalize = TRUE, symmetrize = FALSE)
 }
 \arguments{
 \item{theta}{\link[base]{numeric} \link[base]{vector} of angles (measurements of a circular

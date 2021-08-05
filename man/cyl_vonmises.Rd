@@ -16,6 +16,9 @@ vonMises function used to construct the copula.}
 \item{flip}{\link[base]{logical} value indicating whether the copula
 should be rotated 90 degrees to capture negative correlation.}
 }
+\value{
+An \R object of class '\code{\linkS4class{cyl_vonmises}}'.
+}
 \description{
 Constructs a circular-linear von Mises copula according to
 \insertCite{Johnson1978;textual}{cylcop} of class

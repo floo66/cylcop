@@ -76,6 +76,9 @@ setClass(
 #'
 #' @param object \R object of class '\code{\linkS4class{cyl_copula}}'.
 #'
+#' @return An invisible \code{NULL}. As side effect, information on \code{object} is
+#' printed.
+#'
 #' @export
 #'
 setMethod("show", "cyl_copula", function(object) {
@@ -93,6 +96,8 @@ setMethod("show", "cyl_copula", function(object) {
 #' @param x \R object of class '\code{\linkS4class{cyl_copula}}'.
 #' @param n sample size of the random sample drawn from \code{x}.
 #' @param ... additional arguments passed to \code{\link[base]{plot}()}.
+#'
+#' @return An invisible \code{NULL}. As side effect, a plot is produced.
 #'
 #' @examples set.seed(123)
 #'
@@ -322,7 +327,7 @@ setGeneric("setCopParam",
 #' @name ccylcop
 #'
 setGeneric("ccylcop",
-           function(u, copula, cond_on=2, inverse=F, ...){
+           function(u, copula, cond_on = 2, inverse = FALSE, ...){
              if(!is.matrix(u)) u <- rbind(u, deparse.level = 0L)
              standardGeneric("ccylcop")
              },

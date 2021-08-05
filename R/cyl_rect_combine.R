@@ -92,6 +92,8 @@ setClass(
 #' @param flip_up \link[base]{logical} value indicating whether the copula (\code{sym.cop})
 #'   is rotated 90 degrees in the upper (\code{flip_up = TRUE}) or lower rectangle.
 #'
+#' @return An \R object of class '\code{\linkS4class{cyl_rect_combine}}'.
+#'
 #' @export
 #'
 #' @examples
@@ -753,7 +755,10 @@ setMethod("pcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
 #' @rdname ccylcop
 # @describeIn cyl_rect_combine-class Calculate the conditional copula.
 #' @export
-setMethod("ccylcop", signature("cyl_rect_combine"), function(u, copula, cond_on=2, inverse=F) {
+setMethod("ccylcop", signature("cyl_rect_combine"), function(u,
+                                                             copula,
+                                                             cond_on = 2,
+                                                             inverse = FALSE) {
 
   if(cond_on==2){
       if(inverse==F){
@@ -804,19 +809,19 @@ setMethod("setCopParam", "cyl_rect_combine", function(copula, param_val, param_n
 
 #set copula parameters
 
-  if (any(stringr::str_starts(param_name, "bg_|up_|low_", negate = T))) {
+  if (any(stringr::str_starts(param_name, "bg_|up_|low_", negate = TRUE))) {
     cop_param_val <-
-      param_val[which(stringr::str_starts(param_name, "bg_|up_|low_", negate = T))]
+      param_val[which(stringr::str_starts(param_name, "bg_|up_|low_", negate = TRUE))]
 
     if (!any(is(copula@sym.cop) == "rotCopula")) {
       cop_param_num <-
-        param_name[which(stringr::str_starts(param_name, "bg_|up_|low_", negate = T))] %>%
+        param_name[which(stringr::str_starts(param_name, "bg_|up_|low_", negate = TRUE))] %>%
         match(copula@sym.cop@param.names)
       copula@sym.cop@parameters[cop_param_num] <- cop_param_val
     }
     else{
       cop_param_num <-
-        param_name[which(stringr::str_starts(param_name, "bg_|up_|low_", negate = T))] %>%
+        param_name[which(stringr::str_starts(param_name, "bg_|up_|low_", negate = TRUE))] %>%
         match(copula@sym.cop@copula@param.names)
       copula@sym.cop@copula@parameters[cop_param_num] <-
         cop_param_val
