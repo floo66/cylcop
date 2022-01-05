@@ -7,9 +7,11 @@
 fit_steplength(
   x,
   parametric = c("beta", "cauchy", "chi-squared", "exponential", "gamma", "lognormal",
-    "logistic", "normal", "t", "weibull", FALSE),
+    "logistic", "normal", "t", "weibull", "normalmix", "weibullmix", "gammamix",
+    "lnormmix", FALSE),
   start = NULL,
-  bandwidth = NULL
+  bandwidth = NULL,
+  ncomp = 2
 )
 }
 \arguments{
@@ -28,11 +30,15 @@ values.}
 
 \item{bandwidth}{\link[base]{numeric} value for the kernel density bandwidth.
 Default is  \code{cylcop::\link{opt_lin_bw}(x, "adhoc")}.}
+
+\item{ncomp}{\link[base]{integer}, number of components of the mixed distribution.
+Only has an effect if \code{parametric %in% c("normalmix", "weibullmix", "gammamix",
+"lnormmix")}.}
 }
 \value{
 If a parametric estimate is made, a \link[base]{list} containing the
 estimated parameters, their standard errors and the log-likelihood is returned.
-If a non-parametric estimate is made, , the output is a list, and comes directly
+If a non-parametric estimate is made, the output is a list, and comes directly
 from the function \code{GoFKernel::\link[GoFKernel]{density.reflected}()} of the '\pkg{GoFKernel}'
 package.
 }

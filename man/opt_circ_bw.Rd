@@ -20,7 +20,7 @@ Either maximum likelihood \code{"ML"}, or trigonometric moment \code{"trigmoment
 A \link[base]{numeric} value, the optimized bandwidth.
 }
 \description{
-This function is basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}()}
+This function basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}()}
 and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
  package, simplifying their inputs. For more control,
 these '\pkg{circular}' functions could be used directly.
@@ -35,14 +35,11 @@ set.seed(123)
 n <- 100  #n (number of samples) is set small for performance. Increase n to
 # a value larger than 1000 to see the effects of multimodality
 
-angles <- circular::rmixedvonmises(n,
-  mu1 = circular::circular(0),
-  mu2 = circular::circular(pi),
-  kappa1 = 2,
-  kappa2 = 1,
-  prop = 0.5
+angles <- rvonmisesmix(n,
+  mu = c(0,pi),
+  kappa = c(2,1),
+  prop = c(0.5,0.5)
 )
-angles <- as.double(angles)
 bw1 <- opt_circ_bw(theta = angles, loss="adhoc")
 bw2 <- opt_circ_bw(theta = angles, loss="adhoc", kappa.est = "trigmoments")
 bw3 <- opt_circ_bw(theta = angles, loss="KullbackLeibler")
@@ -50,13 +47,11 @@ bw3 <- opt_circ_bw(theta = angles, loss="KullbackLeibler")
 dens1 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw1)
 dens2 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw2)
 dens3 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw3)
-true_dens <- circular::dmixedvonmises(
-  circular(seq(-pi,pi,0.001)),
-  mu1 = circular::circular(0),
-  mu2 = circular::circular(pi),
-  kappa1 = 2,
-  kappa2 = 1,
-  prop = 0.5
+true_dens <- dvonmisesmix(
+  seq(-pi,pi,0.001),
+  mu = c(0,pi),
+  kappa = c(2,1),
+  prop = c(0.5,0.5)
 )
 
 plot(seq(-pi, pi, 0.001), true_dens, type = "l")

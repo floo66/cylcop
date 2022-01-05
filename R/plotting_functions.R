@@ -309,7 +309,7 @@ circ_plot <- function(traj) {
   #set positions of angle labels
   max_rad <- max(y_breaks)
   angle_label_pos <-  cbind(x = x_breaks,
-                            y = c(1.2, 1.2, 1.2, 1.15, 1.2, 1.2, 1.2, 1.15)*marginal_angle_dens$y[map(x_breaks,~which.min(abs(marginal_angle_dens$x-.x)))%>%unlist()]) %>%
+                            y = c(1.3, 1.3, 1.3, 1.15, 1.3, 1.3, 1.3, 1.15)*marginal_angle_dens$y[map(x_breaks,~which.min(abs(marginal_angle_dens$x-.x)))%>%unlist()]) %>%
     as.data.frame()
 
   #convert to cartesian coordinates to determine plot-margins

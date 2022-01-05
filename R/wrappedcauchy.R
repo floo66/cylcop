@@ -61,7 +61,7 @@
 #' @seealso \code{circular::\link[circular]{dwrappedcauchy}()},
 #' \code{circular::\link[circular]{rwrappedcauchy}()}.
 #'
-#' @aliases rwrappedcauchy pwrappedcauchy rdwrappedcauchy qwrappedcauchy
+#' @aliases rwrappedcauchy pwrappedcauchy dwrappedcauchy qwrappedcauchy
 #'
 NULL
 

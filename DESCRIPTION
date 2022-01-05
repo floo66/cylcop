@@ -42,9 +42,11 @@ Imports:
     plotly,
     cowplot,
     movMF,
-    Rdpack
+    Rdpack,
+    mixR,
+    transport
 RdMacros: Rdpack
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Collate: 
     'cyl_cop_class.R'
     'Ccond.R'
@@ -60,6 +62,8 @@ Collate:
     'fit_cop_corr.R'
     'fit_cop_mle.R'
     'fit_margin.R'
+    'gof.R'
+    'mixed_linear.R'
     'mixedvonmises.R'
     'opt_auto.R'
     'plotting_functions.R'

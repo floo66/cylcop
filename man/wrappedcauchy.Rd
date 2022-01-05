@@ -4,9 +4,8 @@
 \alias{wrappedcauchy}
 \alias{rwrappedcauchy}
 \alias{pwrappedcauchy}
-\alias{rdwrappedcauchy}
-\alias{qwrappedcauchy}
 \alias{dwrappedcauchy}
+\alias{qwrappedcauchy}
 \title{Density, Distribution, Quantiles and Random Number Generation for the Wrapped
 Cauchy Distribution}
 \usage{

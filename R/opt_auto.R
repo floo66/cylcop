@@ -38,7 +38,6 @@
 opt_auto <- function(theta, x) {
   original_silent <- cylcop.env$silent
   cylcop.env$silent <- T
-  original_silent <- F
 
   name_lst <- vector(mode = "list", length = 15)
   copula_lst <- vector(mode = "list", length = 15)

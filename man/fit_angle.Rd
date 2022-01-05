@@ -6,9 +6,10 @@
 \usage{
 fit_angle(
   theta,
-  parametric = c("vonmises", "wrappedcauchy", "mixedvonmises", FALSE),
+  parametric = c("vonmises", "wrappedcauchy", "vonmisesmix", FALSE),
   bandwidth = NULL,
-  mu = NULL
+  mu = NULL,
+  ncomp = 2
 )
 }
 \arguments{
@@ -16,7 +17,7 @@ fit_angle(
 
 \item{parametric}{either a \link[base]{character} string describing what distribution
 should be fitted (\code{"vonmises"}, \code{"wrappedcauchy"}, or
-\code{"mixedvonmises"}), or the \link[base]{logical} \code{FALSE} if a non-parametric
+\code{"vonmisesmix"}), or the \link[base]{logical} \code{FALSE} if a non-parametric
 estimation (kernel density) should be made.}
 
 \item{bandwidth}{If \code{parametric = FALSE}, the numeric value of the kernel density bandwidth.
@@ -24,6 +25,9 @@ Default is \code{cylcop::\link{opt_circ_bw}(theta, "adhoc")}.}
 
 \item{mu}{(optional) \link[base]{numeric} \link[base]{vector}, fixed mean direction(s) of the
 parametric distribution.}
+
+\item{ncomp}{\link[base]{integer}, number of components of the mixed vonMises distribution.
+Only has an effect if \code{parametric="vonmisesmix"}.}
 }
 \value{
 If a parametric estimate is made, a \link[base]{list}
@@ -49,12 +53,10 @@ cylcop_set_option(silent = TRUE)
 n <- 100  #n (number of samples) is set small for performance. Increase n to
 # a value larger than 1000 to see the effects of multimodality
 
-angles <- circular::rmixedvonmises(n,
-  mu1 = circular::circular(0),
-  mu2 = circular::circular(pi),
-  kappa1 = 2,
-  kappa2 = 1,
-  prop = 0.5
+angles <- rvonmisesmix(n,
+  mu = c(0, pi),
+  kappa = c(2,1),
+  prop = c(0.5, 0.5)
 )
 angles <- as.double(angles)
 
@@ -68,32 +70,26 @@ dens_non_param <- fit_angle(theta = angles,
 )
 
 param_estimate <- fit_angle(theta = angles,
-  parametric = "mixedvonmises"
+  parametric = "vonmisesmix"
 )
 param_estimate_fixed_mean <- fit_angle(theta = angles,
-  parametric = "mixedvonmises",
+  parametric = "vonmisesmix",
   mu = c(0, pi)
 )
 
-true_dens <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
-  mu1 = circular(0),
-  mu2 = circular(pi),
-  kappa1 = 2,
-  kappa2 = 1,
-  prop = 0.5
+true_dens <- dvonmisesmix(seq(-pi,pi,0.001),
+  mu = c(0, pi),
+  kappa = c(2,1),
+  prop = c(0.5, 0.5)
 )
-dens_estimate <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
-  mu1 = circular::circular(param_estimate$coef$mu1),
-  mu2 = circular::circular(param_estimate$coef$mu2),
-  kappa1 = param_estimate$coef$kappa1,
-  kappa2 = param_estimate$coef$kappa2,
+dens_estimate <- dvonmisesmix(seq(-pi,pi,0.001),
+  mu= param_estimate$coef$mu,
+  kappa = param_estimate$coef$kappa,
   prop = param_estimate$coef$prop
 )
-dens_estimate_fixed_mean <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
-  mu1 = circular(param_estimate_fixed_mean$coef$mu1),
-  mu2 = circular(param_estimate_fixed_mean$coef$mu2),
-  kappa1 = param_estimate_fixed_mean$coef$kappa1,
-  kappa2 = param_estimate_fixed_mean$coef$kappa2,
+dens_estimate_fixed_mean <- dvonmisesmix(seq(-pi,pi,0.001),
+  mu= param_estimate_fixed_mean$coef$mu,
+  kappa = param_estimate_fixed_mean$coef$kappa,
   prop = param_estimate_fixed_mean$coef$prop
 )
 

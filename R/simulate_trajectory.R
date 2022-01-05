@@ -11,11 +11,11 @@
 #' @param n \link[base]{integer}, number of trajectory steps to generate.
 #' @param copula '\code{\linkS4class{cyl_copula}}' object.
 #' @param marginal_circ \link[base]{character} string denoting the name of the circular
-#'   distribution. It can be \code{"vonmises"}, \code{"mixedvonmises"},
+#'   distribution. It can be \code{"vonmises"}, \code{"vonmisesmix"},
 #'   \code{"wrappedcauchy"}, or \code{"dens"} (for kernel density estimate).
 #' @param parameter_circ (named) \link[base]{list} of parameters of the circular
 #' marginal distribution as taken by the functions
-#' \code{\link[circular]{qvonmises}()}, \code{\link{qmixedvonmises}()},
+#' \code{\link[circular]{qvonmises}()}, \code{\link{qvonmisesmix}()},
 #' or \code{\link{qwrappedcauchy}()}. If \code{marginal_circ = "dens"},
 #' \code{parameter_circ} must be a named \link[base]{list}, containing information
 #' on the kernel density estimate, which can be obtained
@@ -47,12 +47,10 @@
 #' )
 #' traj
 #'
-#' angles <- circular::rmixedvonmises(100,
-#'   mu1 = circular::circular(0),
-#'   mu2 = circular::circular(pi),
-#'   kappa1 = 2,
-#'   kappa2 = 3,
-#'   prop = 0.4
+#' angles <- rvonmisesmix(100,
+#'   mu = c(0, pi),
+#'   kappa = c(2, 3),
+#'   prop = c(0.4, 0.6)
 #' )
 #' angles <- full2half_circ(angles)
 #' bw <- opt_circ_bw(theta = angles,loss = "adhoc", kappa.est = "trigmoments")
@@ -74,7 +72,7 @@
 make_traj <-
   function(n,
            copula,
-           marginal_circ = c("vonmises","wrappedcauchy", "mixedvonmises", "dens"),
+           marginal_circ = c("vonmises","wrappedcauchy", "vonmisesmix", "dens"),
            parameter_circ,
            marginal_lin,
            parameter_lin,

@@ -18,10 +18,11 @@
 #' @importFrom viridis inferno
 #' @importFrom plotly plot_ly add_trace add_surface
 #' @importFrom circular rvonmises pvonmises dvonmises qvonmises
-#' @importFrom circular rmixedvonmises dmixedvonmises pmixedvonmises
 #' @importFrom extraDistr rhnorm phnorm dhnorm qhnorm
 #' @importFrom movMF movMF
 #' @importFrom Rdpack reprompt
+#' @importFrom transport pgrid wpp semidiscrete wasserstein
+#' @importFrom mixR mixfit
 #' @keywords internal
 "_PACKAGE"
 

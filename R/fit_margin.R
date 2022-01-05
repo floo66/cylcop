@@ -1,6 +1,6 @@
 #' Find the Optimal Bandwidth for a Circular Kernel Density Estimate
 #'
-#' This function is basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}()}
+#' This function basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}()}
 #' and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
 #'  package, simplifying their inputs. For more control,
 #' these '\pkg{circular}' functions could be used directly.
@@ -23,14 +23,11 @@
 #' n <- 100  #n (number of samples) is set small for performance. Increase n to
 #' # a value larger than 1000 to see the effects of multimodality
 #'
-#' angles <- circular::rmixedvonmises(n,
-#'   mu1 = circular::circular(0),
-#'   mu2 = circular::circular(pi),
-#'   kappa1 = 2,
-#'   kappa2 = 1,
-#'   prop = 0.5
+#' angles <- rvonmisesmix(n,
+#'   mu = c(0,pi),
+#'   kappa = c(2,1),
+#'   prop = c(0.5,0.5)
 #' )
-#' angles <- as.double(angles)
 #' bw1 <- opt_circ_bw(theta = angles, loss="adhoc")
 #' bw2 <- opt_circ_bw(theta = angles, loss="adhoc", kappa.est = "trigmoments")
 #' bw3 <- opt_circ_bw(theta = angles, loss="KullbackLeibler")
@@ -38,13 +35,11 @@
 #' dens1 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw1)
 #' dens2 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw2)
 #' dens3 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw3)
-#' true_dens <- circular::dmixedvonmises(
-#'   circular(seq(-pi,pi,0.001)),
-#'   mu1 = circular::circular(0),
-#'   mu2 = circular::circular(pi),
-#'   kappa1 = 2,
-#'   kappa2 = 1,
-#'   prop = 0.5
+#' true_dens <- dvonmisesmix(
+#'   seq(-pi,pi,0.001),
+#'   mu = c(0,pi),
+#'   kappa = c(2,1),
+#'   prop = c(0.5,0.5)
 #' )
 #'
 #' plot(seq(-pi, pi, 0.001), true_dens, type = "l")
@@ -75,12 +70,12 @@ opt_circ_bw <- function(theta,
     )
   }
   else if (loss == "adhoc") {
-    if(kappa.est != "trigmoments"){
-    warning(
-      "ad-hoc method of finding bandwidth parameter might give very bad results, especially for multimodal population distributions\n",
-      "you can use(kappa.est=\"trigmoments\" or an mle method (loss=\"KullbackLeibler\")"
-    )
-  }
+    if (kappa.est != "trigmoments") {
+      warning(
+        "ad-hoc method of finding bandwidth parameter might give very bad results, especially for multimodal population distributions\n",
+        "you can use(kappa.est=\"trigmoments\" or an mle method (loss=\"KullbackLeibler\")"
+      )
+    }
     bw <-
       suppressWarnings(
         circular::bw.nrd.circular(
@@ -165,12 +160,14 @@ opt_lin_bw <- function(x,
 #' @param theta \link[base]{numeric} \link[base]{vector} of angles in \eqn{[-\pi, \pi)}.
 #' @param parametric either a \link[base]{character} string describing what distribution
 #'   should be fitted (\code{"vonmises"}, \code{"wrappedcauchy"}, or
-#'   \code{"mixedvonmises"}), or the \link[base]{logical} \code{FALSE} if a non-parametric
+#'   \code{"vonmisesmix"}), or the \link[base]{logical} \code{FALSE} if a non-parametric
 #'   estimation (kernel density) should be made.
 #' @param bandwidth If \code{parametric = FALSE}, the numeric value of the kernel density bandwidth.
 #'  Default is \code{cylcop::\link{opt_circ_bw}(theta, "adhoc")}.
 #' @param mu (optional) \link[base]{numeric} \link[base]{vector}, fixed mean direction(s) of the
 #' parametric distribution.
+#' @param ncomp \link[base]{integer}, number of components of the mixed vonMises distribution.
+#' Only has an effect if \code{parametric="vonmisesmix"}.
 #'
 #' @return If a parametric estimate is made, a \link[base]{list}
 #'  containing the estimated parameters, their
@@ -189,12 +186,10 @@ opt_lin_bw <- function(x,
 #' n <- 100  #n (number of samples) is set small for performance. Increase n to
 #' # a value larger than 1000 to see the effects of multimodality
 #'
-#' angles <- circular::rmixedvonmises(n,
-#'   mu1 = circular::circular(0),
-#'   mu2 = circular::circular(pi),
-#'   kappa1 = 2,
-#'   kappa2 = 1,
-#'   prop = 0.5
+#' angles <- rvonmisesmix(n,
+#'   mu = c(0, pi),
+#'   kappa = c(2,1),
+#'   prop = c(0.5, 0.5)
 #' )
 #' angles <- as.double(angles)
 #'
@@ -208,32 +203,26 @@ opt_lin_bw <- function(x,
 #' )
 #'
 #' param_estimate <- fit_angle(theta = angles,
-#'   parametric = "mixedvonmises"
+#'   parametric = "vonmisesmix"
 #' )
 #' param_estimate_fixed_mean <- fit_angle(theta = angles,
-#'   parametric = "mixedvonmises",
+#'   parametric = "vonmisesmix",
 #'   mu = c(0, pi)
 #' )
 #'
-#' true_dens <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
-#'   mu1 = circular(0),
-#'   mu2 = circular(pi),
-#'   kappa1 = 2,
-#'   kappa2 = 1,
-#'   prop = 0.5
+#' true_dens <- dvonmisesmix(seq(-pi,pi,0.001),
+#'   mu = c(0, pi),
+#'   kappa = c(2,1),
+#'   prop = c(0.5, 0.5)
 #' )
-#' dens_estimate <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
-#'   mu1 = circular::circular(param_estimate$coef$mu1),
-#'   mu2 = circular::circular(param_estimate$coef$mu2),
-#'   kappa1 = param_estimate$coef$kappa1,
-#'   kappa2 = param_estimate$coef$kappa2,
+#' dens_estimate <- dvonmisesmix(seq(-pi,pi,0.001),
+#'   mu= param_estimate$coef$mu,
+#'   kappa = param_estimate$coef$kappa,
 #'   prop = param_estimate$coef$prop
 #' )
-#' dens_estimate_fixed_mean <- circular::dmixedvonmises(circular(seq(-pi,pi,0.001)),
-#'   mu1 = circular(param_estimate_fixed_mean$coef$mu1),
-#'   mu2 = circular(param_estimate_fixed_mean$coef$mu2),
-#'   kappa1 = param_estimate_fixed_mean$coef$kappa1,
-#'   kappa2 = param_estimate_fixed_mean$coef$kappa2,
+#' dens_estimate_fixed_mean <- dvonmisesmix(seq(-pi,pi,0.001),
+#'   mu= param_estimate_fixed_mean$coef$mu,
+#'   kappa = param_estimate_fixed_mean$coef$kappa,
 #'   prop = param_estimate_fixed_mean$coef$prop
 #' )
 #'
@@ -253,17 +242,16 @@ opt_lin_bw <- function(x,
 #'
 fit_angle <-
   function(theta,
-           parametric = c("vonmises", "wrappedcauchy", "mixedvonmises", FALSE),
+           parametric = c("vonmises", "wrappedcauchy", "vonmisesmix", FALSE),
            bandwidth = NULL,
-           mu = NULL) {
+           mu = NULL,
+           ncomp = 2) {
     theta <- na.omit(theta)
 
     if (!parametric == FALSE) {
-      if (!parametric %in% c("vonmises", "wrappedcauchy", "mixedvonmises")) {
-        stop(
-          error_sound(),
-          "distribution must be vonmises, wrappedcauchy or mixedvonmises"
-        )
+      if (!parametric %in% c("vonmises", "wrappedcauchy", "vonmisesmix")) {
+        stop(error_sound(),
+             "distribution must be vonmises, wrappedcauchy or vonmisesmix")
       }
       else if (parametric == "vonmises") {
         if (!is.null(mu) && length(mu) != 1) {
@@ -316,18 +304,14 @@ fit_angle <-
         return(out)
       }
 
-      else if (parametric == "mixedvonmises") {
-        distr <- mle.mixedvonmises(theta, mu = mu)
-
-        #for compatibility with other distributions calculate logL with circular package
+      else if (parametric == "vonmisesmix") {
+        distr <- mle.vonmisesmix(theta, mu = mu, ncomp = ncomp)
         logL <- suppressWarnings(
-          circular::dmixedvonmises(
+          dvonmisesmix(
             theta,
-            distr$mu[1],
-            distr$mu[2],
-            distr$kappa[1],
-            distr$kappa[2],
-            distr$prop
+            mu = distr$mu,
+            kappa = distr$kappa,
+            prop = distr$prop
           ) %>%
             log() %>% sum()
         )
@@ -335,33 +319,25 @@ fit_angle <-
         out <-
           list(
             coef = list(
-              mu1 = distr$mu[1] ,
-              mu2 = distr$mu[2] ,
-              kappa1 = distr$kappa[1] ,
-              kappa2 = distr$kappa[2] ,
+              mu = distr$mu ,
+              kappa = distr$kappa ,
               prop = distr$prop
             ),
             se = list(),
             logL = logL ,
             AIC = 2 * df - 2 * logL ,
-            name = "mixedvonmises"
+            name = "vonmisesmix"
           )
         msg <-
           paste0(
-            "mu1:\t",
-            distr$mu[1] %>% round(3),
+            "mu:\t",
+            paste(distr$mu %>% round(3), collapse = ", "),
             "\n",
-            "mu2:\t",
-            distr$mu[2] %>% round(3),
-            "\n",
-            "kappa1:\t",
-            distr$kappa[1] %>% round(3),
-            "\n",
-            "kappa2:\t",
-            distr$kappa[2] %>% round(3),
+            "kappa:\t",
+            paste(distr$kappa %>% round(3), collapse = ", "),
             "\n",
             "prop:\t",
-            distr$prop %>% round(3),
+            paste(distr$prop %>% round(3), collapse = ", "),
             "\n",
             "logL:\t",
             logL %>% round(5),
@@ -462,10 +438,13 @@ fit_angle <-
 #' @param start (optional, except when \code{parametric = "chi-squared"})
 #' named \link[base]{list} containing the parameters to be optimized with inital
 #' values.
+#' @param ncomp \link[base]{integer}, number of components of the mixed distribution.
+#' Only has an effect if \code{parametric %in% c("normalmix", "weibullmix", "gammamix",
+#' "lnormmix")}.
 #'
 #' @return If a parametric estimate is made, a \link[base]{list} containing the
 #' estimated parameters, their standard errors and the log-likelihood is returned.
-#' If a non-parametric estimate is made, , the output is a list, and comes directly
+#' If a non-parametric estimate is made, the output is a list, and comes directly
 #' from the function \code{GoFKernel::\link[GoFKernel]{density.reflected}()} of the '\pkg{GoFKernel}'
 #' package.
 #'
@@ -525,10 +504,15 @@ fit_steplength <-
              "normal",
              "t",
              "weibull",
+             "normalmix",
+             "weibullmix",
+             "gammamix",
+             "lnormmix",
              FALSE
            ),
            start = NULL,
-           bandwidth = NULL) {
+           bandwidth = NULL,
+           ncomp = 2) {
     x <- na.omit(x)
     if (!is.logical(parametric))
       parametric <- match.arg(parametric)
@@ -543,7 +527,11 @@ fit_steplength <-
         "logistic",
         "normal",
         "t",
-        "weibull"
+        "weibull",
+        "normalmix",
+        "weibullmix",
+        "gammamix",
+        "lnormmix"
       )) {
         stop(error_sound(),
              "distribution not supported")
@@ -562,7 +550,6 @@ fit_steplength <-
                          method = "BFGS")
       }
 
-
       low <- switch(
         parametric,
         "cauchy" = c(0, 0),
@@ -572,33 +559,90 @@ fit_steplength <-
         "weibull" = c(0, 0),
         NULL
       )
-      if (parametric != "chi-squared") {
+      if (!parametric %in% c("chi-squared",
+                             "normalmix",
+                             "weibullmix",
+                             "gammamix",
+                             "lnormmix")) {
         distr <-
           MASS::fitdistr(x,
                          densfun = parametric,
                          start = start,
                          lower = low)
       }
-      if (parametric == "lognormal")
-        parametric <- "lnorm"
-      out <-
-        list(
-          coef = as.list(distr$estimate),
-          se = as.list(distr$sd),
-          logL = distr$loglik ,
-          AIC = 2 * attributes(logLik(distr))$df - 2 * distr$loglik,
-          name = parametric
+      if (!parametric %in% c("normalmix",
+                             "weibullmix",
+                             "gammamix",
+                             "lnormmix")) {
+        if (parametric == "lognormal")
+          parametric <- "lnorm"
+        out <-
+          list(
+            coef = as.list(distr$estimate),
+            se = as.list(distr$sd),
+            logL = distr$loglik ,
+            AIC = 2 * attributes(logLik(distr))$df - 2 * distr$loglik,
+            name = parametric
+          )
+        if (cylcop.env$silent == F) {
+          message(
+            show(distr),
+            "\nlogL= ",
+            distr$loglik,
+            "\n",
+            "AIC= ",
+            2 * attributes(logLik(distr))$df - 2 * logLik(distr),
+            "\n"
+          )
+        }
+      } else{
+        family <- switch(
+          parametric,
+          "normalmix" = "normal",
+          "weibullmix" = "weibull",
+          "gammamix" = "gamma",
+          "lnormmix" = "lnorm"
         )
-      if (cylcop.env$silent == F) {
-        message(
-          show(distr),
-          "\nlogL= ",
-          distr$loglik,
-          "\n",
-          "AIC= ",
-          2 * attributes(logLik(distr))$df - 2 * logLik(distr),
-          "\n"
-        )
+        distr <- mixR::mixfit(x, ncomp = ncomp, family = family)
+        if (parametric == "normalmix") {
+          out <-
+            list(
+              coef = list(distr[[1]], distr[[2]], distr[[3]]),
+              se = list(),
+              logL = distr$loglik,
+              AIC = distr$aic,
+              name = parametric
+            )
+          names(out$coef) <- c("prop", "mu", "sd")
+        } else if (parametric == "gammamix") {
+          out <-
+            list(
+              coef = list(distr[[1]], distr[[4]], 1/distr[[5]]),
+              se = list(),
+              logL = distr$loglik,
+              AIC = distr$aic,
+              name = parametric
+            )
+          names(out$coef) <- c("prop", "shape", "scale")
+        }
+        else{
+          out <-
+            list(
+              coef = list(distr[[1]], distr[[4]], distr[[5]]),
+              se = list(),
+              logL = distr$loglik,
+              AIC = distr$aic,
+              name = parametric
+            )
+          names(out$coef) <- c("prop", names(distr)[4], names(distr)[5])
+          if (parametric == "weibullmix") {
+            names(out$coef) <- c("prop", "shape", "scale")
+          }
+        }
+
+        if (cylcop.env$silent == F) {
+          message(show(distr))
+        }
       }
       return(out)
     }
