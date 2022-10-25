@@ -14,18 +14,18 @@ opt_auto(theta, x)
 (measurements of a linear variable).}
 }
 \value{
-A list containing 3 lists: Descriptions of the copulae, the
+A list containing 3 lists: Descriptions of the copulas, the
 '\code{\linkS4class{cyl_copula}}' objects with fitted parameters, and the AIC.
 The lists are sorted by ascending AIC.
-If \code{\link{optML}()} has failed, the reported parameters are the ones with
-\code{\link{optCor}()} and the AIC is set to \code{NA}.
+If \code{\link{optML}()} has failed, the reported parameters are the ones obtained
+ with \code{\link{optCor}()} and the AIC is set to \code{NA}.
 }
 \description{
 The parameters of 15 different circular-linear copulas are fitted to data
 and sorted
 according to AIC. For each copula, first, a starting value for the maximum
 likelihood estimation (MLE) is found using \code{\link{optCor}()}.
-Then MLE with a "reasonable" setup is carried out using \code{\link{optML}()}.
+Then, MLE is carried out with a "reasonable" setup using \code{\link{optML}()}.
 If MLE fails, parameters obtained with \code{\link{optCor}()} are reported.
 }
 \examples{

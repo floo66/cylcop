@@ -6,8 +6,9 @@
 \title{An S4 Class of Bivariate Copulas with Cubic Sections}
 \description{
 This class contains bivariate circular-linear copulas with cubic sections in the linear dimension.
-They are periodic in the circular dimension, u, and symmetric with respect to u=0.5. I.e.
-the can capture correlation in data where there is symmetry between positive and negative angles.
+They are periodic in the circular dimension, \eqn{u}, and symmetric with respect
+to \eqn{u=0.5}. Therefore,
+they can capture correlation in data where there is symmetry between positive and negative angles.
 These copulas are described by two parameters, \code{a} and \code{b}.
 }
 \section{Slots}{

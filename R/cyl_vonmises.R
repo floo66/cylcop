@@ -72,6 +72,27 @@ cyl_vonmises <- function(mu = 0,
                          kappa = 1,
                          flip = FALSE) {
 
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric",
+                                      length = 1)
+                  ,1)
+    check_arg_all(check_argument_type(kappa,
+                                      type="numeric",
+                                      length = 1,
+                                      lower = 0)
+                  ,1)
+    check_arg_all(check_argument_type(flip,
+                                      type="logical")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   lowbnd = c(-Inf, 0)
   upbnd = c(Inf, Inf)
 
@@ -174,10 +195,16 @@ setMethod("pcylcop", signature("matrix", "cyl_vonmises"), function(u, copula) {
   }
   else{
     #if the copula is flipped, instead of integrating from (0,0) to (u,v) we need to integrate from  (1-u,0) to (1,v).
-    #Use the C-volume of the unflipped copula for that, it recursively calls this pcylcop function.
+    #Use the C-volume of the unflipped copula for that.
     unflipped <- copula
     unflipped@flip <- FALSE
-    cdf <- prob(unflipped, l = c((1 - u), 0), u = c(1, v))
+    low <- cbind((1-u),0)
+    up <- cbind(1, v)
+    cdf <- pcylcop(cbind(low[,1], low[,2]), unflipped) -
+      pcylcop(cbind(low[,1], up[,2]), unflipped) -
+      pcylcop(cbind(up[,1], low[,2]), unflipped) +
+      pcylcop(cbind(up[,1], up[,2]), unflipped)
+
   }
   return(c(cdf))
 })
@@ -202,7 +229,7 @@ setMethod("ccylcop", signature("cyl_vonmises"), function(u,
     if(!copula@flip){
       if(inverse==F){
         result <-
-          map2_dbl(u, v, ~ circular::pvonmises(2*pi*.x,
+          map2_dbl(u, v, ~ circular::pvonmises(circular::circular(2*pi*.x),
                                                mu = circular::circular(2 * pi * .y + mu),
                                                kappa = kappa,
                                                from = circular::circular(0)))
@@ -222,14 +249,13 @@ setMethod("ccylcop", signature("cyl_vonmises"), function(u,
       #if flip, we need to integrate the cdf from 1-u to 1 instead of 0 to u
       if(inverse==F){
         result <-
-          map2_dbl(u, v, ~ circular::pvonmises(2*pi,
+          map2_dbl(u, v, ~ circular::pvonmises(circular::circular(2*pi),
                                                mu = circular::circular(2 * pi * .y + mu),
                                                kappa = kappa,
                                                from = circular::circular((1-.x)*2*pi)))
       }
       if(inverse==T){
-        #TODO find analytical formula
-        result <- numerical_inv_conditional_cop(c(u,v),copula,cond_on = 2)
+        result <- numerical_inv_conditional_cop(cbind(u,v),copula,cond_on = 2)
       }
     }
   }
@@ -239,7 +265,7 @@ setMethod("ccylcop", signature("cyl_vonmises"), function(u,
       u <- 1 - u
     if(inverse==F){
       result <-
-        map2_dbl(u, v, ~ circular::pvonmises(2*pi*.y,
+        map2_dbl(u, v, ~ circular::pvonmises(circular::circular(2*pi*.y),
                                              mu = circular::circular(2 * pi * .x - mu),
                                              kappa = kappa,
                                              from = circular::circular(0)))

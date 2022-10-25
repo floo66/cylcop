@@ -45,7 +45,7 @@ calculated.}
 }
 \value{
 A vector containing the values of the distribution of the copula at
-\code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+\code{u[,-cond_on]} conditional on the values of \code{u[,cond_on]}.
 }
 \description{
 Calculates the conditional distributions and their inverses of circular-linear

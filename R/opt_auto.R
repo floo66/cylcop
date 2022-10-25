@@ -5,7 +5,7 @@
 #' and sorted
 #' according to AIC. For each copula, first, a starting value for the maximum
 #' likelihood estimation (MLE) is found using \code{\link{optCor}()}.
-#' Then MLE with a "reasonable" setup is carried out using \code{\link{optML}()}.
+#' Then, MLE is carried out with a "reasonable" setup using \code{\link{optML}()}.
 #' If MLE fails, parameters obtained with \code{\link{optCor}()} are reported.
 #'
 #' @param theta \link[base]{numeric} \link[base]{vector} of angles
@@ -13,11 +13,11 @@
 #' @param x \link[base]{numeric} \link[base]{vector} of step lengths
 #' (measurements of a linear variable).
 #'
-#' @return A list containing 3 lists: Descriptions of the copulae, the
+#' @return A list containing 3 lists: Descriptions of the copulas, the
 #' '\code{\linkS4class{cyl_copula}}' objects with fitted parameters, and the AIC.
 #' The lists are sorted by ascending AIC.
-#' If \code{\link{optML}()} has failed, the reported parameters are the ones with
-#' \code{\link{optCor}()} and the AIC is set to \code{NA}.
+#' If \code{\link{optML}()} has failed, the reported parameters are the ones obtained
+#'  with \code{\link{optCor}()} and the AIC is set to \code{NA}.
 #'
 #' @examples set.seed(123)
 #'
@@ -36,6 +36,21 @@
 #' @export
 #'
 opt_auto <- function(theta, x) {
+  #validate input
+  tryCatch({
+
+    check_arg_all(check_argument_type(theta,
+                                           type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   original_silent <- cylcop.env$silent
   cylcop.env$silent <- T
 

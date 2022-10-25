@@ -9,8 +9,8 @@ mle.vonmisesmix(theta, mu = NULL, ncomp = 2)
 \arguments{
 \item{theta}{\link[base]{numeric} \link[base]{vector} of angles.}
 
-\item{mu}{(optional) \link[base]{numeric} \link[base]{vector} of length 2
- holding the 2 mean directions (angles). If not specified
+\item{mu}{(optional) \link[base]{numeric} \link[base]{vector} of length \code{ncomp}
+ holding the mean directions (angles). If not specified
 the mean directions are estimated.}
 
 \item{ncomp}{positive \link[base]{integer} specifying the number of components
@@ -23,7 +23,7 @@ and \code{prop}.
 \description{
 Computes the maximum likelihood estimates for the parameters of a mixed
 von Mises distribution: the mean directions, the concentration parameters,
-and the proportion of the 2 distributions. The code is a simplified version of
+and the proportions of the distributions. The code is a simplified version of
  \code{movMF::\link[movMF]{movMF}()} with the added
 feature of optionally fixed mean directions \insertCite{Hornik2014}{cylcop}.
 }

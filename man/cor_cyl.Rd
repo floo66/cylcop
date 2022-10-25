@@ -36,10 +36,8 @@ cor_cyl(theta = sample[,1], x = sample[,2])
 #the correlation coefficient is independent of the marginal distribution.
 sample <- make_traj(100,
   cop,
-  marginal_circ = "vonmises",
-  parameter_circ = list(0, 1),
-  marginal_lin = "weibull",
-  parameter_lin = list(shape = 2)
+  marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
+  marginal_lin = list(name = "weibull", coef = list(shape = 2))
 )
 cor_cyl(theta = sample$angle, x = sample$steplength)
 cor_cyl(theta = sample$cop_u, x = sample$cop_v)

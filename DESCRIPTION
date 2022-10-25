@@ -63,6 +63,7 @@ Collate:
     'fit_cop_mle.R'
     'fit_margin.R'
     'gof.R'
+    'joint_distr.R'
     'mixed_linear.R'
     'mixedvonmises.R'
     'opt_auto.R'

@@ -21,7 +21,7 @@ should be fitted (\code{"vonmises"}, \code{"wrappedcauchy"}, or
 estimation (kernel density) should be made.}
 
 \item{bandwidth}{If \code{parametric = FALSE}, the numeric value of the kernel density bandwidth.
-Default is \code{cylcop::\link{opt_circ_bw}(theta, "adhoc")}.}
+Default is \code{cylcop::\link{opt_circ_bw}(theta, "nrd")}.}
 
 \item{mu}{(optional) \link[base]{numeric} \link[base]{vector}, fixed mean direction(s) of the
 parametric distribution.}
@@ -30,11 +30,12 @@ parametric distribution.}
 Only has an effect if \code{parametric="vonmisesmix"}.}
 }
 \value{
-If a parametric estimate is made, a \link[base]{list}
+If a parametric estimate is made, a \link[base]{list} is returned
  containing the estimated parameters, their
-standard errors and the log-likelihood is returned.
-If a non-parametric estimate is made, the output is a list and comes directly
-from the function \code{circular::\link[circular]{density.circular}()} of the '\pkg{circular}'
+standard errors (if available), the log-likelihood,
+the AIC and the name of the distribution.
+If a non-parametric estimate is made, the output is a '\code{\link[circular]{density.circular}}' object
+obtained with the function \code{circular::\link[circular]{density.circular}()} of the '\pkg{circular}'
 package.
 }
 \description{
@@ -50,18 +51,16 @@ set.seed(123)
 silent_curr <- cylcop_get_option("silent")
 cylcop_set_option(silent = TRUE)
 
-n <- 100  #n (number of samples) is set small for performance. Increase n to
-# a value larger than 1000 to see the effects of multimodality
+n <- 100  #n (number of samples) is set small for performance.
 
 angles <- rvonmisesmix(n,
   mu = c(0, pi),
   kappa = c(2,1),
   prop = c(0.5, 0.5)
 )
-angles <- as.double(angles)
 
 bw <- opt_circ_bw(theta = angles,
-  loss="adhoc",
+  method="nrd",
   kappa.est = "trigmoments"
 )
 dens_non_param <- fit_angle(theta = angles,
@@ -74,7 +73,8 @@ param_estimate <- fit_angle(theta = angles,
 )
 param_estimate_fixed_mean <- fit_angle(theta = angles,
   parametric = "vonmisesmix",
-  mu = c(0, pi)
+  mu = c(0, pi),
+  ncomp =2
 )
 
 true_dens <- dvonmisesmix(seq(-pi,pi,0.001),

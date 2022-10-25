@@ -4,36 +4,43 @@
 \alias{cop_scat_plot}
 \title{Scatterplot of Copula Values}
 \usage{
-cop_scat_plot(input)
+cop_scat_plot(traj = NULL, copula = NULL, n = NULL)
 }
 \arguments{
-\item{input}{Either
-a \link[base]{data.frame} containing the trajectory produced by e.g.
-\code{\link{make_traj}()}, which must contain columns
-\code{traj$cop_u} and \code{traj$cop_v},
-or a '\code{\linkS4class{cyl_copula}}' object or a '\code{\linkS4class{Copula}}' object
+\item{traj}{a \link[base]{data.frame} containing the trajectory produced by e.g.
+\code{\link{make_traj}()}, which must contain the columns
+\code{traj$cop_u} and \code{traj$cop_v}.}
+
+\item{copula}{(alternatively) a '\code{\linkS4class{cyl_copula}}' object
+or a '\code{\linkS4class{Copula}}' object
 of the package '\pkg{copula}'.}
+
+\item{n}{an \link[base]{integer}, the number of points to be plotted. Default is
+\code{nrow(traj)} or, if a copula is provided, 10000.}
 }
 \value{
 A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 }
 \description{
 This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
-a sample from a copula. Either a sample is provided as input, or a sample of
-10000 points is drawn from a copula to quickly visualize it.
+a sample from a copula. Either a sample is provided as input, or a sample
+is drawn from a copula to quickly visualize it.
+}
+\details{
+Alternatively, instead of plotting a sample from a copula \code{cop}
+using \code{scatterplot(copula=cop)}, you can also use \code{\link{plot}(cop)}.
+If a trajectory is provided and \code{n} is smaller than \code{nrow(traj)},
+\code{n} steps are randomly selected from the trajectory and plotted.
 }
 \examples{
 set.seed(123)
-
 traj <- make_traj(100,
   copula = cyl_quadsec(0.1),
-  marginal_circ = "vonmises",
-  parameter_circ = list(0, 1),
-  marginal_lin = "weibull",
-  parameter_lin = list(shape=3)
+  marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
+  marginal_lin = list(name = "weibull", coef = list(shape = 3))
 )
-cop_scat_plot(traj)
-cop_scat_plot(cyl_quadsec(0.1))
+cop_scat_plot(traj = traj, n = 50)
+cop_scat_plot(copula = cyl_quadsec(0.1), n = 50)
 
 }
 \references{

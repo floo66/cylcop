@@ -17,15 +17,18 @@
 #' @param prop \link[base]{numeric} \link[base]{vector}, holding the mixing proportions
 #' of the components.
 #'
-#' @return \code{dvonmisesmix()}) and \code{pvonmisesmix()}) give a
+#' @return
+#' \itemize{
+#' \item{\code{dvonmisesmix()}}{ gives a \link[base]{vector} of length \code{length(theta)}
+#'  containing the density at \code{theta}.}
+#' \item{\code{pvonmisesmix()}}{ gives a
 #' \link[base]{vector} of length \code{length(theta)} containing
-#' the density or distribution function at the corresponding values of \code{theta}.
-#' \code{qvonmisesmix()} gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.
-#' \code{rvonmisesmix()} generates a \link[base]{vector} of length \code{n}
-#' containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.
-#'
-#'
+#' the distribution function at the corresponding values of \code{theta}.}
+#' \item{\code{qvonmisesmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.}
+#' \item{\code{rvonmisesmix()}}{ generates a \link[base]{vector} of length \code{n}
+#' containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.}
+#'}
 #'
 #' @examples
 #'
@@ -61,6 +64,31 @@ NULL
 #' @export
 #'
 rvonmisesmix <- function(n, mu, kappa, prop) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      length = 1,
+                                      integer=T,
+                                      lower=1)
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(kappa,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   if (!is.numeric(prop) || !is.numeric(mu) || !is.numeric(kappa)) {
     stop("prop, mu, and kappa must be numeric vectors")
   }
@@ -90,8 +118,9 @@ rvonmisesmix <- function(n, mu, kappa, prop) {
           mu = circular::circular(mu[i]),
           kappa = kappa[i]
         )
-      )
+      ) %>%full2half_circ()
   }
+
   return(x)
 }
 
@@ -102,9 +131,28 @@ rvonmisesmix <- function(n, mu, kappa, prop) {
 #' @export
 #'
 dvonmisesmix <- function(theta, mu, kappa, prop) {
-  if (!is.numeric(prop) || !is.numeric(mu) || !is.numeric(kappa)) {
-    stop("prop, mu, and kappa must be numeric vectors")
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(theta,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(kappa,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
   }
+  )
 
   if (length(prop) != length(mu) ||
       length(prop) != length(kappa) || length(mu) != length(kappa)) {
@@ -136,9 +184,28 @@ dvonmisesmix <- function(theta, mu, kappa, prop) {
 #' @export
 #'
 pvonmisesmix <- function(theta, mu, kappa, prop) {
-  if (!is.numeric(prop) || !is.numeric(mu) || !is.numeric(kappa)) {
-    stop("prop, mu, and kappa must be numeric vectors")
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(theta,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(kappa,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
   }
+  )
 
   if (length(prop) != length(mu) ||
       length(prop) != length(kappa) || length(mu) != length(kappa)) {
@@ -173,6 +240,30 @@ pvonmisesmix <- function(theta, mu, kappa, prop) {
 #' @export
 #'
 qvonmisesmix <- function(p, mu, kappa, prop) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(p,
+                                      type="numeric",
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(kappa,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   if (all(p > 0.999999))
     return(rep(pi, length(p)))
 
@@ -229,12 +320,12 @@ cylcop_vonmisesmix.env <- new.env(parent = emptyenv())
 #'
 #' Computes the maximum likelihood estimates for the parameters of a mixed
 #' von Mises distribution: the mean directions, the concentration parameters,
-#' and the proportion of the 2 distributions. The code is a simplified version of
+#' and the proportions of the distributions. The code is a simplified version of
 #'  \code{movMF::\link[movMF]{movMF}()} with the added
 #' feature of optionally fixed mean directions \insertCite{Hornik2014}{cylcop}.
 #' @param theta \link[base]{numeric} \link[base]{vector} of angles.
-#' @param mu (optional) \link[base]{numeric} \link[base]{vector} of length 2
-#'  holding the 2 mean directions (angles). If not specified
+#' @param mu (optional) \link[base]{numeric} \link[base]{vector} of length \code{ncomp}
+#'  holding the mean directions (angles). If not specified
 #' the mean directions are estimated.
 #' @param ncomp positive \link[base]{integer} specifying the number of components
 #'  of the mixture model.
@@ -271,6 +362,27 @@ cylcop_vonmisesmix.env <- new.env(parent = emptyenv())
 #' @export
 #'
 mle.vonmisesmix <-  function(theta, mu = NULL, ncomp = 2)  {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(theta,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(list(check_argument_type(mu,
+                                      type="numeric"),
+                       check_argument_type(mu,
+                                           type="NULL"))
+                  ,2)
+    check_arg_all(check_argument_type(ncomp,
+                                      type="numeric",
+                                      lower=1,
+                                      integer=T)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   if (!is.null(mu) && length(mu) != ncomp) {
     stop(
       paste0(

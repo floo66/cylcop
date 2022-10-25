@@ -4,12 +4,18 @@
 \alias{circ_plot}
 \title{Circular Scatterplot of Turn Angles and Step Lengths}
 \usage{
-circ_plot(traj)
+circ_plot(traj = NULL, theta = NULL, x = NULL)
 }
 \arguments{
 \item{traj}{\link[base]{data.frame} containing the trajectory produced by e.g.
 \code{\link{make_traj}()}. It must contain
  the columns \code{traj$angle} and \code{traj$steplength}.}
+
+\item{theta}{(alternatively) \link[base]{numeric} \link[base]{vector} of angles
+(measurements of a circular variable) or "circular" component of pseudo-observations.}
+
+\item{x}{(alternatively) \link[base]{numeric} \link[base]{vector} of step lengths
+(measurements of a linear variable) or "linear" component of pseudo-observations.}
 }
 \value{
 A '\code{\link[ggplot2]{ggplot}}' object.
@@ -19,14 +25,17 @@ This function produces a circular scatterplot with the step lengths plotted
 as distance from the center of a circle and the turn angles as angles
 (polar coordinates).
 }
+\details{
+You can either specify \code{traj} or the angels and step lengths
+\code{theta} and \code{x}.
+}
 \examples{
 set.seed(123)
 
 traj <- make_traj(100,
   copula = cyl_quadsec(0.1),
-  marginal_circ = "vonmises",
-  parameter_circ = list(0, 1),
-  marginal_lin = "weibull", list(shape=3)
+  marginal_circ = list(name="vonmises",coef=list(0, 1)),
+  marginal_lin = list(name="weibull", coef=list(shape=3))
 )
 plot1 <- circ_plot(traj)
 

@@ -4,31 +4,39 @@
 \alias{traj_plot}
 \title{Plot a Trajectory in Euclidean Space}
 \usage{
-traj_plot(traj)
+traj_plot(traj = NULL, x_coord = NULL, y_coord = NULL)
 }
 \arguments{
 \item{traj}{\link[base]{data.frame} containing the trajectory produced by e.g.
 \code{\link{make_traj}()}. It must contain
- the columns \code{traj$pos_x} and \code{traj$pos_y}.}
+ the columns \code{traj$pos_x} and \code{traj$pos_y}. It is also possible to specify a
+ \link[base]{list} of such data.frames containing multiple trajectories.}
+
+\item{x_coord}{(alternatively) \link[base]{numeric} \link[base]{vector} of x-coordinates or
+a \link[base]{list} of x-coordinate vectors of multiple trajectories.}
+
+\item{y_coord}{(alternatively) \link[base]{numeric} \link[base]{vector} of y-coordinates or
+a \link[base]{list} of y-coordinate vectors of multiple trajectories.}
 }
 \value{
 A '\code{\link[ggplot2]{ggplot}}' object.
 }
 \description{
-This function plots the locations of a trajectory. The first and last point are
-marked in red.
+This function plots the locations of a trajectory or multiple trajectories.
 }
 \examples{
 set.seed(123)
-
 traj <- make_traj(50,
   copula = cyl_quadsec(0.1),
-  marginal_circ = "vonmises",
-  parameter_circ = list(0, 1),
-  marginal_lin = "weibull",
-  parameter_lin = list(shape=3)
+  marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
+  marginal_lin = list(name = "weibull", coef = list(shape = 3))
 )
-plot1 <- traj_plot(traj)
+plot1 <- traj_plot(traj=traj)
+
+x_coord <- list(runif(10),runif(20),runif(3))
+y_coord <- list(runif(10),runif(20),runif(3))
+
+plot2 <- traj_plot(x_coord=x_coord, y_coord=y_coord)
 
 }
 \references{

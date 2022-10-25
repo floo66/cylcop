@@ -10,7 +10,7 @@
 \alias{setCopParam,cyl_vonmises-method}
 \title{Change Attributes of '\code{cyl_copula}' Objects}
 \usage{
-setCopParam(copula, param_val, param_name = NULL, ...)
+setCopParam(copula, param_val, param_name, ...)
 
 \S4method{setCopParam}{cyl_cubsec}(copula, param_val, param_name)
 

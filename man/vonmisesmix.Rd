@@ -36,13 +36,17 @@ the density or distribution function is evaluated.}
 the quantile function is evaluated.}
 }
 \value{
-\code{dvonmisesmix()}) and \code{pvonmisesmix()}) give a
+\itemize{
+\item{\code{dvonmisesmix()}}{ gives a \link[base]{vector} of length \code{length(theta)}
+ containing the density at \code{theta}.}
+\item{\code{pvonmisesmix()}}{ gives a
 \link[base]{vector} of length \code{length(theta)} containing
-the density or distribution function at the corresponding values of \code{theta}.
-\code{qvonmisesmix()} gives a \link[base]{vector} of length \code{length(p)}
-containing the quantiles at the corresponding values of \code{p}.
-\code{rvonmisesmix()} generates a \link[base]{vector} of length \code{n}
-containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.
+the distribution function at the corresponding values of \code{theta}.}
+\item{\code{qvonmisesmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
+containing the quantiles at the corresponding values of \code{p}.}
+\item{\code{rvonmisesmix()}}{ generates a \link[base]{vector} of length \code{n}
+containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.}
+}
 }
 \description{
 The number of components in the mixed von Mises distribution is specified by the length

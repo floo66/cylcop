@@ -73,6 +73,20 @@ setClass("cyl_rot_combine",
 #' \insertRef{Hodelmethod}{cylcop}
 #'
 cyl_rot_combine <- function(copula, shift = FALSE) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(copula,
+                                           type="Copula")
+    ,1)
+    check_arg_all(check_argument_type(shift,
+                                      type="logical")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   #If the underlying linear-linear copula is a rotated copula, the parameters are not in copula, but copula@copula
   if (any(is(copula) == "rotCopula")) {
     base_copula <- copula@copula

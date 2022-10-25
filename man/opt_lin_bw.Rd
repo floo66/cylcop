@@ -4,23 +4,30 @@
 \alias{opt_lin_bw}
 \title{Find the Optimal Bandwidth for a Linear Kernel Density Estimate}
 \usage{
-opt_lin_bw(x, loss = c("KullbackLeibler", "adhoc"))
+opt_lin_bw(x, method = c("cv", "nrd"))
 }
 \arguments{
 \item{x}{\link[base]{numeric} \link[base]{vector} of linear measurements.}
 
-\item{loss}{\link[base]{character} string describing the loss function,
-either \code{"KullbackLeibler"} (leading to an maximum likelihood estimate),
-    or \code{"adhoc"} leading to a rule-of-thumb estimate.}
+\item{method}{\link[base]{character} string describing the method used to find
+the optimal bandwidth. Either \code{"cv"} (cross-validation),
+or \code{"nrd"} (rule-of-thumb estimate).}
 }
 \value{
 A \link[base]{numeric} value, the optimized bandwidth.
 }
 \description{
-This function is basically wraps \code{stats::\link[stats]{bw.ucv}()}
+This function wraps \code{stats::\link[stats]{bw.ucv}()}
 and \code{stats::\link[stats]{bw.nrd}()} of the '\pkg{stats}'
  package, simplifying their inputs. For more control,
 these '\pkg{stats}' functions could be used directly.
+}
+\details{
+The normal reference distribution (\code{nrd}) method involves
+matching a normal distribution to the data using an empirical measure of spread.
+The optimal bandwidth for that normal distribution can then be exactly calculated
+by minimizing the mean integrated square error.
+\code{method="cv"} finds the optimal bandwidth using unbiased cross-validation.
 }
 \examples{
 require(graphics)
@@ -28,8 +35,8 @@ set.seed(123)
 n <- 1000
 
 x <- rweibull(n, shape = 10)
-bw1 <- opt_lin_bw(x = x, loss="adhoc")
-bw2 <- opt_lin_bw(x = x, loss="KullbackLeibler")
+bw1 <- opt_lin_bw(x = x, method="nrd")
+bw2 <- opt_lin_bw(x = x, method="cv")
 
 dens1 <- fit_steplength(x = x, parametric = FALSE, bandwidth = bw1)
 dens2 <- fit_steplength(x = x, parametric = FALSE, bandwidth = bw2)

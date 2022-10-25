@@ -4,13 +4,13 @@
 \alias{opt_circ_bw}
 \title{Find the Optimal Bandwidth for a Circular Kernel Density Estimate}
 \usage{
-opt_circ_bw(theta, loss = c("KullbackLeibler", "adhoc"), kappa.est = "ML")
+opt_circ_bw(theta, method = c("cv", "nrd"), kappa.est = "trigmoments")
 }
 \arguments{
 \item{theta}{\link[base]{numeric} \link[base]{vector} of angles in \eqn{[-\pi, \pi)}.}
 
-\item{loss}{\link[base]{character} string describing the loss function,
-either \code{"KullbackLeibler"} (leading to a maximum likelihood estimate), or \code{"adhoc"}
+\item{method}{\link[base]{character} string describing the method,
+either \code{"cv"} (cross-validation), or \code{"nrd"}
  leading to a rule-of-thumb estimate.}
 
 \item{kappa.est}{\link[base]{character} string describing how the spread is estimated.
@@ -24,9 +24,26 @@ This function basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}
 and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
  package, simplifying their inputs. For more control,
 these '\pkg{circular}' functions could be used directly.
-The ad-hoc method of finding the bandwidth parameter might give very bad results,
+The normal reference distribution (nrd) method of finding the bandwidth
+parameter might give very bad results,
  especially for multimodal population distributions.
-In these cases it can help to set \code{kappa.est = trigmoments}.
+In these cases it can help to set \code{kappa.est = "trigmoments"}.
+}
+\details{
+\code{method="nrd"} is somewhat similar to the linear case (see
+\code{\link{fit_steplength}()}). Instead of matching a normal distribution to
+the data and then calculating its optimal bandwidth, a von Mises distribution is used.
+To match that von Mises distribution to the data we can either find its concentration
+parameter kappa using maximum likelihood (\code{kappa.est="ML"}) or by trigonometric moment
+matching (\code{kappa.est="trigmoments"}). When the data is multimodal, fitting a
+(unimodal) von Mises distribution using maximum likelihood will probably give bad
+results. Using \code{kappa.est="trigmoments"} potentially works better in those cases.
+
+As an alternative, the bandwidth can be found by maximizing the cross-validation likelihood
+(\code{method="cv"}). However, with this leave-one-out cross-validation scheme, at every
+likelihood optimization step, \eqn{n(n-1)} von Mises densities need to be calculated, where
+\eqn{n=}\code{length(theta)}. Therefore, this method can become quite slow with
+large sample sizes.
 }
 \examples{
 require(circular)
@@ -40,9 +57,9 @@ angles <- rvonmisesmix(n,
   kappa = c(2,1),
   prop = c(0.5,0.5)
 )
-bw1 <- opt_circ_bw(theta = angles, loss="adhoc")
-bw2 <- opt_circ_bw(theta = angles, loss="adhoc", kappa.est = "trigmoments")
-bw3 <- opt_circ_bw(theta = angles, loss="KullbackLeibler")
+bw1 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "ML")
+bw2 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "trigmoments")
+bw3 <- opt_circ_bw(theta = angles, method="cv")
 
 dens1 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw1)
 dens2 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw2)

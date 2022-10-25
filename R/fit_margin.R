@@ -4,16 +4,33 @@
 #' and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
 #'  package, simplifying their inputs. For more control,
 #' these '\pkg{circular}' functions could be used directly.
-#' The ad-hoc method of finding the bandwidth parameter might give very bad results,
+#' The normal reference distribution (nrd) method of finding the bandwidth
+#' parameter might give very bad results,
 #'  especially for multimodal population distributions.
-#' In these cases it can help to set \code{kappa.est = trigmoments}.
+#' In these cases it can help to set \code{kappa.est = "trigmoments"}.
 #'
 #' @param theta \link[base]{numeric} \link[base]{vector} of angles in \eqn{[-\pi, \pi)}.
-#' @param loss \link[base]{character} string describing the loss function,
-#' either \code{"KullbackLeibler"} (leading to a maximum likelihood estimate), or \code{"adhoc"}
+#' @param method \link[base]{character} string describing the method,
+#' either \code{"cv"} (cross-validation), or \code{"nrd"}
 #'  leading to a rule-of-thumb estimate.
 #' @param kappa.est \link[base]{character} string describing how the spread is estimated.
 #' Either maximum likelihood \code{"ML"}, or trigonometric moment \code{"trigmoments"}.
+#'
+#' @details \code{method="nrd"} is somewhat similar to the linear case (see
+#' \code{\link{fit_steplength}()}). Instead of matching a normal distribution to
+#' the data and then calculating its optimal bandwidth, a von Mises distribution is used.
+#' To match that von Mises distribution to the data we can either find its concentration
+#' parameter kappa using maximum likelihood (\code{kappa.est="ML"}) or by trigonometric moment
+#' matching (\code{kappa.est="trigmoments"}). When the data is multimodal, fitting a
+#' (unimodal) von Mises distribution using maximum likelihood will probably give bad
+#' results. Using \code{kappa.est="trigmoments"} potentially works better in those cases.
+#'
+#' As an alternative, the bandwidth can be found by maximizing the cross-validation likelihood
+#' (\code{method="cv"}). However, with this leave-one-out cross-validation scheme, at every
+#' likelihood optimization step, \eqn{n(n-1)} von Mises densities need to be calculated, where
+#' \eqn{n=}\code{length(theta)}. Therefore, this method can become quite slow with
+#' large sample sizes.
+#'
 #'
 #' @return A \link[base]{numeric} value, the optimized bandwidth.
 #'
@@ -28,9 +45,9 @@
 #'   kappa = c(2,1),
 #'   prop = c(0.5,0.5)
 #' )
-#' bw1 <- opt_circ_bw(theta = angles, loss="adhoc")
-#' bw2 <- opt_circ_bw(theta = angles, loss="adhoc", kappa.est = "trigmoments")
-#' bw3 <- opt_circ_bw(theta = angles, loss="KullbackLeibler")
+#' bw1 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "ML")
+#' bw2 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "trigmoments")
+#' bw3 <- opt_circ_bw(theta = angles, method="cv")
 #'
 #' dens1 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw1)
 #' dens2 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw2)
@@ -54,9 +71,31 @@
 #' @export
 #'
 opt_circ_bw <- function(theta,
-                        loss = c("KullbackLeibler", "adhoc"),
-                        kappa.est = "ML") {
-  if (loss == "KullbackLeibler") {
+                        method = c("cv", "nrd"),
+                        kappa.est = "trigmoments") {
+
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(theta,
+                                           type="numeric")
+    ,1)
+    check_arg_all(check_argument_type(method,
+                                      type="character",
+                                      values = c("cv", "nrd"),
+                                      length=1)
+                  ,1)
+    check_arg_all(check_argument_type(kappa.est,
+                                      type="character",
+                                      values = c("ML", "trigmoments"))
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
+  if (method == "cv") {
     bw <- suppressWarnings(
       circular::bw.cv.ml.circular(
         na.omit(theta),
@@ -69,11 +108,11 @@ opt_circ_bw <- function(theta,
       )
     )
   }
-  else if (loss == "adhoc") {
+  else if (method == "nrd") {
     if (kappa.est != "trigmoments") {
       warning(
-        "ad-hoc method of finding bandwidth parameter might give very bad results, especially for multimodal population distributions\n",
-        "you can use(kappa.est=\"trigmoments\" or an mle method (loss=\"KullbackLeibler\")"
+        "rule-of-thumb method of finding bandwidth parameter might give very bad results, especially for multimodal population distributions\n",
+        "you can use(kappa.est=\"trigmoments\" or a cross-validation approach method (method=\"cv\")."
       )
     }
     bw <-
@@ -89,7 +128,7 @@ opt_circ_bw <- function(theta,
       )
   }
   else
-    stop("method of estimating bandwidth must be from c(\"Kullback-Leibler\",\"adhoc\")")
+    stop("method of estimating bandwidth must be from c(\"cv\",\"nrd\")")
   return(bw)
 }
 
@@ -99,15 +138,21 @@ opt_circ_bw <- function(theta,
 
 #' Find the Optimal Bandwidth for a Linear Kernel Density Estimate
 #'
-#' This function is basically wraps \code{stats::\link[stats]{bw.ucv}()}
+#' This function wraps \code{stats::\link[stats]{bw.ucv}()}
 #' and \code{stats::\link[stats]{bw.nrd}()} of the '\pkg{stats}'
 #'  package, simplifying their inputs. For more control,
 #' these '\pkg{stats}' functions could be used directly.
 #'
 #' @param x \link[base]{numeric} \link[base]{vector} of linear measurements.
-#' @param loss \link[base]{character} string describing the loss function,
-#' either \code{"KullbackLeibler"} (leading to an maximum likelihood estimate),
-#'     or \code{"adhoc"} leading to a rule-of-thumb estimate.
+#' @param method \link[base]{character} string describing the method used to find
+#' the optimal bandwidth. Either \code{"cv"} (cross-validation),
+#' or \code{"nrd"} (rule-of-thumb estimate).
+#'
+#' @details The normal reference distribution (\code{nrd}) method involves
+#' matching a normal distribution to the data using an empirical measure of spread.
+#' The optimal bandwidth for that normal distribution can then be exactly calculated
+#' by minimizing the mean integrated square error.
+#' \code{method="cv"} finds the optimal bandwidth using unbiased cross-validation.
 #'
 #' @return A \link[base]{numeric} value, the optimized bandwidth.
 #'
@@ -116,8 +161,8 @@ opt_circ_bw <- function(theta,
 #' n <- 1000
 #'
 #' x <- rweibull(n, shape = 10)
-#' bw1 <- opt_lin_bw(x = x, loss="adhoc")
-#' bw2 <- opt_lin_bw(x = x, loss="KullbackLeibler")
+#' bw1 <- opt_lin_bw(x = x, method="nrd")
+#' bw2 <- opt_lin_bw(x = x, method="cv")
 #'
 #' dens1 <- fit_steplength(x = x, parametric = FALSE, bandwidth = bw1)
 #' dens2 <- fit_steplength(x = x, parametric = FALSE, bandwidth = bw2)
@@ -134,17 +179,33 @@ opt_circ_bw <- function(theta,
 #' @export
 #'
 opt_lin_bw <- function(x,
-                       loss = c("KullbackLeibler", "adhoc")) {
-  if (loss == "KullbackLeibler") {
-    bw <- stats::bw.ucv(x, nb = 10000)
+                       method = c("cv", "nrd")) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(method,
+                                      type="character",
+                                      values = c("cv", "nrd"),
+                                      length=1)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
   }
-  else if (loss == "adhoc") {
+  )
+  if (method == "cv") {
+    bw <- MASS::ucv(x, nb = 10000)
+  }
+  else if (method == "nrd") {
     bw <- stats::bw.nrd(x)
   }
   else
     stop(
       error_sound(),
-      "method of estimating bandwidth must be from c(\"KullbackLeibler\",\"adhoc\")"
+      "method of estimating bandwidth must be from c(\"cv\",\"nrd\")"
     )
   return(bw)
 }
@@ -163,17 +224,18 @@ opt_lin_bw <- function(x,
 #'   \code{"vonmisesmix"}), or the \link[base]{logical} \code{FALSE} if a non-parametric
 #'   estimation (kernel density) should be made.
 #' @param bandwidth If \code{parametric = FALSE}, the numeric value of the kernel density bandwidth.
-#'  Default is \code{cylcop::\link{opt_circ_bw}(theta, "adhoc")}.
+#'  Default is \code{cylcop::\link{opt_circ_bw}(theta, "nrd")}.
 #' @param mu (optional) \link[base]{numeric} \link[base]{vector}, fixed mean direction(s) of the
 #' parametric distribution.
 #' @param ncomp \link[base]{integer}, number of components of the mixed vonMises distribution.
 #' Only has an effect if \code{parametric="vonmisesmix"}.
 #'
-#' @return If a parametric estimate is made, a \link[base]{list}
+#' @return If a parametric estimate is made, a \link[base]{list} is returned
 #'  containing the estimated parameters, their
-#' standard errors and the log-likelihood is returned.
-#' If a non-parametric estimate is made, the output is a list and comes directly
-#' from the function \code{circular::\link[circular]{density.circular}()} of the '\pkg{circular}'
+#' standard errors (if available), the log-likelihood,
+#' the AIC and the name of the distribution.
+#' If a non-parametric estimate is made, the output is a '\code{\link[circular]{density.circular}}' object
+#' obtained with the function \code{circular::\link[circular]{density.circular}()} of the '\pkg{circular}'
 #' package.
 #'
 #' @examples require(circular)
@@ -183,18 +245,16 @@ opt_lin_bw <- function(x,
 #' silent_curr <- cylcop_get_option("silent")
 #' cylcop_set_option(silent = TRUE)
 #'
-#' n <- 100  #n (number of samples) is set small for performance. Increase n to
-#' # a value larger than 1000 to see the effects of multimodality
+#' n <- 100  #n (number of samples) is set small for performance.
 #'
 #' angles <- rvonmisesmix(n,
 #'   mu = c(0, pi),
 #'   kappa = c(2,1),
 #'   prop = c(0.5, 0.5)
 #' )
-#' angles <- as.double(angles)
 #'
 #' bw <- opt_circ_bw(theta = angles,
-#'   loss="adhoc",
+#'   method="nrd",
 #'   kappa.est = "trigmoments"
 #' )
 #' dens_non_param <- fit_angle(theta = angles,
@@ -207,7 +267,8 @@ opt_lin_bw <- function(x,
 #' )
 #' param_estimate_fixed_mean <- fit_angle(theta = angles,
 #'   parametric = "vonmisesmix",
-#'   mu = c(0, pi)
+#'   mu = c(0, pi),
+#'   ncomp =2
 #' )
 #'
 #' true_dens <- dvonmisesmix(seq(-pi,pi,0.001),
@@ -246,16 +307,65 @@ fit_angle <-
            bandwidth = NULL,
            mu = NULL,
            ncomp = 2) {
+
+    #validate input
+    tryCatch({
+      check_arg_all(check_argument_type(theta,
+                                        type="numeric")
+                    ,1)
+      check_arg_all(list(check_argument_type(parametric,
+                                        type="character",
+                                        values = c("vonmises", "wrappedcauchy", "vonmisesmix")),
+                         check_argument_type(parametric,
+                                             type="logical",
+                                             values = FALSE))
+                    ,2)
+      check_arg_all(list(check_argument_type(bandwidth,
+                                             type="NULL"),
+                         check_argument_type(bandwidth,
+                                             type="numeric",
+                                             lower=0))
+      ,2)
+      check_arg_all(check_argument_type(ncomp,
+                                        type="numeric",
+                                        length=1,
+                                        integer=T,
+                                        lower=1)
+                    ,1)
+      mu_length <- 1
+      if(parametric=="vonmisesmix"){
+        mu_length <- ncomp
+      }
+      if(parametric==FALSE){
+        if(!is.null(mu)){
+          stop(error_sound(),
+               "Argument mu only has an effect if a parametric distribution is selected.")
+        }
+      }else{
+      check_arg_all(list(check_argument_type(mu,
+                                             type="NULL"),
+                         check_argument_type(mu,
+                                             type="numeric",
+                                             length=mu_length))
+                    ,2)
+      }
+    },
+    error = function(e) {
+      error_sound()
+      rlang::abort(conditionMessage(e))
+    }
+    )
     theta <- na.omit(theta)
 
     if (!parametric == FALSE) {
       if (!parametric %in% c("vonmises", "wrappedcauchy", "vonmisesmix")) {
         stop(error_sound(),
-             "distribution must be vonmises, wrappedcauchy or vonmisesmix")
+             "Distribution must be vonmises, wrappedcauchy or vonmisesmix")
       }
       else if (parametric == "vonmises") {
         if (!is.null(mu) && length(mu) != 1) {
-          stop("If mean direction is not estimated, length of mu should be 1")
+          stop(error_sound(),
+               "If mean direction is to be fixed, length of mu should be 1")
         }
         distr <- suppressWarnings(circular::mle.vonmises(
           theta,
@@ -402,7 +512,7 @@ fit_angle <-
 
     else{
       if (is.null(bandwidth)) {
-        bandwidth <- opt_circ_bw(theta, "adhoc")
+        bandwidth <- opt_circ_bw(theta, "nrd")
       }
       suppressWarnings(
         circular::density.circular(
@@ -431,21 +541,25 @@ fit_angle <-
 #' @param parametric either a \link[base]{character} string describing what distribution
 #'  should be fitted (\code{"beta"}, \code{"cauchy"}, \code{"chi-squared"},
 #'  \code{"exponential"}, \code{"gamma"}, \code{"lognormal"}, \code{"logistic"},
-#'  \code{"normal"}, \code{"t"}, or \code{"weibull"}), or the \link[base]{logical}
+#'  \code{"normal"}, \code{"t"}, \code{"weibull"},\code{"normalmix"},
+#'  \code{"weibullmix"}, \code{"gammamix"}, or \code{"lnormmix"}),
+#'  or the \link[base]{logical}
 #'  \code{FALSE} if a non-parametric estimation (kernel density) should be made.
 #' @param bandwidth \link[base]{numeric} value for the kernel density bandwidth.
-#'  Default is  \code{cylcop::\link{opt_lin_bw}(x, "adhoc")}.
+#'  Default is  \code{cylcop::\link{opt_lin_bw}(x, "nrd")}.
 #' @param start (optional, except when \code{parametric = "chi-squared"})
 #' named \link[base]{list} containing the parameters to be optimized with inital
 #' values.
 #' @param ncomp \link[base]{integer}, number of components of the mixed distribution.
-#' Only has an effect if \code{parametric %in% c("normalmix", "weibullmix", "gammamix",
+#' Only has an effect if \code{parametric \%in\% c("normalmix", "weibullmix", "gammamix",
 #' "lnormmix")}.
 #'
-#' @return If a parametric estimate is made, a \link[base]{list} containing the
-#' estimated parameters, their standard errors and the log-likelihood is returned.
-#' If a non-parametric estimate is made, the output is a list, and comes directly
-#' from the function \code{GoFKernel::\link[GoFKernel]{density.reflected}()} of the '\pkg{GoFKernel}'
+#' @return If a parametric estimate is made, a \link[base]{list} is returned
+#' containing the estimated parameters, their standard errors,
+#' the log-likelihood, the AIC and the name of the distribution.
+#' If a non-parametric estimate is made, the output is a a '\code{\link[stats]{density}}' object,
+#' which is obtained with the function
+#' \code{GoFKernel::\link[GoFKernel]{density.reflected}()} of the '\pkg{GoFKernel}'
 #' package.
 #'
 #' @examples require(graphics)
@@ -454,7 +568,7 @@ fit_angle <-
 #' silent_curr <- cylcop_get_option("silent")
 #' cylcop_set_option(silent = TRUE)
 #'
-#' n <- 10000
+#' n <- 100 #n (number of samples) is set small for performance.
 #'
 #' x <- rweibull(n, shape = 10)
 #'
@@ -494,47 +608,102 @@ fit_angle <-
 fit_steplength <-
   function(x,
            parametric = c(
-             "beta",
-             "cauchy",
-             "chi-squared",
-             "exponential",
-             "gamma",
-             "lognormal",
-             "logistic",
-             "normal",
-             "t",
-             "weibull",
-             "normalmix",
-             "weibullmix",
-             "gammamix",
-             "lnormmix",
-             FALSE
-           ),
+               "beta",
+               "cauchy",
+               "chi-squared",
+               "chisq",
+               "exponential",
+               "exp",
+               "gamma",
+               "lognormal",
+               "lnorm",
+               "lognorm",
+               "logistic",
+               "normal",
+               "t",
+               "weibull",
+               "normalmix",
+               "weibullmix",
+               "gammamix",
+               "lnormmix",
+               FALSE),
            start = NULL,
            bandwidth = NULL,
            ncomp = 2) {
+    #validate input
+    tryCatch({
+      check_arg_all(check_argument_type(x,
+                                        type="numeric")
+                    ,1)
+      check_arg_all(list(check_argument_type(parametric,
+                                             type="character",
+                                             values = c(
+                                               "beta",
+                                               "cauchy",
+                                               "chi-squared",
+                                               "chisq",
+                                               "exponential",
+                                               "exp",
+                                               "gamma",
+                                               "lognormal",
+                                               "lnorm",
+                                               "lognorm",
+                                               "logistic",
+                                               "normal",
+                                               "t",
+                                               "weibull",
+                                               "normalmix",
+                                               "weibullmix",
+                                               "gammamix",
+                                               "lnormmix"),
+                                             length=1),
+                         check_argument_type(parametric,
+                                             type="logical",
+                                             values = FALSE))
+                    ,2)
+
+      check_arg_all(list(check_argument_type(start,
+                                             type="NULL"),
+                         check_argument_type(start,
+                                             type="list"))
+                    ,2)
+      check_arg_all(list(check_argument_type(bandwidth,
+                                             type="NULL"),
+                         check_argument_type(bandwidth,
+                                             type="numeric",
+                                             lower=0))
+                    ,2)
+      check_arg_all(check_argument_type(ncomp,
+                                        type="numeric",
+                                        length=1,
+                                        integer=T,
+                                        lower=1)
+                    ,1)
+    },
+    error = function(e) {
+      error_sound()
+      rlang::abort(conditionMessage(e))
+    }
+    )
     x <- na.omit(x)
     if (!is.logical(parametric))
       parametric <- match.arg(parametric)
+    if (parametric == "lnorm"||parametric == "lognorm")
+      parametric <- "lognormal"
+    if (parametric == "chisq")
+      parametric <- "chi-squared"
+    if (parametric == "exp")
+      parametric <- "exponential"
 
     if (!parametric == FALSE) {
-      if (!parametric %in% c(
-        "cauchy",
-        "chi-squared",
-        "exponential",
-        "gamma",
-        "lognormal",
-        "logistic",
-        "normal",
-        "t",
-        "weibull",
-        "normalmix",
-        "weibullmix",
-        "gammamix",
-        "lnormmix"
-      )) {
-        stop(error_sound(),
-             "distribution not supported")
+      if(!parametric %in% c("normal",
+                          "logistic",
+                          "exponential",
+                          "weibullmix",
+                          "cauchy")){
+        if(any(x <= 0)){
+          stop("With the selected distribution, all entries of x must be larger than 0.")
+        }
       }
       if (parametric == "chi-squared") {
         if (is.null(start)) {
@@ -543,13 +712,27 @@ fit_steplength <-
             "For a chi-squared distribution, you have to provide start values for df"
           )
         }
+        start <- list(df=start[[1]])
         distr <-
           MASS::fitdistr(x,
                          densfun = "chi-squared",
                          start = start,
                          method = "BFGS")
       }
-
+      if(parametric == "beta"){
+        if (is.null(start)) {
+          stop(
+            error_sound(),
+            "For a beta distribution, you have to provide start values for shape1
+            and shape2"
+          )}
+          start <- list(shape1=start[[1]], shape2=start[[2]])
+          distr <-
+            MASS::fitdistr(x,
+                           densfun = "beta",
+                           start = start,
+                           method = "BFGS")
+        }
       low <- switch(
         parametric,
         "cauchy" = c(0, 0),
@@ -560,6 +743,7 @@ fit_steplength <-
         NULL
       )
       if (!parametric %in% c("chi-squared",
+                             "beta",
                              "normalmix",
                              "weibullmix",
                              "gammamix",
@@ -574,8 +758,15 @@ fit_steplength <-
                              "weibullmix",
                              "gammamix",
                              "lnormmix")) {
+
         if (parametric == "lognormal")
           parametric <- "lnorm"
+        if (parametric == "exponential")
+          parametric <- "exp"
+        if (parametric == "chi-squared")
+        parametric <- "chisq"
+
+
         out <-
           list(
             coef = as.list(distr$estimate),
@@ -617,13 +808,13 @@ fit_steplength <-
         } else if (parametric == "gammamix") {
           out <-
             list(
-              coef = list(distr[[1]], distr[[4]], 1/distr[[5]]),
+              coef = list(distr[[1]], distr[[4]], distr[[5]]),
               se = list(),
               logL = distr$loglik,
               AIC = distr$aic,
               name = parametric
             )
-          names(out$coef) <- c("prop", "shape", "scale")
+          names(out$coef) <- c("prop", "shape", "rate")
         }
         else{
           out <-
@@ -649,7 +840,7 @@ fit_steplength <-
 
     else{
       if (is.null(bandwidth)) {
-        bandwidth <- opt_lin_bw(x, "adhoc")
+        bandwidth <- opt_lin_bw(x, "nrd")
       }
 
       #Use density.reflected instead of density to avoid boundary effects

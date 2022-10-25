@@ -7,19 +7,22 @@
 #'
 #' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'.
 #' @param theta \link[base]{numeric} \link[base]{vector} of angles
-#' (measurements of a circular variable).
+#' (measurements of a circular variable) or "circular" component of pseudo-observations.
 #' @param x \link[base]{numeric} \link[base]{vector} of step lengths
-#' (measurements of a linear variable).
+#' (measurements of a linear variable) or "linear" component of pseudo-observations.
 #' @param parameters \link[base]{vector} of \link[base]{character} strings
 #' holding the names of the parameters to be optimized.
-#'   These can be any parameters in \code{copula@@parameters}.
-#' @param start \link[base]{vector} of staring values of the parameters.
-#' @param lower OPTIONAL: \link[base]{vector} of lower bounds of the parameters.
-#' @param upper OPTIONAL: \link[base]{vector} of upper bounds of the parameters.
+#'   These can be any parameters in \code{copula@@parameters}. Default is to
+#'   optimize the first 2 parameters or the single parameter if \code{copula} only
+#'   has 1.
+#' @param start \link[base]{vector} of starting values of the parameters. Default is
+#' to take the starting values from \code{copula}.
+#' @param lower (optional) \link[base]{vector} of lower bounds of the parameters.
+#' @param upper (optional) \link[base]{vector} of upper bounds of the parameters.
 #' @param optim.method \link[base]{character} string, optimizer used in
 #' \code{\link[stats]{optim}()}, can be
 #'  \code{"Nelder-Mead"}, \code{"BFGS"}, \code{"CG"}, \code{"L-BFGS-B"},
-#'  \code{"SANN"}, or \code{"Brent"}.
+#'  \code{"SANN"}, or \code{"Brent"}. Default is "L-BFGS-B".
 #' @param optim.control \link[base]{list} of additional controls passed to
 #' \code{\link[stats]{optim}()}.
 #' @param estimate.variance \link[base]{logical} value, denoting whether to include an
@@ -27,13 +30,20 @@
 #' @param traceOpt \link[base]{logical} value, whether to print information regarding
 #'   convergence, current values, etc. during the optimization process.
 #'
+#' @details The data is first converted to pseudo observations to which
+#' the copula is then fit. Therefore, the result of the optimization will be
+#' exactly the same whether measurements (\code{theta=theta} and \code{x=x})
+#' or pseudo observations (\code{theta=copula::\link[copula]{pobs}(theta,x)[,1]}
+#' and \code{x=copula::\link[copula]{pobs}(theta,x)[,2]}) are provided.
+#' If you wish to fit parameters of a '\code{\linkS4class{Copula}}' object
+#' (package '\pkg{copula}'), use the function \code{copula::\link{fitCopula}()}.
+#'
 #' @return A list of length 3 containing the same type of '\code{\linkS4class{cyl_copula}}'
 #'  object as \code{copula}, but with optimized parameters, the log-likelihood
 #'  and the AIC.
 #'
 #' @examples set.seed(123)
 #'
-#' #optimization of copula is independent of the marginals
 #' sample <- rcylcop(100,cyl_quadsec(0.1))
 #' optML(copula = cyl_quadsec(),
 #'   theta = sample[,1],
@@ -46,6 +56,25 @@
 #'   x = sample[,2],
 #'   parameters = "alpha",
 #'   start = 1
+#' )
+#'
+#'
+#' sample <- rjoint(
+#'   n = 100,
+#'   copula = cyl_cubsec(0.1, -0.08),
+#'   marginal_1 = list(name = "vonmisesmix", coef = list(
+#'      mu = c(pi, 0),
+#'      kappa = c(2, 5),
+#'      prop = c(0.3, 0.7)
+#'     )),
+#'   marginal_2 = list(name = "exp", coef = list(0.3))
+#'   )
+#'   optML(copula = cyl_cubsec(),
+#'   theta = sample[,1],
+#'   x = sample[,2],
+#'   parameters = c("a","b"),
+#'   start = c(0,0),
+#'   upper= c(0.1, 1/(2*pi))
 #' )
 #'
 #' @seealso \code{copula::\link[copula]{fitCopula}()}, \code{\link{optCor}()},
@@ -61,15 +90,70 @@
 optML <-  function(copula,
                    theta,
                    x,
-                   parameters,
-                   start,
+                   parameters=NULL,
+                   start=NULL,
                    lower = NULL,
                    upper = NULL,
                    optim.method = "L-BFGS-B",
                    optim.control = list(maxit = 100),
                    estimate.variance = FALSE,
                    traceOpt = FALSE) {
+
+#validate input
+  tryCatch({
+  check_arg_all(check_argument_type(copula, type="cyl_copula"),1)
+  check_arg_all(check_argument_type(theta,
+                                    type="numeric")
+                ,1)
+  check_arg_all(check_argument_type(x,
+                                    type="numeric")
+                ,1)
+  check_arg_all(list(check_argument_type(parameters,
+                                    type="character"),
+                     check_argument_type(parameters,
+                                         type="NULL"))
+                ,2)
+  check_arg_all(list(check_argument_type(start,
+                                         type="numeric"),
+                     check_argument_type(start,
+                                         type="NULL"))
+                ,2)
+  check_arg_all(list(check_argument_type(lower,
+                                         type="numeric"),
+                     check_argument_type(lower,
+                                         type="NULL"))
+                ,2)
+  check_arg_all(list(check_argument_type(upper,
+                                         type="numeric"),
+                     check_argument_type(upper,
+                                         type="NULL"))
+                ,2)
+  check_arg_all(check_argument_type(estimate.variance, type="logical"),1)
+  check_arg_all(check_argument_type(traceOpt, type="logical"),1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+  if(length(theta)!=length(x)){
+    stop(
+      error_sound(),
+      "theta and x must have the same length."
+    )
+  }
+
 # Check input and prepare data
+  if(is.null(parameters)){
+    if(length(copula@param.names)==1){
+      parameters <- copula@param.names
+    }else{
+      parameters <- copula@param.names[1:2]
+    }
+  }
+  if(is.null(start)){
+    start <- copula@parameters[match(parameters,copula@param.names)]
+  }
   checked <-
     prep_n_check_ML(copula, theta, x, parameters, start, lower, upper)
   emp_cop <- checked[[1]]

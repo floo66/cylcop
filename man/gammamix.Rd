@@ -33,7 +33,7 @@ of the components.}
 \item{prop}{\link[base]{numeric} \link[base]{vector}, holding the mixing proportions
 of the components.}
 
-\item{x}{\link[base]{numeric} \link[base]{vector} giving the angles where
+\item{x}{\link[base]{numeric} \link[base]{vector} giving the points where
 the density function is evaluated.}
 
 \item{q}{\link[base]{numeric} \link[base]{vector} giving the quantiles where
@@ -43,14 +43,17 @@ the distribution function is evaluated.}
 the quantile function is evaluated.}
 }
 \value{
-\code{dgammamix()}) gives a \link[base]{vector} of length \code{length(x)}
- containing the density at \code{x}. \code{pgammamix()}) gives a
+\itemize{
+\item{\code{dgammamix()}}{ gives a \link[base]{vector} of length \code{length(x)}
+ containing the density at \code{x}.}
+\item{\code{pgammamix()}}{ gives a
 \link[base]{vector} of length \code{length(q)} containing
-the distribution function at the corresponding values of \code{q}.
-\code{qgammamix()} gives a \link[base]{vector} of length \code{length(p)}
-containing the quantiles at the corresponding values of \code{p}.
-\code{rgammamix()} generates a \link[base]{vector} of length \code{n}
-containing the random samples.
+the distribution function at the corresponding values of \code{q}.}
+\item{\code{qgammamix()}}{ gives a \link[base]{vector} of length \code{length(p)}
+containing the quantiles at the corresponding values of \code{p}.}
+\item{\code{rgammamix()}}{ generates a \link[base]{vector} of length \code{n}
+containing the random samples.}
+}
 }
 \description{
 The number of components in the mixed gamma distribution is specified by the length

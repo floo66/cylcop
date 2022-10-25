@@ -5,7 +5,7 @@
 #' of the parameter vectors. The quantiles are numerically obtained from the distribution function using
 #' monotone cubic splines.
 #'
-#' @param x \link[base]{numeric} \link[base]{vector} giving the angles where
+#' @param x \link[base]{numeric} \link[base]{vector} giving the points where
 #' the density function is evaluated.
 #' @param q \link[base]{numeric} \link[base]{vector} giving the quantiles where
 #' the distribution function is evaluated.
@@ -19,15 +19,18 @@
 #' @param prop \link[base]{numeric} \link[base]{vector}, holding the mixing proportions
 #' of the components.
 #'
-#' @return \code{dnormmix()}) gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}. \code{pnormmix()}) gives a
+#' @return
+#' \itemize{
+#' \item{\code{dnormmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.}
+#' \item{\code{pnormmix()}}{ gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.
-#' \code{qnormmix()} gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.
-#' \code{rnormmix()} generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.
-#'
+#' the distribution function at the corresponding values of \code{q}.}
+#' \item{\code{qnormmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.}
+#' \item{\code{rnormmix()}}{ generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.}
+#'}
 #'
 #'
 #' @examples
@@ -56,7 +59,7 @@ NULL
 #' of the parameter vectors. The quantiles are numerically obtained from the distribution function using
 #' monotone cubic splines.
 #'
-#' @param x \link[base]{numeric} \link[base]{vector} giving the angles where
+#' @param x \link[base]{numeric} \link[base]{vector} giving the points where
 #' the density function is evaluated.
 #' @param q \link[base]{numeric} \link[base]{vector} giving the quantiles where
 #' the distribution function is evaluated.
@@ -71,16 +74,18 @@ NULL
 #' @param prop \link[base]{numeric} \link[base]{vector}, holding the mixing proportions
 #' of the components.
 #'
-#' @return \code{dweibullmix()}) gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}. \code{pweibullmix()}) gives a
+#' @return
+#' \itemize{
+#' \item{\code{dweibullmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.}
+#' \item{\code{pweibullmix()}}{ gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.
-#' \code{qweibullmix()} gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.
-#' \code{rweibullmix()} generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.
-#'
-#'
+#' the distribution function at the corresponding values of \code{q}.}
+#' \item{\code{qweibullmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.}
+#' \item{\code{rweibullmix()}}{ generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.}
+#'}
 #'
 #' @examples
 #'
@@ -108,7 +113,7 @@ NULL
 #' of the parameter vectors. The quantiles are numerically obtained from the distribution function using
 #' monotone cubic splines.
 #'
-#' @param x \link[base]{numeric} \link[base]{vector} giving the angles where
+#' @param x \link[base]{numeric} \link[base]{vector} giving the points where
 #' the density function is evaluated.
 #' @param q \link[base]{numeric} \link[base]{vector} giving the quantiles where
 #' the distribution function is evaluated.
@@ -123,16 +128,18 @@ NULL
 #' @param prop \link[base]{numeric} \link[base]{vector}, holding the mixing proportions
 #' of the components.
 #'
-#' @return \code{dlnormmix()}) gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}. \code{plnormmix()}) gives a
+#' @return
+#' \itemize{
+#' \item{\code{dlnormmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.}
+#' \item{\code{plnormmix()}}{ gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.
-#' \code{qlnormmix()} gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.
-#' \code{rlnormmix()} generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.
-#'
-#'
+#' the distribution function at the corresponding values of \code{q}.}
+#' \item{\code{qlnormmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.}
+#' \item{\code{rlnormmix()}}{ generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.}
+#'}
 #'
 #' @examples
 #'
@@ -160,7 +167,7 @@ NULL
 #' of the parameter vectors. The quantiles are numerically obtained from the distribution function using
 #' monotone cubic splines.
 #'
-#' @param x \link[base]{numeric} \link[base]{vector} giving the angles where
+#' @param x \link[base]{numeric} \link[base]{vector} giving the points where
 #' the density function is evaluated.
 #' @param q \link[base]{numeric} \link[base]{vector} giving the quantiles where
 #' the distribution function is evaluated.
@@ -177,16 +184,18 @@ NULL
 #' @param prop \link[base]{numeric} \link[base]{vector}, holding the mixing proportions
 #' of the components.
 #'
-#' @return \code{dgammamix()}) gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}. \code{pgammamix()}) gives a
+#' @return
+#' \itemize{
+#' \item{\code{dgammamix()}}{ gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.}
+#' \item{\code{pgammamix()}}{ gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.
-#' \code{qgammamix()} gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.
-#' \code{rgammamix()} generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.
-#'
-#'
+#' the distribution function at the corresponding values of \code{q}.}
+#' \item{\code{qgammamix()}}{ gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.}
+#' \item{\code{rgammamix()}}{ generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.}
+#'}
 #'
 #' @examples
 #'
@@ -213,6 +222,31 @@ NULL
 #' @export
 #'
 rnormmix <- function(n, mu, sigma, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      integer=T,
+                                      length=1,
+                                      lower=1)
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(sigma,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   rlinearmix(n,param1=mu, param2=sigma, prop=prop, func=rnorm)
 }
 
@@ -222,6 +256,28 @@ rnormmix <- function(n, mu, sigma, prop){
 #' @export
 #'
 dnormmix <- function(x, mu, sigma, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(sigma,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   pdlinearmix(point=x,param1=mu, param2=sigma, prop=prop, func=dnorm)
 }
 
@@ -231,6 +287,28 @@ dnormmix <- function(x, mu, sigma, prop){
 #' @export
 #'
 pnormmix <- function(q, mu, sigma, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(q,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(sigma,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   pdlinearmix(point=q,param1=mu, param2=sigma, prop=prop, func=pnorm)
 }
 
@@ -240,6 +318,30 @@ pnormmix <- function(q, mu, sigma, prop){
 #' @export
 #'
 qnormmix <- function(p, mu, sigma, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(p,
+                                      type="numeric",
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(check_argument_type(mu,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(sigma,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   qlinearmix(p, param1=mu, param2=sigma, prop=prop, lowlim=-Inf, npts=1000, envir=cylcop_normmix.env, func=pnorm)
 }
 
@@ -251,6 +353,32 @@ qnormmix <- function(p, mu, sigma, prop){
 #' @export
 #'
 rweibullmix <- function(n, shape, scale, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      integer=T,
+                                      length=1,
+                                      lower=1)
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   rlinearmix(n,param1=shape, param2=scale, prop=prop, func=rweibull)
 }
 
@@ -260,6 +388,29 @@ rweibullmix <- function(n, shape, scale, prop){
 #' @export
 #'
 dweibullmix <- function(x, shape, scale, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   pdlinearmix(point=x,param1=shape, param2=scale, prop=prop, func=dweibull)
 }
 
@@ -269,6 +420,29 @@ dweibullmix <- function(x, shape, scale, prop){
 #' @export
 #'
 pweibullmix <- function(q, shape, scale, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(q,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   pdlinearmix(point=q,param1=shape, param2=scale, prop=prop, func=pweibull)
 }
 
@@ -278,6 +452,31 @@ pweibullmix <- function(q, shape, scale, prop){
 #' @export
 #'
 qweibullmix <- function(p, shape, scale, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(p,
+                                      type="numeric",
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   qlinearmix(p, param1=shape, param2=scale, prop=prop, lowlim=0, npts=1000, envir=cylcop_weibullmix.env, func=pweibull)
 }
 
@@ -288,7 +487,31 @@ qweibullmix <- function(p, shape, scale, prop){
 #' @rdname lnormmix
 #' @export
 #'
-rlnormmix <- function(n, meanlog , sdlog, prop){
+rlnormmix <- function(n, meanlog, sdlog, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      integer=T,
+                                      length=1,
+                                      lower=1)
+                  ,1)
+    check_arg_all(check_argument_type(meanlog,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(sdlog,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   rlinearmix(n,param1=meanlog , param2=sdlog, prop=prop, func=rlnorm)
 }
 
@@ -298,6 +521,27 @@ rlnormmix <- function(n, meanlog , sdlog, prop){
 #' @export
 #'
 dlnormmix <- function(x, meanlog , sdlog, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(meanlog,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(sdlog,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   pdlinearmix(point=x,param1=meanlog , param2=sdlog, prop=prop, func=dlnorm)
 }
 
@@ -307,6 +551,27 @@ dlnormmix <- function(x, meanlog , sdlog, prop){
 #' @export
 #'
 plnormmix <- function(q, meanlog , sdlog, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(q,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(meanlog,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(sdlog,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   pdlinearmix(point=q,param1=meanlog , param2=sdlog, prop=prop, func=plnorm)
 }
 
@@ -316,6 +581,29 @@ plnormmix <- function(q, meanlog , sdlog, prop){
 #' @export
 #'
 qlnormmix <- function(p, meanlog , sdlog, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(p,
+                                      type="numeric",
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(check_argument_type(meanlog,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(sdlog,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   qlinearmix(p, param1=meanlog , param2=sdlog, prop=prop, lowlim=0, npts=1000, envir=cylcop_lnormmix.env, func=plnorm)
 }
 
@@ -327,6 +615,36 @@ qlnormmix <- function(p, meanlog , sdlog, prop){
 #' @export
 #'
 rgammamix <- function(n, shape, rate=1, scale=1/rate, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      integer=T,
+                                      length=1,
+                                      lower=1)
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(rate,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   rate <- 1/scale
   rlinearmix(n,param1=shape, param2=rate, prop=prop, func=rgamma)
 }
@@ -338,6 +656,33 @@ rgammamix <- function(n, shape, rate=1, scale=1/rate, prop){
 #' @export
 #'
 dgammamix <- function(x, shape, rate=1, scale=1/rate, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(rate,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   rate <- 1/scale
   pdlinearmix(point=x,param1=shape, param2=rate, prop=prop, func=dgamma)
 }
@@ -349,6 +694,33 @@ dgammamix <- function(x, shape, rate=1, scale=1/rate, prop){
 #' @export
 #'
 pgammamix <- function(q, shape, rate=1, scale=1/rate, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(q,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(rate,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   rate <- 1/scale
   pdlinearmix(point=q,param1=shape, param2=rate, prop=prop, func=pgamma)
 }
@@ -360,9 +732,39 @@ pgammamix <- function(q, shape, rate=1, scale=1/rate, prop){
 #' @export
 #'
 qgammamix <- function(p, shape, rate=1, scale=1/rate, prop){
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(p,
+                                      type="numeric",
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(check_argument_type(shape,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(rate,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(prop,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   rate <- 1/scale
   qlinearmix(p, param1=shape, param2=rate, prop=prop, lowlim=0, npts=1000, envir=cylcop_gammamix.env, func=pgamma)
 }
+
 
 cylcop_gammamix.env <- new.env(parent = emptyenv())
 cylcop_lnormmix.env <- new.env(parent = emptyenv())

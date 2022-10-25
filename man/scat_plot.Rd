@@ -2,17 +2,37 @@
 % Please edit documentation in R/plotting_functions.R
 \name{scat_plot}
 \alias{scat_plot}
-\title{Scatterplot of Turn Angles ans Step Lengths}
+\title{Scatterplot of Turn Angles and Step Lengths}
 \usage{
-scat_plot(traj, periodic = FALSE)
+scat_plot(
+  traj = NULL,
+  theta = NULL,
+  x = NULL,
+  periodic = FALSE,
+  plot_margins = FALSE
+)
 }
 \arguments{
 \item{traj}{\link[base]{data.frame} containing the trajectory produced by e.g.
 \code{\link{make_traj}()}. It must contain
  the columns \code{traj$angle} and \code{traj$steplength}.}
 
+\item{theta}{(alternatively) \link[base]{numeric} \link[base]{vector} of angles
+(measurements of a circular variable) or "circular" component of pseudo-observations.}
+
+\item{x}{(alternatively) \link[base]{numeric} \link[base]{vector} of step lengths
+(measurements of a linear variable) or "linear" component of pseudo-observations.}
+
 \item{periodic}{\link[base]{logical} value denoting whether the plot should
 be periodically extended past -pi and pi.}
+
+\item{plot_margins}{\link[base]{logical} determining whether the marginal kernel
+density estimates are computed and plotted. Alternatively, \code{plot_margins} can
+be a list of length 2 containing first a kernel density estimate for \code{theta} and
+second a kernel density estimate for \code{x}. The first entry must be of type
+\code{'density.circular'} (as returned e.g. by \code{\link{fit_angle}(theta, parametric=FALSE))},
+and the second entry must be of type \code{"density"}
+(as returned e.g. by \code{\link{fit_steplength}(x, parametric=FALSE))}.}
 }
 \value{
 A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
@@ -21,18 +41,32 @@ A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
 the turn angles and step lengths.
 }
+\details{
+You can either specify \code{traj} or the angels and step lengths
+(\code{theta} and \code{x}).
+If \code{plot_margins=T}, the code will attempt to find appropriate bandwidths for
+the kernel density estimate autonomously, also taking into account computational time.
+For more control over the actual method and parameters used to obtain the kernel
+density estimates, you can calculate them "by hand" using e.g.
+\code{\link{fit_angle}(theta, parametric=FALSE)}
+and \code{\link{fit_steplength}(x, parametric=FALSE))}.
+}
 \examples{
 set.seed(123)
-
 traj <- make_traj(100,
   copula = cyl_quadsec(0.1),
-  marginal_circ = "vonmises",
-  parameter_circ = list(0, 1),
-  marginal_lin = "weibull",
-  parameter_lin = list(shape=3)
+  marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
+  marginal_lin = list(name = "weibull", coef = list(shape = 3))
 )
+
 plot1 <- scat_plot(traj)
 plot2 <- scat_plot(traj, periodic = TRUE)
+plot3 <- scat_plot(theta=traj$angle, x=traj$steplength, periodic = TRUE, plot_margins=TRUE)
+
+bw <- opt_circ_bw(theta = traj$angle, method = "nrd",kappa.est = "trigmoments")
+ang_dens <- fit_angle(theta=traj$angle, parametric=FALSE, bandwidth=bw)
+step_dens <- fit_steplength(x=traj$steplength, parametric=FALSE)
+plot4 <- scat_plot(traj, periodic = TRUE, plot_margins=list(ang_dens, step_dens))
 
 }
 \references{

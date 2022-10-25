@@ -6,7 +6,7 @@
 \usage{
 cop_plot(
   copula,
-  type = c("pdf", "cdf"),
+  type = "pdf",
   plot_type = "rgl",
   resolution = 50,
   n_gridlines = 11
