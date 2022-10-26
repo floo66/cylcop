@@ -6,9 +6,9 @@
 \usage{
 fit_steplength(
   x,
-  parametric = c("beta", "cauchy", "chi-squared", "chisq", "exponential", "exp",
-    "gamma", "lognormal", "lnorm", "lognorm", "logistic", "normal", "t", "weibull",
-    "normalmix", "weibullmix", "gammamix", "lnormmix", FALSE),
+  parametric = c("beta", "cauchy", "chi-squared", "chisq", "exponential", "exp", "gamma",
+    "lognormal", "lnorm", "lognorm", "logistic", "normal", "t", "weibull", "normalmix",
+    "weibullmix", "gammamix", "lnormmix", FALSE),
   start = NULL,
   bandwidth = NULL,
   ncomp = 2

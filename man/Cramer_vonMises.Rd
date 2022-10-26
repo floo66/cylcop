@@ -60,7 +60,7 @@ fit to those pseudo-observations using maximum likelihood (function
 \code{cylcop::\link[cylcop]{optML}()}).
 }
 \examples{
-
+set.seed(1234)
 sample <- rcylcop(100,cyl_cubsec(0.1, 0.1))
 
 opt_cop <- optML(copula = cyl_quadsec(),
@@ -72,7 +72,7 @@ opt_cop <- optML(copula = cyl_quadsec(),
 Cramer_vonMises(opt_cop,
   theta = sample[,1],
   x = sample[,2],
-  n_bootstrap=100)
+  n_bootstrap=5)
 
 }
 \references{

@@ -100,7 +100,9 @@ setClass(
 #'
 #' #symmetric rectangles spanning entire unit square
 #' cop <- cyl_rect_combine(copula::frankCopula(2))
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' #symmetric rectangles, independence copula as background
 #' cop <- cyl_rect_combine(copula::frankCopula(2),
@@ -108,7 +110,9 @@ setClass(
 #'   up_rect = "symmetric",
 #'   flip_up = FALSE
 #' )
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' #symmetric rectangles, cy_quadsec-copula as background
 #' cop <- cyl_rect_combine(copula::normalCopula(0.3),
@@ -116,7 +120,9 @@ setClass(
 #'   up_rect = "symmetric",
 #'   background = cyl_quadsec(-0.1)
 #' )
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' #asymmetric rectangles, von Mises copula as background.
 #' #!!Not a symmetric circular linear copula!!
@@ -125,7 +131,9 @@ setClass(
 #'   up_rect = c(0.5, 0.7),
 #'   background = cyl_vonmises(mu = pi, kappa = 0.3)
 #' )
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' @references \insertRef{Durante2009}{cylcop}
 #'

@@ -37,8 +37,8 @@
 #' @examples require(circular)
 #' require(graphics)
 #' set.seed(123)
-#' n <- 100  #n (number of samples) is set small for performance. Increase n to
-#' # a value larger than 1000 to see the effects of multimodality
+#' n <- 10  #n (number of samples) is set small for performance. Increase n to
+#'          # a value larger than 1000 to see the effects of multimodality
 #'
 #' angles <- rvonmisesmix(n,
 #'   mu = c(0,pi),
@@ -58,11 +58,12 @@
 #'   kappa = c(2,1),
 #'   prop = c(0.5,0.5)
 #' )
-#'
-#' plot(seq(-pi, pi, 0.001), true_dens, type = "l")
-#' lines(as.double(dens1$x), as.double(dens1$y), col = "red")
-#' lines(as.double(dens2$x), as.double(dens2$y), col = "green")
-#' lines(as.double(dens3$x), as.double(dens3$y), col = "blue")
+#' if(interactive()){
+#'  plot(seq(-pi, pi, 0.001), true_dens, type = "l")
+#'  lines(as.double(dens1$x), as.double(dens1$y), col = "red")
+#'  lines(as.double(dens2$x), as.double(dens2$y), col = "green")
+#'  lines(as.double(dens3$x), as.double(dens3$y), col = "blue")
+#' }
 #'
 #' @seealso \code{circular::\link[circular]{bw.cv.ml.circular}()},
 #' \code{circular::\link[circular]{bw.nrd.circular}()},
@@ -473,18 +474,21 @@ fit_angle <-
           tol = 1e-15,
           max.iter = 100
         ))
+        #parameterization used in dwprappedcauchy(), is scale=-ln(rho)
+        distr$scale <- -log(distr$rho)
+        distr$mu <- as.double(distr$mu)
         # Calculating the density does not need a numerical approximation. Therefore we can use circular::dwrappedcauchy()
         # instead of cylcop::dwrappedcauchy(), but have to convert the parameter rho to scale
         logL <-
-          suppressWarnings(circular::dwrappedcauchy(theta, mu = distr$mu, rho = distr$rho)) %>%
+          circular::dwrappedcauchy(theta, location = distr$mu, scale = distr$scale) %>%
           log() %>% sum()
         df <- ifelse(is.null(mu), 2, 1)
-        #parameterization used in wprappedg("cauchy"), is scale=-ln(rho)
+
         out <-
           list(
             coef = list(
-              location = distr$mu %>% as.double() ,
-              scale = -log(distr$rho)
+              location = distr$mu ,
+              scale = distr$scale
             ),
             logL = logL ,
             AIC = 2 * df - 2 * logL ,

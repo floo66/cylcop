@@ -56,16 +56,15 @@ and \code{transport::\link[transport]{semidiscrete}()}.
 set.seed(1234)
 copula1 <- cyl_quadsec(0.1)
 copula2 <- cyl_rect_combine(copula::frankCopula(2))
-wasserstein(copula=copula1,copula2 = copula2,p=2,n_grid=200)
-wasserstein(copula=copula1,copula2 = copula1,p=2,n_grid=200)
-wasserstein(copula=copula1,copula2 = copula::frankCopula(2),p=2,n_grid=200)
+wasserstein(copula=copula1,copula2 = copula2,p=2,n_grid=20)
+wasserstein(copula=copula1,copula2 = copula1,p=2,n_grid=20)
+wasserstein(copula=copula1,copula2 = copula::frankCopula(2),p=2,n_grid=20)
 
- sample <- rjoint(100,
+ sample <- rjoint(10,
   copula1,
   marginal_1 = list(name = "vonmises", coef  = list(0, 1)),
   marginal_2 = list(name = "weibull", coef = list(3,4))
 )
 
-wasserstein(copula=copula1, theta=sample[,1], x=sample[,2], n_grid=200)
-
+wasserstein(copula=copula1, theta=sample[,1], x=sample[,2], n_grid=20)
 }

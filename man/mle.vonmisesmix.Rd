@@ -36,7 +36,7 @@ provides functions to make maximum likelihood estimates of e.g. von Mises
 \examples{
 set.seed(123)
 
-n <- 1000
+n <- 10
 angles <- rvonmisesmix(n,
   mu = c(0, pi),
   kappa = c(2, 1),

@@ -35,18 +35,17 @@
 #' set.seed(1234)
 #' copula1 <- cyl_quadsec(0.1)
 #' copula2 <- cyl_rect_combine(copula::frankCopula(2))
-#' wasserstein(copula=copula1,copula2 = copula2,p=2,n_grid=200)
-#' wasserstein(copula=copula1,copula2 = copula1,p=2,n_grid=200)
-#' wasserstein(copula=copula1,copula2 = copula::frankCopula(2),p=2,n_grid=200)
+#' wasserstein(copula=copula1,copula2 = copula2,p=2,n_grid=20)
+#' wasserstein(copula=copula1,copula2 = copula1,p=2,n_grid=20)
+#' wasserstein(copula=copula1,copula2 = copula::frankCopula(2),p=2,n_grid=20)
 #'
-#'  sample <- rjoint(100,
+#'  sample <- rjoint(10,
 #'   copula1,
 #'   marginal_1 = list(name = "vonmises", coef  = list(0, 1)),
 #'   marginal_2 = list(name = "weibull", coef = list(3,4))
 #' )
 #'
-#' wasserstein(copula=copula1, theta=sample[,1], x=sample[,2], n_grid=200)
-#'
+#' wasserstein(copula=copula1, theta=sample[,1], x=sample[,2], n_grid=20)
 #' @export
 #'
 wasserstein <- function(copula, copula2=NULL, theta=NULL, x=NULL, n_grid=2500, p=2){
@@ -185,7 +184,7 @@ wasserstein <- function(copula, copula2=NULL, theta=NULL, x=NULL, n_grid=2500, p
 #' @export
 #'
 #' @examples
-#'
+#' set.seed(1234)
 #' sample <- rcylcop(100,cyl_cubsec(0.1, 0.1))
 #'
 #' opt_cop <- optML(copula = cyl_quadsec(),
@@ -197,7 +196,7 @@ wasserstein <- function(copula, copula2=NULL, theta=NULL, x=NULL, n_grid=2500, p
 #' Cramer_vonMises(opt_cop,
 #'   theta = sample[,1],
 #'   x = sample[,2],
-#'   n_bootstrap=100)
+#'   n_bootstrap=5)
 #'
 Cramer_vonMises <-function(copula, theta, x, n_bootstrap=1000,
                            parameters = NULL,

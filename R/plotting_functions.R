@@ -882,15 +882,36 @@ cop_scat_plot <- function(traj = NULL, copula = NULL, n=NULL) {
 #' is returned, or a '\pkg{plotly}' visualization or '\pkg{rgl}' plot is produced.
 #'
 #' @examples
-#' cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot")
-#' cop_plot(copula::frankCopula(2), type="cdf", plot_type="ggplot")
-#' cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot", resolution = 5)
+#' if(interactive()){
+#'  cop_plot(copula::frankCopula(2),
+#'    type="pdf",
+#'    plot_type="ggplot",
+#'    resolution = 5
+#'  )
+#'  cop_plot(copula::frankCopula(2),
+#'    type="cdf",
+#'    plot_type="ggplot",
+#'    resolution = 5
+#'  )
 #'
 #' #opens a new window
-#' cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl")
-#' cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl", n_gridlines = 60)
+#'   cop_plot(cyl_quadsec(0.1),
+#'     type="pdf",
+#'     plot_type="rgl"
+#'   )
+#'   cop_plot(cyl_quadsec(0.1),
+#'     type="pdf",
+#'     plot_type="rgl",
+#'     n_gridlines = 60
+#'   )
 #'
-#' cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="plotly", n_gridlines = 20)
+#'   cop_plot(cyl_quadsec(0.1),
+#'     type="pdf",
+#'     plot_type="plotly",
+#'     n_gridlines = 10,
+#'     resolution = 10
+#'   )
+#' }
 #'
 #' @references \insertRef{Hodelappl}{cylcop}
 #'
@@ -1103,7 +1124,7 @@ cop_plot <- function(copula,
 
       # Make plot
 
-      p <-  persp3d(
+      p <-  rgl::persp3d(
         u,
         v,
         mat,
@@ -1118,9 +1139,9 @@ cop_plot <- function(copula,
         else
           "C(u,v)",
         expand = 0
-      ) +      light3d(theta = 0, phi = 30) +
-        title3d(main = title)+
-        (if(n_gridlines>0){surface3d(
+      ) +      rgl::light3d(theta = 0, phi = 30) +
+        rgl::title3d(main = title)+
+        (if(n_gridlines>0){rgl::surface3d(
           u_grid,
           v_grid,
           mat_grid,
@@ -2001,7 +2022,7 @@ circ_hist <- function(theta, nbars=20) {
   }
   )
 theta <- theta/pi
-  theta_hist <- hist(theta,breaks=seq(-1,1,length.out=(nbars+1)),plot=FALSE)
+  theta_hist <- graphics::hist(theta,breaks=seq(-1,1,length.out=(nbars+1)),plot=FALSE)
   df_rect <- data.frame(xmin = theta_hist$breaks[1:(length(theta_hist$breaks)-1)],
                         xmax = theta_hist$breaks[2:length(theta_hist$breaks)],
                         ymax=theta_hist$counts,

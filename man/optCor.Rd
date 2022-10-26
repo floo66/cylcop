@@ -83,30 +83,30 @@ See also individual methods (below) for more detailed explanations.
 }
 \section{Functions}{
 \itemize{
-\item \code{optCor,cyl_vonmises-method}: only parameter \code{"kappa"} can be optimized, since parameter
+\item \code{optCor(cyl_vonmises)}: only parameter \code{"kappa"} can be optimized, since parameter
 \code{"mu"} does not influence the correlation.
 
-\item \code{optCor,cyl_quadsec-method}: the absolute value of the parameter is optimized, positive
+\item \code{optCor(cyl_quadsec)}: the absolute value of the parameter is optimized, positive
 and negative values give the same correlation.
 
-\item \code{optCor,cyl_cubsec-method}: optimization of parameters, \code{"a"} and \code{"b"},
+\item \code{optCor(cyl_cubsec)}: optimization of parameters, \code{"a"} and \code{"b"},
 can be done separately or simultaneously.
 
-\item \code{optCor,cyl_rot_combine-method}: the circular-linear correlation coefficient will give a
+\item \code{optCor(cyl_rot_combine)}: the circular-linear correlation coefficient will give a
 value close to 0 for any parameter value. It therefore only makes sense to
 use \code{method = "mi_cyl"} for the optimization.
 
-\item \code{optCor,cyl_rect_combine-method}: if the rectangles span the entire unit square and the background
+\item \code{optCor(cyl_rect_combine)}: if the rectangles span the entire unit square and the background
 is the independence copula, it is recommended to use \code{method = "tau"}, since this
 calculates the copula parameter analytically. If there is a background copula,
 other than the independence copula, its parameter can be optimized by setting
 \code{background=TRUE}.
-}}
 
+}}
 \examples{
 set.seed(123)
 
-sample <- rcylcop(1000, cyl_rect_combine(copula::frankCopula(2)))
+sample <- rcylcop(100, cyl_rect_combine(copula::frankCopula(2)))
 optCor(cyl_rect_combine(copula::frankCopula()),
   theta = sample[,1],
   x = sample[,2],
@@ -117,7 +117,7 @@ optCor(cyl_rect_combine(copula::frankCopula()),
   theta = sample[,1],
   x = sample[,2],
   method = "mi_cyl",
-  n = 1000
+  n = 100
 )
 
 optCor(cyl_rect_combine(copula::claytonCopula()),
@@ -132,7 +132,7 @@ optCor(cyl_quadsec(),
   theta = sample[,1],
   x = sample[,2],
   method = "cor_cyl",
-  n = 1000,
+  n = 100,
   acc = 0.001
 )
 

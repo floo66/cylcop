@@ -26,10 +26,14 @@ Constructs a circular-linear von Mises copula according to
 }
 \examples{
 cop <- cyl_vonmises(mu=pi, kappa=10, flip = TRUE)
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 cop <- cyl_vonmises(mu=0, kappa=8, flip = FALSE)
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 }
 \references{

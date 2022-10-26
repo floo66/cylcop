@@ -42,15 +42,36 @@ a surface plot using either functions from the '\pkg{rgl}' or from the
 '\pkg{ggplot2}'.
 }
 \examples{
-cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot")
-cop_plot(copula::frankCopula(2), type="cdf", plot_type="ggplot")
-cop_plot(copula::frankCopula(2), type="pdf", plot_type="ggplot", resolution = 5)
+if(interactive()){
+ cop_plot(copula::frankCopula(2),
+   type="pdf",
+   plot_type="ggplot",
+   resolution = 5
+ )
+ cop_plot(copula::frankCopula(2),
+   type="cdf",
+   plot_type="ggplot",
+   resolution = 5
+ )
 
 #opens a new window
-cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl")
-cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="rgl", n_gridlines = 60)
+  cop_plot(cyl_quadsec(0.1),
+    type="pdf",
+    plot_type="rgl"
+  )
+  cop_plot(cyl_quadsec(0.1),
+    type="pdf",
+    plot_type="rgl",
+    n_gridlines = 60
+  )
 
-cop_plot(cyl_quadsec(0.1), type="pdf", plot_type="plotly", n_gridlines = 20)
+  cop_plot(cyl_quadsec(0.1),
+    type="pdf",
+    plot_type="plotly",
+    n_gridlines = 10,
+    resolution = 10
+  )
+}
 
 }
 \references{

@@ -54,7 +54,9 @@ setClass("cyl_cubsec", contains = "cyl_copula")
 #'
 #' @examples
 #' cop <- cyl_cubsec(a = 0.1, b = -0.1)
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#' if(interactive()){
+#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#' }
 #'
 #' @references \insertRef{Nelsen1997}{cylcop}
 #'

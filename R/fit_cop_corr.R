@@ -44,7 +44,7 @@
 #'
 #' @examples set.seed(123)
 #'
-#' sample <- rcylcop(1000, cyl_rect_combine(copula::frankCopula(2)))
+#' sample <- rcylcop(100, cyl_rect_combine(copula::frankCopula(2)))
 #' optCor(cyl_rect_combine(copula::frankCopula()),
 #'   theta = sample[,1],
 #'   x = sample[,2],
@@ -55,7 +55,7 @@
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   method = "mi_cyl",
-#'   n = 1000
+#'   n = 100
 #' )
 #'
 #' optCor(cyl_rect_combine(copula::claytonCopula()),
@@ -70,7 +70,7 @@
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   method = "cor_cyl",
-#'   n = 1000,
+#'   n = 100,
 #'   acc = 0.001
 #' )
 #'

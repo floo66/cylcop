@@ -49,8 +49,8 @@ large sample sizes.
 require(circular)
 require(graphics)
 set.seed(123)
-n <- 100  #n (number of samples) is set small for performance. Increase n to
-# a value larger than 1000 to see the effects of multimodality
+n <- 10  #n (number of samples) is set small for performance. Increase n to
+         # a value larger than 1000 to see the effects of multimodality
 
 angles <- rvonmisesmix(n,
   mu = c(0,pi),
@@ -70,11 +70,12 @@ true_dens <- dvonmisesmix(
   kappa = c(2,1),
   prop = c(0.5,0.5)
 )
-
-plot(seq(-pi, pi, 0.001), true_dens, type = "l")
-lines(as.double(dens1$x), as.double(dens1$y), col = "red")
-lines(as.double(dens2$x), as.double(dens2$y), col = "green")
-lines(as.double(dens3$x), as.double(dens3$y), col = "blue")
+if(interactive()){
+ plot(seq(-pi, pi, 0.001), true_dens, type = "l")
+ lines(as.double(dens1$x), as.double(dens1$y), col = "red")
+ lines(as.double(dens2$x), as.double(dens2$y), col = "green")
+ lines(as.double(dens3$x), as.double(dens3$y), col = "blue")
+}
 
 }
 \seealso{

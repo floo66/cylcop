@@ -53,7 +53,9 @@ setClass("cyl_quadsec", contains = "cyl_copula")
 #'
 #' @examples
 #' cop <- cyl_quadsec(a = 0.1)
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#' if(interactive()){
+#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#' }
 #'
 #' @references \insertRef{Quesada-Molina1995}{cylcop}
 #'

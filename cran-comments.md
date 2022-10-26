@@ -6,7 +6,7 @@ This is a resubmission. In this version I have:
 * removed options(warn=-1) in function cop_plot().
 
 ## Test environments
-* local R installation, R 4.0.5
+* local R installation, R 4.2.1
 * ubuntu 16.04 (on travis-ci), R 4.0.5
 * win-builder (devel)
 

@@ -73,10 +73,10 @@ cor_cyl <- function(theta, x) {
 # Assigning ranks to angular and linear measurements
 
   data <- data.frame(theta, x) %>% na.omit() %>% dplyr::arrange(x) %>%
-    mutate(r_theta = frank(.data$theta, ties.method = "average"))
+    mutate(r_theta = data.table::frank(.data$theta, ties.method = "average"))
   n <- nrow(data)
   data <- mutate(data, r_theta_star = .data$r_theta * 2 * pi / n) %>%
-    mutate(r_x = frank(.data$x, ties.method = "average"))
+    mutate(r_x = data.table::frank(.data$x, ties.method = "average"))
 
 
 # Calcualte correlation

@@ -298,12 +298,6 @@ make_traj <-
         angle <- angle_vec[step_in_batch]
 
 
-        # with hnorm, we only get "right-turns" so we flip them to left turns with a probability of 0.5
-        if (marginal_circ == "hnorm" && runif(1) < 0.5) {
-          angle <- (-1) * angle
-        }
-
-
         #take the step and add it to trajectory
         point <- angstep2xy(angle, steplength, prevp1, prevp2)
         x_pos_vec[step_in_batch] <- point[1]
