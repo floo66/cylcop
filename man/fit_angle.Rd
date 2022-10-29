@@ -26,7 +26,7 @@ Default is \code{cylcop::\link{opt_circ_bw}(theta, "nrd")}.}
 \item{mu}{(optional) \link[base]{numeric} \link[base]{vector}, fixed mean direction(s) of the
 parametric distribution.}
 
-\item{ncomp}{\link[base]{integer}, number of components of the mixed vonMises distribution.
+\item{ncomp}{\link[base]{integer}, number of components of the mixed von Mises distribution.
 Only has an effect if \code{parametric="vonmisesmix"}.}
 }
 \value{
@@ -44,14 +44,12 @@ distribution (with potentially fixed mean), or gives a kernel density estimate u
 a von Mises smoothing kernel.
 }
 \examples{
-require(circular)
-require(graphics)
 set.seed(123)
 
 silent_curr <- cylcop_get_option("silent")
 cylcop_set_option(silent = TRUE)
 
-n <- 100  #n (number of samples) is set small for performance.
+n <- 10 #n (number of samples) is set small for performance.
 
 angles <- rvonmisesmix(n,
   mu = c(0, pi),
@@ -76,27 +74,6 @@ param_estimate_fixed_mean <- fit_angle(theta = angles,
   mu = c(0, pi),
   ncomp =2
 )
-
-true_dens <- dvonmisesmix(seq(-pi,pi,0.001),
-  mu = c(0, pi),
-  kappa = c(2,1),
-  prop = c(0.5, 0.5)
-)
-dens_estimate <- dvonmisesmix(seq(-pi,pi,0.001),
-  mu= param_estimate$coef$mu,
-  kappa = param_estimate$coef$kappa,
-  prop = param_estimate$coef$prop
-)
-dens_estimate_fixed_mean <- dvonmisesmix(seq(-pi,pi,0.001),
-  mu= param_estimate_fixed_mean$coef$mu,
-  kappa = param_estimate_fixed_mean$coef$kappa,
-  prop = param_estimate_fixed_mean$coef$prop
-)
-
-plot(seq(-pi, pi, 0.001), true_dens, type = "l")
-lines(as.double(dens_non_param$x), as.double(dens_non_param$y), col = "red")
-lines(seq(-pi, pi, 0.001), dens_estimate, , col = "green")
-lines(seq(-pi, pi, 0.001), dens_estimate_fixed_mean, , col = "blue")
 
 cylcop_set_option(silent = silent_curr)
 

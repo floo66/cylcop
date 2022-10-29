@@ -243,7 +243,7 @@ qwrappedcauchy <- function(p,
     check_precision(scale, K)
 
   qq = p
-  for (i in 1:length(p))
+  for (i in seq_along(p))
   {
     ff = function (theta) {
       pwrappedcauchy(theta,

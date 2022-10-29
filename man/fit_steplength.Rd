@@ -27,7 +27,7 @@ or the \link[base]{logical}
 \code{FALSE} if a non-parametric estimation (kernel density) should be made.}
 
 \item{start}{(optional, except when \code{parametric = "chi-squared"})
-named \link[base]{list} containing the parameters to be optimized with inital
+named \link[base]{list} containing the parameters to be optimized with initial
 values.}
 
 \item{bandwidth}{\link[base]{numeric} value for the kernel density bandwidth.

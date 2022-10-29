@@ -36,8 +36,9 @@ between points is taken in order to compute transportation costs.}
 \link[base]{numeric}, the pth Wasserstein distance
 }
 \description{
-The pth Wasserstein distance is calculated based on the Euclidean distance between
-two copula PDFs on a grid, or between a copula PDF and pseudo-observations.
+The Wasserstein distance is calculated based on the Euclidean distance
+between two copula PDFs on a grid, or between a copula PDF and
+pseudo-observations.
 }
 \details{
 Note that when comparing 2 copula PDFs (i.e. \code{theta = NULL} and \code{x = NULL}),

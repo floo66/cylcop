@@ -1,5 +1,3 @@
-
-
 #' Estimate Parameters of a Circular-Linear Copula According to Maximum Likelihood
 #'
 #' The code of this function is based on \code{copula::\link[copula]{fitCopula}()}.
@@ -37,6 +35,7 @@
 #' and \code{x=copula::\link[copula]{pobs}(theta,x)[,2]}) are provided.
 #' If you wish to fit parameters of a '\code{\linkS4class{Copula}}' object
 #' (package '\pkg{copula}'), use the function \code{copula::\link{fitCopula}()}.
+#' \code{optML()} is an alias for \code{fit_cylcop_ml}.
 #'
 #' @return A list of length 3 containing the same type of '\code{\linkS4class{cyl_copula}}'
 #'  object as \code{copula}, but with optimized parameters, the log-likelihood
@@ -45,13 +44,13 @@
 #' @examples set.seed(123)
 #'
 #' sample <- rcylcop(100,cyl_quadsec(0.1))
-#' optML(copula = cyl_quadsec(),
+#' fit_cylcop_ml(copula = cyl_quadsec(),
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   parameters = "a",
 #'   start = 0
 #' )
-#' optML(copula = cyl_rect_combine(copula::frankCopula()),
+#' fit_cylcop_ml(copula = cyl_rect_combine(copula::frankCopula()),
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   parameters = "alpha",
@@ -69,7 +68,7 @@
 #'     )),
 #'   marginal_2 = list(name = "exp", coef = list(0.3))
 #'   )
-#'   optML(copula = cyl_cubsec(),
+#'   fit_cylcop_ml(copula = cyl_cubsec(),
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   parameters = c("a","b"),
@@ -77,8 +76,8 @@
 #'   upper= c(0.1, 1/(2*pi))
 #' )
 #'
-#' @seealso \code{copula::\link[copula]{fitCopula}()}, \code{\link{optCor}()},
-#'  \code{\link{optML}()}, \code{\link{opt_auto}()}.
+#' @seealso \code{copula::\link[copula]{fitCopula}()}, \code{\link{fit_cylcop_cor}()},
+#' \code{\link{opt_auto}()}.
 #'
 #' @references
 #' \insertRef{Hodelappl}{cylcop}
@@ -87,7 +86,7 @@
 #'
 #' @export
 #'
-optML <-  function(copula,
+fit_cylcop_ml <-  function(copula,
                    theta,
                    x,
                    parameters=NULL,
@@ -323,7 +322,7 @@ fit_LL <-
 
       copula <-
         tryCatch(
-          setCopParam(copula, param_val = param, param_name = param_name),
+          set_cop_param(copula, param_val = param, param_name = param_name),
           OOB_too_large = function(e) {
             warning(
               warning_sound(),
@@ -384,7 +383,7 @@ fit_LL <-
       param_name = param_name
     )
 
-    setCopParam(copula, param_val = fit$par, param_name = param_name)
+    set_cop_param(copula, param_val = fit$par, param_name = param_name)
     loglik <- fit$val
 
 
@@ -392,7 +391,7 @@ fit_LL <-
 
     warn_tips <-
       paste(
-        " - Change the starting values. Find appropriate ones using optCor() or optTau().\n",
+        " - Change the starting values. Find appropriate ones using fit_cylcop_cor() or optTau().\n",
         "- Change the optimization method 'optim.method='.\n",
         "- Worst case, try a global optimization using annealing (optim.method = \"SANN\").\n",
         "\tFor this to work properly, you need to play around with the starting temperature\n",
@@ -428,6 +427,18 @@ fit_LL <-
     }
 
     opt_cop <-
-      setCopParam(copula, param_val = fit$par, param_name = param_name)
+      set_cop_param(copula, param_val = fit$par, param_name = param_name)
     return(list(copula=opt_cop,logL=loglik, AIC=(2*length(param_name)-2*loglik)))
   }
+
+
+#' @rdname fit_cylcop_ml
+#' @examples
+#' optML(copula = cyl_quadsec(),
+#'   theta = sample[,1],
+#'   x = sample[,2],
+#'   parameters = "a",
+#'   start = 0
+#' )
+#' @export
+optML <- fit_cylcop_ml

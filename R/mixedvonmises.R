@@ -103,14 +103,14 @@ rvonmisesmix <- function(n, mu, kappa, prop) {
   prop <- prop / sum(prop)
 
   dist_component <-
-    sample(1:length(prop),
+    sample(seq_along(prop),
            size = n,
            replace = TRUE,
            prob = prop)
   draws_per_component <-
     tabulate(dist_component, nbins = length(prop))
   x <- rep(0, n)
-  for (i in 1:length(prop)) {
+  for (i in seq_along(prop)) {
     x[dist_component == i] <-
       suppressWarnings(
         circular::rvonmises(
@@ -164,7 +164,7 @@ dvonmisesmix <- function(theta, mu, kappa, prop) {
   prop <- prop / sum(prop)
 
   out <- 0
-  for (i in 1:length(prop)) {
+  for (i in seq_along(prop)) {
     out <-
       out + prop[i] * suppressWarnings(
         circular::dvonmises(
@@ -217,7 +217,7 @@ pvonmisesmix <- function(theta, mu, kappa, prop) {
   prop <- prop / sum(prop)
 
   out <- 0
-  for (i in 1:length(prop)) {
+  for (i in seq_along(prop)) {
     out <-
       out + prop[i] * suppressWarnings(
         circular::pvonmises(
@@ -348,7 +348,6 @@ cylcop_vonmisesmix.env <- new.env(parent = emptyenv())
 #' )
 #' mle.vonmisesmix(theta = angles)
 #' mle.vonmisesmix(theta = angles, mu = c(0, pi))
-#' mle.vonmisesmix(theta = angles, ncomp=3)
 #'
 #' @references \insertRef{Hornik2014}{cylcop}.
 #'

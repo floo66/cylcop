@@ -134,7 +134,7 @@ setMethod("plot", c("cyl_copula", "missing"), function(x, n=1000, ...){
 
 #Print Copula Parameters
 #
-#Used e.g. for printing a short summary of the copula in \code{make_traj()} and other
+#Used e.g. for printing a short summary of the copula in \code{traj_sim()} and other
 #functions.
 #
 # @param copula A \code{cyl_copula} or \code{Copula} object.
@@ -152,7 +152,7 @@ setGeneric("printCop",
 # Print  '\code{cyl_copula}' Parameters
 # @describeIn printCop Print \code{cyl_copula} parameters
 setMethod("printCop", "cyl_copula", function(copula) {
-  parameter_summary = paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
+  parameter_summary <-  paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
   if (length(copula@parameters) > 1) {
     for (i in 2:length(copula@parameters)) {
       parameter_summary <-
@@ -183,7 +183,7 @@ setMethod("printCop", "cyl_copula", function(copula) {
 # Print Copula parameterss
 # @describeIn printCop Print \code{Copula} parameters
 setMethod("printCop", "Copula", function(copula) {
-  parameter_summary = paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
+  parameter_summary <- paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
   if (length(copula@parameters) > 1) {
     for (i in 2:length(copula@parameters)) {
       parameter_summary <-
@@ -285,7 +285,7 @@ setMethod("prob", "cyl_copula", function(x, l, u) {
 #'
 #' @details Note that for a rectangular patchwork copula
 #' ('\code{\linkS4class{cyl_rect_combine}}')
-#' the attribute \code{rectangles_symmetric} cannot be changed by \code{setCopParam()},
+#' the attribute \code{rectangles_symmetric} cannot be changed by \code{set_cop_param()},
 #' since rectangular patchwork copulas with symmetric rectangles are treated as
 #' distinct from rectangular patchwork copulas with potentially asymmetric rectangles.
 #' Therefore, when changing one of the bounds of the lower rectangle of such a copula,
@@ -300,21 +300,21 @@ setMethod("prob", "cyl_copula", function(x, l, u) {
 #' @param ... additional arguments.
 #'
 #' @return A '\code{\linkS4class{cyl_copula}}' object with the changed parameters.
-#' @name setCopParam
+#' @name set_cop_param
 #'
 #' @examples
 #' cop <- cyl_rect_combine(copula::normalCopula(0.2),low_rect = c(0.1,0.4), up_rect="symmetric")
 #' cop
-#' cop <- setCopParam(cop, param_val = c(0.1, 0.3), param_name = c("rho.1", "low_rect2"))
+#' cop <- set_cop_param(cop, param_val = c(0.1, 0.3), param_name = c("rho.1", "low_rect2"))
 #' cop <- cyl_rect_combine(copula::normalCopula(0.2),low_rect = c(0.1,0.4), up_rect=c(0.6,0.9))
 #' cop
-#' cop <- setCopParam(cop, param_val = 0.3, param_name = "low_rect2")
+#' cop <- set_cop_param(cop, param_val = 0.3, param_name = "low_rect2")
 #' cop
 #' @export
 #'
-setGeneric("setCopParam",
+setGeneric("set_cop_param",
            function(copula, param_val, param_name, ...)
-             standardGeneric("setCopParam"),
+             standardGeneric("set_cop_param"),
            signature = "copula")
 
 

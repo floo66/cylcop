@@ -44,7 +44,7 @@ Constructs a circular-linear copula of class
 #symmetric rectangles spanning entire unit square
 cop <- cyl_rect_combine(copula::frankCopula(2))
 if(interactive()){
- cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 }
 
 #symmetric rectangles, independence copula as background
@@ -54,7 +54,7 @@ cop <- cyl_rect_combine(copula::frankCopula(2),
   flip_up = FALSE
 )
 if(interactive()){
- cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 }
 
 #symmetric rectangles, cy_quadsec-copula as background
@@ -64,7 +64,7 @@ cop <- cyl_rect_combine(copula::normalCopula(0.3),
   background = cyl_quadsec(-0.1)
 )
 if(interactive()){
- cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 }
 
 #asymmetric rectangles, von Mises copula as background.
@@ -75,7 +75,7 @@ cop <- cyl_rect_combine(copula::normalCopula(0.3),
   background = cyl_vonmises(mu = pi, kappa = 0.3)
 )
 if(interactive()){
- cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 }
 
 }

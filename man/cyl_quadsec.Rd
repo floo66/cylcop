@@ -20,7 +20,7 @@ Constructs a circular-linear copula with cubic sections of class
 \examples{
 cop <- cyl_quadsec(a = 0.1)
 if(interactive()){
- cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot")
 }
 
 }

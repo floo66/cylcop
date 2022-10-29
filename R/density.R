@@ -208,7 +208,7 @@ qdens <- function(p, density) {
     l <- 0L
     r <- length(density$x)
     while (abs(r - l) > 1) {
-      m = floor((l + r) / 2)
+      m <- floor((l + r) / 2)
       prob <- sum(density$y[1:m]) * delx
       if (prob < p)
         l <- m

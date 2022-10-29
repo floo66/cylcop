@@ -2,7 +2,7 @@
 NULL
 
 
-#' An S4 Class of Bivariate vonMises Copulas
+#' An S4 Class of Bivariate von Mises Copulas
 #'
 #' This class contains circular-linear copulas that are based on the approach by
 #' \insertCite{Johnson1978;textual}{cylcop} with a von Mises periodic function.
@@ -44,10 +44,10 @@ setClass("cyl_vonmises", contains = "cyl_copula", slots = "flip")
 #' Constructs a circular-linear von Mises copula according to
 #' \insertCite{Johnson1978;textual}{cylcop} of class
 #'  '\code{\linkS4class{cyl_vonmises}}'.
-#' @param mu \link[base]{numeric} value giving the mean of the vonMises
+#' @param mu \link[base]{numeric} value giving the mean of the von Mises
 #' function used to construct the copula.
 #' @param kappa \link[base]{numeric} value giving the concentration of the
-#' vonMises function used to construct the copula.
+#' von Mises function used to construct the copula.
 #' @param flip \link[base]{logical} value indicating whether the copula
 #' should be rotated 90 degrees to capture negative correlation.
 #'
@@ -58,12 +58,12 @@ setClass("cyl_vonmises", contains = "cyl_copula", slots = "flip")
 #' @examples
 #' cop <- cyl_vonmises(mu=pi, kappa=10, flip = TRUE)
 #' if(interactive()){
-#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 #' }
 #'
 #' cop <- cyl_vonmises(mu=0, kappa=8, flip = FALSE)
 #' if(interactive()){
-#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 #' }
 #'
 #' @references \insertRef{Johnson1978}{cylcop}
@@ -97,12 +97,12 @@ cyl_vonmises <- function(mu = 0,
   }
   )
 
-  lowbnd = c(-Inf, 0)
-  upbnd = c(Inf, Inf)
+  lowbnd <- c(-Inf, 0)
+  upbnd <- c(Inf, Inf)
 
   new(
     "cyl_vonmises",
-    name = "vonMises copula",
+    name = "von Mises copula",
     parameters = c(mu, kappa),
     param.names = c("mu", "kappa"),
     param.lowbnd = lowbnd,
@@ -290,10 +290,10 @@ setMethod("ccylcop", signature("cyl_vonmises"), function(u,
 
 #-----Change attributes of existing cyl_vonmises object.-------------------------------------------
 #
-#' @rdname setCopParam
+#' @rdname set_cop_param
 # @describeIn cyl_vonmises-class Change attributes of existing object.
 #' @export
-setMethod("setCopParam", "cyl_vonmises", function(copula, param_val, param_name) {
+setMethod("set_cop_param", "cyl_vonmises", function(copula, param_val, param_name) {
   if(is.null(param_name)) param_name<-copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)
   copula@parameters[param_num] <- param_val

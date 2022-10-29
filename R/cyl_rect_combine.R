@@ -101,7 +101,7 @@ setClass(
 #' #symmetric rectangles spanning entire unit square
 #' cop <- cyl_rect_combine(copula::frankCopula(2))
 #' if(interactive()){
-#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 #' }
 #'
 #' #symmetric rectangles, independence copula as background
@@ -111,7 +111,7 @@ setClass(
 #'   flip_up = FALSE
 #' )
 #' if(interactive()){
-#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 #' }
 #'
 #' #symmetric rectangles, cy_quadsec-copula as background
@@ -121,7 +121,7 @@ setClass(
 #'   background = cyl_quadsec(-0.1)
 #' )
 #' if(interactive()){
-#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 #' }
 #'
 #' #asymmetric rectangles, von Mises copula as background.
@@ -132,7 +132,7 @@ setClass(
 #'   background = cyl_vonmises(mu = pi, kappa = 0.3)
 #' )
 #' if(interactive()){
-#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
 #' }
 #'
 #' @references \insertRef{Durante2009}{cylcop}
@@ -189,7 +189,7 @@ cyl_rect_combine <-
     }
     )
 
-    sym_rect = FALSE
+    sym_rect <-  FALSE
 # Checks and warnings
 
     if (identical(up_rect, "symmetric")) {
@@ -200,7 +200,7 @@ cyl_rect_combine <-
         )
       }
       up_rect <- c(1 - low_rect[2], 1 - low_rect[1])
-      sym_rect = TRUE
+      sym_rect <-  TRUE
     }
 
     if(!sym_rect){
@@ -252,7 +252,7 @@ cyl_rect_combine <-
     else
       stop(
         error_sound(),
-        "provide a (rotated) 'copula'-object from the 'copula'-package or a circular vonMises-object as input"
+        "provide a (rotated) 'copula'-object from the 'copula'-package or a circular von Mises-object as input"
       )
 
 
@@ -476,7 +476,7 @@ setMethod("rcylcop", signature("numeric", "cyl_rect_combine"), function(n, copul
         upper = 1
       )
 
-    for (i in 1:n) {
+    for (i in seq_len(n)) {
       # Draw from background copula fell in lower rectangle
       if (c0[i,1] < low_rect[2] &&
           c0[i,1] > low_rect[1]) {
@@ -808,10 +808,10 @@ setMethod("ccylcop", signature("cyl_rect_combine"), function(u,
 
 #-----Change attributes of existing cyl_rect_combine object.-------------------------------------------
 #
-#' @rdname setCopParam
+#' @rdname set_cop_param
 #@describeIn cyl_rect_combine-class Change attributes of existing object.
 #' @export
-setMethod("setCopParam", "cyl_rect_combine", function(copula, param_val, param_name) {
+setMethod("set_cop_param", "cyl_rect_combine", function(copula, param_val, param_name) {
   if (is.null(param_name))
     param_name <- copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)

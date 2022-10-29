@@ -147,7 +147,7 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
 
 
   if(cond_on==2){
-    for (i in 1:length) {
+    for (i in seq_len(length)) {
       cond_func_v <- function(u){
         integrand <- function(x) {
           dcylcop(c(x[1], v[i,]), copula)
@@ -166,7 +166,7 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
     }
   }
   else if(cond_on==1){
-    for (i in 1:length) {
+    for (i in seq_len(length)) {
       cond_func_u <- function(v){
         integrand <- function(y) {
           dcylcop(c(u[i,], y[1]), copula)

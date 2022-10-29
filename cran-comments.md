@@ -1,15 +1,32 @@
-## Resubmission
-This is a resubmission. In this version I have:
-* written TRUE and FALSE instead of T and F.
-* made sure all .Rd files have a \value section.
-* uncommented code in examples and used \donttest instead.
-* removed options(warn=-1) in function cop_plot().
-
 ## Test environments
-* local R installation, R 4.2.1
-* ubuntu 16.04 (on travis-ci), R 4.0.5
-* win-builder (devel)
+- local R installation, Windows 10 x64, R 4.2.1
+- win-builder (devel and release),
+- R-hub windows-x86_64-devel (r-devel)
+- R-hub macos-highsierra-release-cran (r-release)
+- R-hub fedora-clang-devel (r-devel)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 note
+There were no ERRORs or WARNINGs. There are 2 NOTEs:
+
+### On windows-x86_64-devel (r-devel)
+
+* checking for detritus in the temp directory ... NOTE
+  Found the following files/directories:
+    'lastMiKTeXException'
+
+As noted in R-hub issue #503, this could be due to a bug/crash in MiKTeX and can likely be ignored.
+
+### On fedora-clang-devel (r-devel)
+
+* checking HTML version of manual ... NOTE
+  Skipping checking HTML validation: no command 'tidy' found
+  Skipping checking math rendering: package 'V8' unavailable
+  
+I cannot change that Tidy is not on the path, or update Tidy on the external 
+Fedora Linux server.
+Same for pacakge V8.
+  
+
+## Downstream dependencies
+There are no downstream dependencies.

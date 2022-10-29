@@ -55,18 +55,18 @@ distributions and a copula
 If entered "by hand", the named lists describing the parametric distributions
 (\code{marginal_1} and \code{marginal_2}) must contain 2 entries:
 \enumerate{
-   \item{name:
+   \item{\code{name}:
 a \link[base]{character} string denoting the name of the distribution.
 For a circular distribution, it can be \code{"vonmises"}, \code{"vonmisesmix"}, or
   \code{"wrappedcauchy"}. For a linear distribution, it must be a
   string denoting the name of a linear distribution in the environment, i.e. the name of its
    distribution function without the "p",
   e.g. "norm" for normal distribution}
-   \item{coef: For a circular distribution coef is a (named) \link[base]{list} of
+   \item{\code{coef}: For a circular distribution \code{coef} is a (named) \link[base]{list} of
 parameters of the circular
 marginal distribution as taken by the functions
 \code{\link[circular]{qvonmises}()}, \code{\link{qvonmisesmix}()},
-or \code{\link{qwrappedcauchy}()}. For a linear distribution, coef is
+or \code{\link{qwrappedcauchy}()}. For a linear distribution, \code{coef} is
 a named list containing the parameters of the distribution given in \code{"name"}.}
 }
 }

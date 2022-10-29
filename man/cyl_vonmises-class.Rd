@@ -3,7 +3,7 @@
 \docType{class}
 \name{cyl_vonmises-class}
 \alias{cyl_vonmises-class}
-\title{An S4 Class of Bivariate vonMises Copulas}
+\title{An S4 Class of Bivariate von Mises Copulas}
 \description{
 This class contains circular-linear copulas that are based on the approach by
 \insertCite{Johnson1978;textual}{cylcop} with a von Mises periodic function.

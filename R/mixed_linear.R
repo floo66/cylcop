@@ -793,7 +793,7 @@ rlinearmix <- function(n, param1, param2, prop, func){
   dist_component <- sample(1:length(prop), size = n, replace = TRUE, prob = prop)
   draws_per_component <- tabulate(dist_component, nbins = length(prop))
   x <- rep(0, n)
-  for (i in 1:length(prop)) {
+  for (i in seq_along(prop)) {
     x[dist_component == i] <- func(draws_per_component[i], param1[i], param2[i])
   }
   return(x)
@@ -817,7 +817,7 @@ pdlinearmix <- function(point, param1, param2, prop, func){
   prop <- prop / sum(prop)
 
   out <- 0
-  for (i in 1:length(prop)) {
+  for (i in seq_along(prop)) {
     out <- out + prop[i]*func(point,param1[i],param2[i])
   }
   out

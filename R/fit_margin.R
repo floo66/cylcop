@@ -4,9 +4,9 @@
 #' and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
 #'  package, simplifying their inputs. For more control,
 #' these '\pkg{circular}' functions could be used directly.
-#' The normal reference distribution (nrd) method of finding the bandwidth
+#' The normal reference distribution (\code{"nrd"}) method of finding the bandwidth
 #' parameter might give very bad results,
-#'  especially for multimodal population distributions.
+#'  especially for multi-modal population distributions.
 #' In these cases it can help to set \code{kappa.est = "trigmoments"}.
 #'
 #' @param theta \link[base]{numeric} \link[base]{vector} of angles in \eqn{[-\pi, \pi)}.
@@ -228,7 +228,7 @@ opt_lin_bw <- function(x,
 #'  Default is \code{cylcop::\link{opt_circ_bw}(theta, "nrd")}.
 #' @param mu (optional) \link[base]{numeric} \link[base]{vector}, fixed mean direction(s) of the
 #' parametric distribution.
-#' @param ncomp \link[base]{integer}, number of components of the mixed vonMises distribution.
+#' @param ncomp \link[base]{integer}, number of components of the mixed von Mises distribution.
 #' Only has an effect if \code{parametric="vonmisesmix"}.
 #'
 #' @return If a parametric estimate is made, a \link[base]{list} is returned
@@ -239,14 +239,13 @@ opt_lin_bw <- function(x,
 #' obtained with the function \code{circular::\link[circular]{density.circular}()} of the '\pkg{circular}'
 #' package.
 #'
-#' @examples require(circular)
-#' require(graphics)
+#' @examples
 #' set.seed(123)
 #'
 #' silent_curr <- cylcop_get_option("silent")
 #' cylcop_set_option(silent = TRUE)
 #'
-#' n <- 100  #n (number of samples) is set small for performance.
+#' n <- 10 #n (number of samples) is set small for performance.
 #'
 #' angles <- rvonmisesmix(n,
 #'   mu = c(0, pi),
@@ -271,27 +270,6 @@ opt_lin_bw <- function(x,
 #'   mu = c(0, pi),
 #'   ncomp =2
 #' )
-#'
-#' true_dens <- dvonmisesmix(seq(-pi,pi,0.001),
-#'   mu = c(0, pi),
-#'   kappa = c(2,1),
-#'   prop = c(0.5, 0.5)
-#' )
-#' dens_estimate <- dvonmisesmix(seq(-pi,pi,0.001),
-#'   mu= param_estimate$coef$mu,
-#'   kappa = param_estimate$coef$kappa,
-#'   prop = param_estimate$coef$prop
-#' )
-#' dens_estimate_fixed_mean <- dvonmisesmix(seq(-pi,pi,0.001),
-#'   mu= param_estimate_fixed_mean$coef$mu,
-#'   kappa = param_estimate_fixed_mean$coef$kappa,
-#'   prop = param_estimate_fixed_mean$coef$prop
-#' )
-#'
-#' plot(seq(-pi, pi, 0.001), true_dens, type = "l")
-#' lines(as.double(dens_non_param$x), as.double(dens_non_param$y), col = "red")
-#' lines(seq(-pi, pi, 0.001), dens_estimate, , col = "green")
-#' lines(seq(-pi, pi, 0.001), dens_estimate_fixed_mean, , col = "blue")
 #'
 #' cylcop_set_option(silent = silent_curr)
 #'
@@ -552,7 +530,7 @@ fit_angle <-
 #' @param bandwidth \link[base]{numeric} value for the kernel density bandwidth.
 #'  Default is  \code{cylcop::\link{opt_lin_bw}(x, "nrd")}.
 #' @param start (optional, except when \code{parametric = "chi-squared"})
-#' named \link[base]{list} containing the parameters to be optimized with inital
+#' named \link[base]{list} containing the parameters to be optimized with initial
 #' values.
 #' @param ncomp \link[base]{integer}, number of components of the mixed distribution.
 #' Only has an effect if \code{parametric \%in\% c("normalmix", "weibullmix", "gammamix",

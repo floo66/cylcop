@@ -3,12 +3,12 @@
 #' This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
 #' the turn angles and step lengths.
 #' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
-#' \code{\link{make_traj}()}. It must contain
+#' \code{\link{traj_sim}()}. It must contain
 #'  the columns \code{traj$angle} and \code{traj$steplength}.
 #' @param theta (alternatively) \link[base]{numeric} \link[base]{vector} of angles
-#' (measurements of a circular variable) or "circular" component of pseudo-observations.
+#' (measurements of a circular variable).
 #' @param x (alternatively) \link[base]{numeric} \link[base]{vector} of step lengths
-#' (measurements of a linear variable) or "linear" component of pseudo-observations.
+#' (measurements of a linear variable).
 #' @param periodic \link[base]{logical} value denoting whether the plot should
 #' be periodically extended past -pi and pi.
 #' @param plot_margins \link[base]{logical} determining whether the marginal kernel
@@ -31,143 +31,157 @@
 #' @return A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 #'
 #' @examples set.seed(123)
-#' traj <- make_traj(100,
+#' traj <- traj_sim(100,
 #'   copula = cyl_quadsec(0.1),
 #'   marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
 #'   marginal_lin = list(name = "weibull", coef = list(shape = 3))
 #' )
 #'
-#' plot1 <- scat_plot(traj)
-#' plot2 <- scat_plot(traj, periodic = TRUE)
-#' plot3 <- scat_plot(theta=traj$angle, x=traj$steplength, periodic = TRUE, plot_margins=TRUE)
+#' plot1 <- plot_joint_scat(traj)
+#' plot2 <- plot_joint_scat(traj, periodic = TRUE)
+#' plot3 <- plot_joint_scat(theta=traj$angle, x=traj$steplength, periodic = TRUE, plot_margins=TRUE)
 #'
 #' bw <- opt_circ_bw(theta = traj$angle, method = "nrd",kappa.est = "trigmoments")
 #' ang_dens <- fit_angle(theta=traj$angle, parametric=FALSE, bandwidth=bw)
 #' step_dens <- fit_steplength(x=traj$steplength, parametric=FALSE)
-#' plot4 <- scat_plot(traj, periodic = TRUE, plot_margins=list(ang_dens, step_dens))
+#' plot4 <- plot_joint_scat(traj, periodic = TRUE, plot_margins=list(ang_dens, step_dens))
 #'
 #' @references \insertRef{Hodelappl}{cylcop}
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
-#' \code{\link{circ_plot}()}, \code{\link{cop_plot}()}.
+#' @seealso \code{\link{plot_cop_scat}()}, \code{\link{plot_track}()},
+#' \code{\link{plot_joint_circ}()}, \code{\link{plot_cop_surf}()}.
 #'
 #' @export
 #'
-scat_plot <- function(traj=NULL, theta=NULL, x=NULL, periodic = FALSE, plot_margins = FALSE) {
-  #validate input
-  tryCatch({
-    check_arg_all(list(check_argument_type(traj,
-                                           type=c("data.frame", "list")),
-                       check_argument_type(traj,
-                                           type="NULL")
-    )
-    ,2)
-    check_arg_all(list(check_argument_type(theta,
-                                           type="numeric"),
-                       check_argument_type(theta,
-                                           type="NULL"))
-                  ,2)
-    check_arg_all(list(check_argument_type(x,
-                                           type="numeric"),
-                       check_argument_type(x,
-                                           type="NULL"))
-                  ,2)
-    check_arg_all(check_argument_type(periodic,
-                                      type="logical")
-                  ,1)
-    check_arg_all(list(check_argument_type(plot_margins,
-                                           type="logical"),
-                       check_argument_type(plot_margins,
-                                           type="list"))
-                  ,2)
-  },
-  error = function(e) {
-    error_sound()
-    rlang::abort(conditionMessage(e))
-  }
-  )
-  if((is.null(theta) && !is.null(x))||(!is.null(theta) && is.null(x))){
-    stop(error_sound(), "Specify angles AND step lengths!")
-  }
-  if(is.null(traj) &&(is.null(theta)||is.null(x))){
-    stop(error_sound(), "Specify either the trajectory or angles and steplengths!")
-  }
-  if(!is.null(traj) && (!is.null(theta)|| !is.null(x))){
-    stop(error_sound(), "Specify either the trajectory or angles and steplengths!")
-  }
-  if(length(theta)!=length(x)){
-    stop(
-      error_sound(), "x and theta must have the same length!"
-    )
-  }
-
-
-  if(!is.null(theta)){
-    traj <- data.frame(angle=theta, steplength=x)
-  }
-
-  if(!is.list(plot_margins)){
-  calc_margins <- plot_margins
-  }else{
-    if((!any(is(plot_margins[[1]])=="density.circular"))||(!any(is(plot_margins[[2]])=="density"))){
-      stop(
-        error_sound(), "If a list of densities is provided with plot_margins, the first entry
-      of that list must be of type 'density.circular' and the second of type 'density'."
+plot_joint_scat <-
+  function(traj = NULL,
+           theta = NULL,
+           x = NULL,
+           periodic = FALSE,
+           plot_margins = FALSE) {
+    #validate input
+    tryCatch({
+      check_arg_all(list(
+        check_argument_type(traj,
+                            type = c("data.frame", "list")),
+        check_argument_type(traj,
+                            type = "NULL")
       )
+      , 2)
+      check_arg_all(list(
+        check_argument_type(theta,
+                            type = "numeric"),
+        check_argument_type(theta,
+                            type = "NULL")
+      )
+      , 2)
+      check_arg_all(list(
+        check_argument_type(x,
+                            type = "numeric"),
+        check_argument_type(x,
+                            type = "NULL")
+      )
+      , 2)
+      check_arg_all(check_argument_type(periodic,
+                                        type = "logical")
+                    , 1)
+      check_arg_all(list(
+        check_argument_type(plot_margins,
+                            type = "logical"),
+        check_argument_type(plot_margins,
+                            type = "list")
+      )
+      , 2)
+    },
+    error = function(e) {
+      error_sound()
+      rlang::abort(conditionMessage(e))
+    })
+    if ((is.null(theta) &&
+         !is.null(x)) || (!is.null(theta) && is.null(x))) {
+      stop(error_sound(), "Specify angles AND step lengths!")
     }
-    marginal_angle_dens <- plot_margins[[1]]
-    marginal_step_dens <- plot_margins[[2]]
-    plot_margins <- TRUE
-    calc_margins <- FALSE
-  }
+    if (is.null(traj) && (is.null(theta) || is.null(x))) {
+      stop(error_sound(),
+           "Specify either the trajectory or angles and steplengths!")
+    }
+    if (!is.null(traj) && (!is.null(theta) || !is.null(x))) {
+      stop(error_sound(),
+           "Specify either the trajectory or angles and steplengths!")
+    }
+    if (length(theta) != length(x)) {
+      stop(error_sound(), "x and theta must have the same length!")
+    }
 
-  plot_theme <- list(
-    geom_hline(
-      yintercept = 0,
-      colour = "grey60",
-      size = 0.2
-    ),
-    geom_point(shape=16, alpha=0.3),
-    theme(legend.position = "none"),
-    theme_bw(),
-    xlab("X"),
-    ylab(bquote(Theta)),
-    theme(
-      axis.title.x = element_text(size = 12, colour = "black"),
-      axis.title.y = element_text(size = 17, colour = "black"),
-      axis.text = element_text(size = 10, colour = "black"),
-      panel.border = element_blank(),
-      axis.line = element_line(colour = "black"),
-      legend.position = "none"
+
+    if (!is.null(theta)) {
+      traj <- data.frame(angle = theta, steplength = x)
+    }
+
+    if (!is.list(plot_margins)) {
+      calc_margins <- plot_margins
+    } else{
+      if ((!any(is(plot_margins[[1]]) == "density.circular")) ||
+          (!any(is(plot_margins[[2]]) == "density"))) {
+        stop(
+          error_sound(),
+          "If a list of densities is provided with plot_margins, the first entry
+      of that list must be of type 'density.circular' and the second of type 'density'."
+        )
+      }
+      marginal_angle_dens <- plot_margins[[1]]
+      marginal_step_dens <- plot_margins[[2]]
+      plot_margins <- TRUE
+      calc_margins <- FALSE
+    }
+
+    plot_theme <- list(
+      geom_hline(
+        yintercept = 0,
+        colour = "grey60",
+        size = 0.2
+      ),
+      geom_point(shape = 16, alpha = 0.3),
+      theme(legend.position = "none"),
+      theme_bw(),
+      xlab("X"),
+      ylab(bquote(Theta)),
+      theme(
+        axis.title.x = element_text(size = 12, colour = "black"),
+        axis.title.y = element_text(size = 17, colour = "black"),
+        axis.text = element_text(size = 10, colour = "black"),
+        panel.border = element_blank(),
+        axis.line = element_line(colour = "black"),
+        legend.position = "none"
+      )
     )
-  )
 
-#circular marginal density estimated with vonMises kernel density
-  if(calc_margins){
-    #rough bandwidth estimate with trigonometric moments. This can fail when
-    #the function has no root (i.e. uniroot gives an error) in this case use
-    #only a subset of the sample (for speed) and maximize the cross validation
-    #log–likelihood with respect to the bandwidth
-    bw <-  tryCatch({
-      suppressWarnings(opt_circ_bw(traj$angle, method = "nrd", kappa.est="trigmoments"))
-                             },
+    #circular marginal density estimated with von Mises kernel density
+    if (calc_margins) {
+      #rough bandwidth estimate with trigonometric moments. This can fail when
+      #the function has no root (i.e. uniroot gives an error) in this case use
+      #only a subset of the sample (for speed) and maximize the cross validation
+      #log–likelihood with respect to the bandwidth
+      bw <-  tryCatch({
+        suppressWarnings(opt_circ_bw(traj$angle, method = "nrd", kappa.est = "trigmoments"))
+      },
       error = function(e) {
-        if(length(traj$angle)>1000){
-          sample_angle <- traj$angle[sample(seq(1:length(traj$angle)),1000,replace=FALSE)]
-        }else{
+        if (length(traj$angle) > 1000) {
+          sample_angle <-
+            traj$angle[sample(seq_along(traj$angle), 1000, replace = FALSE)]
+        } else{
           sample_angle <- traj$angle
         }
         suppressWarnings(opt_circ_bw(sample_angle, method = "cv"))
-      }
-      )
+      })
 
       marginal_angle_dens <- traj$angle %>%
         half2full_circ() %>%
         circular::circular(zero = 0, rotation = "counter") %>%
         circular::density.circular(
-          #circular marginal density estimated with vonMises kernel density and rough bandwidth estimate
+          #circular marginal density estimated with von Mises kernel density and rough bandwidth estimate
           bw = bw,
           kernel = "vonmises",
           na.rm = TRUE,
@@ -175,10 +189,11 @@ scat_plot <- function(traj=NULL, theta=NULL, x=NULL, periodic = FALSE, plot_marg
                                     0)
         )
 
-      marginal_step_dens <- fit_steplength(traj$steplength,parametric = FALSE)
+      marginal_step_dens <-
+        fit_steplength(traj$steplength, parametric = FALSE)
 
-  }
-  if(plot_margins){
+    }
+    if (plot_margins) {
       marginal_angle_dens$x <- full2half_circ(marginal_angle_dens$x)
       marginal_angle_dens$y <- as.double(marginal_angle_dens$y)
       marginal_angle_dens <-
@@ -187,129 +202,148 @@ scat_plot <- function(traj=NULL, theta=NULL, x=NULL, periodic = FALSE, plot_marg
       marginal_step_dens <-
         cbind(x = marginal_step_dens$x, y = marginal_step_dens$y) %>%
         as.data.frame()
-}
-
-
-  if (periodic == TRUE) {
-
-#calculate periodic images
-    periodic_image <-
-      traj %>%
-      dplyr::filter((.data$angle <= -0.5 * pi) | (.data$angle >= 0.5 * pi)) %>%
-      mutate(angle = .data$angle - (sign(.data$angle) * 2 * pi)) %>%
-      mutate(period = TRUE)
-    traj <- mutate(traj, period = FALSE) %>%
-      rbind(periodic_image)
-
-# main plot
-    p <-
-      ggplot(traj, aes(
-        x = .data$steplength,
-        y = as.numeric(.data$angle),
-        colour = .data$period
-      )) +
-      geom_hline(yintercept = c(pi, -pi),
-                 colour = "black",
-                 size = 0.2) +
-      scale_y_continuous(breaks = seq(-1.5 * pi, 1.5 * pi, 0.25 * pi),
-                         labels = c(
-                           expression(
-                             0.5 * pi,
-                             0.75 * pi,
-                             -pi / pi,
-                             -0.75 * pi,-0.5 * pi,
-                             -0.25 * pi,
-                             0,
-                             0.25 * pi,
-                             0.5 * pi,
-                             0.75 * pi,
-                             pi / -pi,
-                             -0.75 * pi,
-                             -0.5 * pi
-                           )
-                         )) +
-      plot_theme +
-      scale_color_manual(values = c("black", "grey"))
-
-# add densities on the margins of the main plot
-    if(any(plot_margins!=FALSE)){
-    xmarg <- cowplot::axis_canvas(p, axis = "x") +
-      geom_ribbon(
-        data = marginal_step_dens,
-        aes(x = .data$x, ymin = 0, ymax = .data$y),
-        alpha = 0.1,
-        fill = "red",
-        color = "black"
-      )
-    ymarg <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
-      geom_ribbon(
-        data = marginal_angle_dens,
-        aes(x = .data$x, ymin = 0, ymax = .data$y),
-        alpha = 0.1,
-        fill = "blue",
-        color = "black"
-      ) +
-      coord_flip()
-
-    p1 <-
-      suppressWarnings(cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top"))
-    p <-
-      suppressWarnings(cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right"))
     }
-  }
 
-#if no periodic image should be plotted
-  else{
-#main plot
-    p <-
-      ggplot(traj, aes(x = .data$steplength, y = as.numeric(.data$angle))) +
-      scale_y_continuous(breaks = seq(-pi, pi, 0.25 * pi),
-                         labels = c(
-                           expression(
-                             -pi,
-                             -0.75 * pi,
-                             -0.5 * pi,
-                             -0.25 * pi,
-                             0,
-                             0.25 * pi,
-                             0.5 * pi,
-                             0.75 * pi,
-                             pi
-                           )
-                         )) +
 
-      plot_theme
+    if (periodic == TRUE) {
+      #calculate periodic images
+      periodic_image <-
+        traj %>%
+        dplyr::filter((.data$angle <= -0.5 * pi) |
+                        (.data$angle >= 0.5 * pi)) %>%
+        mutate(angle = .data$angle - (sign(.data$angle) * 2 * pi)) %>%
+        mutate(period = TRUE)
+      traj <- mutate(traj, period = FALSE) %>%
+        rbind(periodic_image)
 
-# add densities on the margins of the main plot
-    if(any(plot_margins!=FALSE)){
-      xmarg <- cowplot::axis_canvas(p, axis = "x") +
-      geom_ribbon(
-        data = marginal_step_dens,
-        aes(x = .data$x, ymin = 0, ymax = .data$y),
-        alpha = 0.1,
-        fill = "red",
-        color = "black"
-      )
-    ymarg <- cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
-      geom_ribbon(
-        data = marginal_angle_dens,
-        aes(x = .data$x, ymin = 0, ymax = .data$y),
-        alpha = 0.1,
-        fill = "blue",
-        color = "black"
-      ) +
-      geom_hline(yintercept = 0) +
-      coord_flip()
+      # main plot
+      p <-
+        ggplot(traj,
+               aes(
+                 x = .data$steplength,
+                 y = as.numeric(.data$angle),
+                 colour = .data$period
+               )) +
+        geom_hline(yintercept = c(pi, -pi),
+                   colour = "black",
+                   size = 0.2) +
+        scale_y_continuous(breaks = seq(-1.5 * pi, 1.5 * pi, 0.25 * pi),
+                           labels = c(
+                             expression(
+                               0.5 * pi,
+                               0.75 * pi,
+                               -pi / pi,
+                               -0.75 * pi,-0.5 * pi,
+                               -0.25 * pi,
+                               0,
+                               0.25 * pi,
+                               0.5 * pi,
+                               0.75 * pi,
+                               pi / -pi,
+                               -0.75 * pi,
+                               -0.5 * pi
+                             )
+                           )) +
+        plot_theme +
+        scale_color_manual(values = c("black", "grey"))
 
-    p1 <-
-      suppressWarnings(cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top"))
-    p <-
-      suppressWarnings(cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right"))
+      # add densities on the margins of the main plot
+      if (any(plot_margins != FALSE)) {
+        xmarg <- cowplot::axis_canvas(p, axis = "x") +
+          geom_ribbon(
+            data = marginal_step_dens,
+            aes(
+              x = .data$x,
+              ymin = 0,
+              ymax = .data$y
+            ),
+            alpha = 0.1,
+            fill = "red",
+            color = "black"
+          )
+        ymarg <-
+          cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
+          geom_ribbon(
+            data = marginal_angle_dens,
+            aes(
+              x = .data$x,
+              ymin = 0,
+              ymax = .data$y
+            ),
+            alpha = 0.1,
+            fill = "blue",
+            color = "black"
+          ) +
+          coord_flip()
+
+        p1 <-
+          suppressWarnings(cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top"))
+        p <-
+          suppressWarnings(cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right"))
+      }
     }
-  }
 
-  return(suppressWarnings(cowplot::ggdraw(p)))
-}
+    #if no periodic image should be plotted
+    else{
+      #main plot
+      p <-
+        ggplot(traj, aes(x = .data$steplength, y = as.numeric(.data$angle))) +
+        scale_y_continuous(breaks = seq(-pi, pi, 0.25 * pi),
+                           labels = c(
+                             expression(
+                               -pi,
+                               -0.75 * pi,
+                               -0.5 * pi,
+                               -0.25 * pi,
+                               0,
+                               0.25 * pi,
+                               0.5 * pi,
+                               0.75 * pi,
+                               pi
+                             )
+                           )) +
+
+        plot_theme
+
+      # add densities on the margins of the main plot
+      if (any(plot_margins != FALSE)) {
+        xmarg <- cowplot::axis_canvas(p, axis = "x") +
+          geom_ribbon(
+            data = marginal_step_dens,
+            aes(
+              x = .data$x,
+              ymin = 0,
+              ymax = .data$y
+            ),
+            alpha = 0.1,
+            fill = "red",
+            color = "black"
+          )
+        ymarg <-
+          cowplot::axis_canvas(p, axis = "y", coord_flip = TRUE) +
+          geom_ribbon(
+            data = marginal_angle_dens,
+            aes(
+              x = .data$x,
+              ymin = 0,
+              ymax = .data$y
+            ),
+            alpha = 0.1,
+            fill = "blue",
+            color = "black"
+          ) +
+          geom_hline(yintercept = 0) +
+          coord_flip()
+
+        p1 <-
+          suppressWarnings(cowplot::insert_xaxis_grob(p, xmarg, grid::unit(.2, "null"), position = "top"))
+        p <-
+          suppressWarnings(cowplot::insert_yaxis_grob(p1, ymarg, grid::unit(.2, "null"), position = "right"))
+      }
+    }
+
+    return(suppressWarnings(cowplot::ggdraw(p)))
+  }
 
 
 #' Plot a Trajectory in Euclidean Space
@@ -317,7 +351,7 @@ scat_plot <- function(traj=NULL, theta=NULL, x=NULL, periodic = FALSE, plot_marg
 #' This function plots the locations of a trajectory or multiple trajectories.
 #'
 #' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
-#' \code{\link{make_traj}()}. It must contain
+#' \code{\link{traj_sim}()}. It must contain
 #'  the columns \code{traj$pos_x} and \code{traj$pos_y}. It is also possible to specify a
 #'  \link[base]{list} of such data.frames containing multiple trajectories.
 #' @param x_coord (alternatively) \link[base]{numeric} \link[base]{vector} of x-coordinates or
@@ -329,159 +363,176 @@ scat_plot <- function(traj=NULL, theta=NULL, x=NULL, periodic = FALSE, plot_marg
 #' @return A '\code{\link[ggplot2]{ggplot}}' object.
 #'
 #' @examples set.seed(123)
-#' traj <- make_traj(50,
+#' traj <- traj_sim(50,
 #'   copula = cyl_quadsec(0.1),
 #'   marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
 #'   marginal_lin = list(name = "weibull", coef = list(shape = 3))
 #' )
-#' plot1 <- traj_plot(traj=traj)
+#' plot1 <- plot_track(traj=traj)
 #'
 #' x_coord <- list(runif(10),runif(20),runif(3))
 #' y_coord <- list(runif(10),runif(20),runif(3))
 #'
-#' plot2 <- traj_plot(x_coord=x_coord, y_coord=y_coord)
+#' plot2 <- plot_track(x_coord=x_coord, y_coord=y_coord)
 #'
 #' @references \insertRef{Hodelappl}{cylcop}
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{cop_scat_plot}()},
-#' \code{\link{circ_plot}()}, \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
+#' @seealso \code{\link{plot_cop_scat}()},
+#' \code{\link{plot_joint_circ}()}, \code{\link{plot_cop_surf}()}, \code{\link{plot_joint_scat}()}.
 #'
 #' @export
 #'
-traj_plot <- function(traj=NULL, x_coord=NULL, y_coord=NULL) {
-
+plot_track <- function(traj = NULL,
+                      x_coord = NULL,
+                      y_coord = NULL) {
   tryCatch({
-    check_arg_all(list(check_argument_type(traj,
-                                           type=c("data.frame", "list")),
-                       check_argument_type(traj,
-                                           type="NULL"),
-                       check_argument_type(traj,
-                                           type="list")
+    check_arg_all(list(
+      check_argument_type(traj,
+                          type = c("data.frame", "list")),
+      check_argument_type(traj,
+                          type = "NULL"),
+      check_argument_type(traj,
+                          type = "list")
     )
-    ,3)
-    check_arg_all(list(check_argument_type(x_coord,
-                                           type="numeric"),
-                       check_argument_type(x_coord,
-                                           type="NULL"),
-                       check_argument_type(x_coord,
-                                           type="list"))
-                  ,3)
-    check_arg_all(list(check_argument_type(y_coord,
-                                           type="numeric"),
-                       check_argument_type(y_coord,
-                                           type="NULL"),
-                       check_argument_type(y_coord,
-                                           type="list"))
-                  ,3)
+    ,
+    3)
+    check_arg_all(list(
+      check_argument_type(x_coord,
+                          type = "numeric"),
+      check_argument_type(x_coord,
+                          type = "NULL"),
+      check_argument_type(x_coord,
+                          type = "list")
+    )
+    ,
+    3)
+    check_arg_all(list(
+      check_argument_type(y_coord,
+                          type = "numeric"),
+      check_argument_type(y_coord,
+                          type = "NULL"),
+      check_argument_type(y_coord,
+                          type = "list")
+    )
+    ,
+    3)
   },
   error = function(e) {
     error_sound()
     rlang::abort(conditionMessage(e))
-  }
-  )
-  if((is.null(x_coord) && !is.null(y_coord))||(!is.null(x_coord) && is.null(y_coord))){
+  })
+  if ((is.null(x_coord) &&
+       !is.null(y_coord)) ||
+      (!is.null(x_coord) && is.null(y_coord))) {
     stop(error_sound(), "Specify x-coordinates AND y-coordinates")
   }
-  if(is.null(traj) &&(is.null(x_coord)||is.null(y_coord))){
-    stop(error_sound(), "Specify either the trajectory or x-coordinates and y-coordinates")
+  if (is.null(traj) && (is.null(x_coord) || is.null(y_coord))) {
+    stop(error_sound(),
+         "Specify either the trajectory or x-coordinates and y-coordinates")
   }
-  if(!is.null(traj) && (!is.null(x_coord)|| !is.null(y_coord))){
-    stop(error_sound(), "Specify either the trajectory OR x-coordinates and y-coordinates")
+  if (!is.null(traj) && (!is.null(x_coord) || !is.null(y_coord))) {
+    stop(error_sound(),
+         "Specify either the trajectory OR x-coordinates and y-coordinates")
   }
 
 
   #validate input
 
- if(!is.null(traj)){
-   if(is.data.frame(traj)){
-     traj_lst <- list(traj)
-   }else{
-     traj_lst <- traj
-   }
-   for (i in 1:length(traj_lst)) {
-   if(!all(c("pos_x", "pos_y") %in% names(traj_lst[[i]]))){
-     stop(
-       error_sound(), "traj-data.frames must contain the columns traj$pos_x and traj$pos_y."
-     )
-   }
-     traj_lst[[i]] <-  traj_lst[[i]][,(names(traj_lst[[i]]))%in%c("pos_x", "pos_y")]
-   }
- }
-
-  if(!is.null(y_coord)){
-    if(!is.list(y_coord)){
-      y_coord_lst <- list(y_coord)
-    }else{
-      y_coord_lst <- y_coord
+  if (!is.null(traj)) {
+    if (is.data.frame(traj)) {
+      traj_lst <- list(traj)
+    } else{
+      traj_lst <- traj
     }
-    if(!is.list(x_coord)){
-      x_coord_lst <- list(x_coord)
-    }else{
-      x_coord_lst <- x_coord
-    }
-    if(length(y_coord_lst)!=length(x_coord_lst)){
-      stop(
-        error_sound(), "x_coord and y_coord must have the same length"
-      )
-    }
-    traj_lst <- vector(mode = "list", length = length(y_coord_lst))
-    for (i in 1:length(y_coord_lst)) {
-      if(length(y_coord_lst[[i]]) != length(x_coord_lst[[i]])){
+    for (i in seq_along(traj_lst)) {
+      if (!all(c("pos_x", "pos_y") %in% names(traj_lst[[i]]))) {
         stop(
-          error_sound(), "x_coord and y_coord must have the same length"
+          error_sound(),
+          "traj-data.frames must contain the columns traj$pos_x and traj$pos_y."
         )
       }
-      traj_lst[[i]] <- data.frame(pos_x = x_coord_lst[[i]], pos_y = y_coord_lst[[i]])
+      traj_lst[[i]] <-
+        traj_lst[[i]][, (names(traj_lst[[i]])) %in% c("pos_x", "pos_y")]
     }
   }
-  if(map(traj_lst, ~any(is.na(.x)))%>%unlist()%>%any()){
-    stop(
-      error_sound(), "There were NA's in the trajectory."
-    )
+
+  if (!is.null(y_coord)) {
+    if (!is.list(y_coord)) {
+      y_coord_lst <- list(y_coord)
+    } else{
+      y_coord_lst <- y_coord
+    }
+    if (!is.list(x_coord)) {
+      x_coord_lst <- list(x_coord)
+    } else{
+      x_coord_lst <- x_coord
+    }
+    if (length(y_coord_lst) != length(x_coord_lst)) {
+      stop(error_sound(),
+           "x_coord and y_coord must have the same length")
+    }
+    traj_lst <- vector(mode = "list", length = length(y_coord_lst))
+    for (i in seq_along(y_coord_lst)) {
+      if (length(y_coord_lst[[i]]) != length(x_coord_lst[[i]])) {
+        stop(error_sound(),
+             "x_coord and y_coord must have the same length")
+      }
+      traj_lst[[i]] <-
+        data.frame(pos_x = x_coord_lst[[i]], pos_y = y_coord_lst[[i]])
+    }
+  }
+  if (map(traj_lst, ~ any(is.na(.x))) %>% unlist() %>% any()) {
+    stop(error_sound(), "There were NA's in the trajectory.")
   }
 
 
 
 
-  if(length(traj_lst)==1){
+  if (length(traj_lst) == 1) {
     traj <- traj_lst[[1]]
-  p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
-    geom_point(aes(colour = 1:nrow(traj)),
-               size=min(4,100/nrow(traj))) +
-    geom_path(aes(colour = 1:nrow(traj))) +
-    geom_point(
-      data = dplyr::slice(traj, 1, nrow(traj)),  #mark first and last point of trajectory
-      aes(x = .data$pos_x, y = .data$pos_y),
-      size = 4,
-      color = "red"
-    ) +
-    scale_colour_gradientn(colours = inferno(1000)) +
-    theme_bw() +
-    xlab("X-position") +
-    ylab("Y-position") +
-    labs(color = 'Step number') +
-    theme(
-      axis.title = element_text(size = 12, colour = "black"),
-      axis.text = element_text(size = 10, colour = "black")
-    )
-  }else{
-    traj_lengths <- map(traj_lst,~nrow(.x))%>%unlist()
-    track_id <- rep(1:length(traj_lst),traj_lengths)
-    traj <- do.call(rbind,traj_lst)
+    p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y)) +
+      geom_point(aes(colour = seq_len(nrow(traj))),
+                 size = min(4, 100 / nrow(traj))) +
+      geom_path(aes(colour = seq_len(nrow(traj)))) +
+      geom_point(
+        data = dplyr::slice(traj, 1, nrow(traj)),
+        #mark first and last point of trajectory
+        aes(x = .data$pos_x, y = .data$pos_y),
+        size = 4,
+        color = "red"
+      ) +
+      scale_colour_gradientn(colours = inferno(1000)) +
+      theme_bw() +
+      xlab("X-position") +
+      ylab("Y-position") +
+      labs(color = 'Step number') +
+      theme(
+        axis.title = element_text(size = 12, colour = "black"),
+        axis.text = element_text(size = 10, colour = "black")
+      )
+  } else{
+    traj_lengths <- map(traj_lst,  ~ nrow(.x)) %>% unlist()
+    track_id <- rep(seq_along(traj_lst), traj_lengths)
+    traj <- do.call(rbind, traj_lst)
     traj$id <- as.factor(track_id)
 
-    p <- ggplot(traj, aes(x = .data$pos_x, y = .data$pos_y, colour = .data$id)) +
-      geom_point(
-                 size=min(4,100/nrow(traj)),alpha=0.7) +
-      geom_path(alpha=0.7) +
-      scale_colour_discrete(type = inferno(length(traj_lst),end = 0.7))+
+    p <-
+      ggplot(traj, aes(
+        x = .data$pos_x,
+        y = .data$pos_y,
+        colour = .data$id
+      )) +
+      geom_point(size = min(4, 100 / nrow(traj)), alpha = 0.7) +
+      geom_path(alpha = 0.7) +
+      scale_colour_discrete(type = inferno(length(traj_lst), end = 0.7)) +
       theme_bw() +
       xlab("X-position") +
       ylab("Y-position") +
       labs(color = 'Track ID') +
-      guides(colour = guide_legend(override.aes = list(alpha = 1,size=1)))+
+      guides(colour = guide_legend(override.aes = list(alpha = 1, size =
+                                                         1))) +
       theme(
         axis.title = element_text(size = 12, colour = "black"),
         axis.text = element_text(size = 10, colour = "black")
@@ -500,7 +551,7 @@ traj_plot <- function(traj=NULL, x_coord=NULL, y_coord=NULL) {
 #' (polar coordinates).
 #'
 #' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
-#' \code{\link{make_traj}()}. It must contain
+#' \code{\link{traj_sim}()}. It must contain
 #'  the columns \code{traj$angle} and \code{traj$steplength}.
 #' @param theta (alternatively) \link[base]{numeric} \link[base]{vector} of angles
 #' (measurements of a circular variable) or "circular" component of pseudo-observations.
@@ -515,75 +566,94 @@ traj_plot <- function(traj=NULL, x_coord=NULL, y_coord=NULL) {
 #'
 #' @examples set.seed(123)
 #'
-#' traj <- make_traj(100,
+#' traj <- traj_sim(100,
 #'   copula = cyl_quadsec(0.1),
 #'   marginal_circ = list(name="vonmises",coef=list(0, 1)),
 #'   marginal_lin = list(name="weibull", coef=list(shape=3))
 #' )
-#' plot1 <- circ_plot(traj)
+#' plot1 <- plot_joint_circ(traj)
 #'
 #' @references \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
-#' \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
+#' @seealso \code{\link{plot_cop_scat}()}, \code{\link{plot_track}()},
+#' \code{\link{plot_cop_surf}()}, \code{\link{plot_joint_scat}()}.
 #'
 #' @export
 #'
-circ_plot <- function(traj=NULL, theta=NULL, x=NULL) {
+plot_joint_circ <- function(traj = NULL,
+                      theta = NULL,
+                      x = NULL) {
   #validate input
   tryCatch({
-    check_arg_all(list(check_argument_type(traj,
-                                           type=c("data.frame", "list")),
-                       check_argument_type(traj,
-                                           type="NULL")
+    check_arg_all(list(
+      check_argument_type(traj,
+                          type = c("data.frame", "list")),
+      check_argument_type(traj,
+                          type = "NULL")
     )
-    ,2)
-    check_arg_all(list(check_argument_type(theta,
-                                           type="numeric"),
-                       check_argument_type(theta,
-                                           type="NULL"))
-                  ,2)
-    check_arg_all(list(check_argument_type(x,
-                                           type="numeric"),
-                       check_argument_type(x,
-                                           type="NULL"))
-                  ,2)
+    , 2)
+    check_arg_all(list(
+      check_argument_type(theta,
+                          type = "numeric"),
+      check_argument_type(theta,
+                          type = "NULL")
+    )
+    , 2)
+    check_arg_all(list(
+      check_argument_type(x,
+                          type = "numeric"),
+      check_argument_type(x,
+                          type = "NULL")
+    )
+    , 2)
   },
   error = function(e) {
     error_sound()
     rlang::abort(conditionMessage(e))
-  }
-  )
-  if((is.null(theta) && !is.null(x))||(!is.null(theta) && is.null(x))){
+  })
+  if ((is.null(theta) &&
+       !is.null(x)) || (!is.null(theta) && is.null(x))) {
     stop(error_sound(), "Specify angles AND step lengths")
   }
-  if(is.null(traj) &&(is.null(theta)||is.null(x))){
-    stop(error_sound(), "Specify either the trajectory or angles and steplengths")
+  if (is.null(traj) && (is.null(theta) || is.null(x))) {
+    stop(error_sound(),
+         "Specify either the trajectory or angles and steplengths")
   }
-  if(!is.null(traj) && (!is.null(theta)|| !is.null(x))){
-    stop(error_sound(), "Specify either the trajectory or angles and steplengths")
-  }
-
-
-  if(!is.null(theta)){
-    traj <- data.frame(angle=theta, steplength=x)
+  if (!is.null(traj) && (!is.null(theta) || !is.null(x))) {
+    stop(error_sound(),
+         "Specify either the trajectory or angles and steplengths")
   }
 
-  #circular marginal density estimated with vonMises kernel density and rough bandwidth estimate
+
+  if (!is.null(theta)) {
+    traj <- data.frame(angle = theta, steplength = x)
+  }
+
+  if (any(is.na(traj$angle)) || any(is.na(traj$steplength))) {
+    traj <-
+      traj[-c(union(which(is.na(traj$angle)), which(is.na(
+        traj$steplength
+      )))),]
+  }
+
+  #circular marginal density estimated with von Mises kernel density and rough bandwidth estimate
   marginal_angle_dens <- traj$angle %>%
     half2full_circ() %>%
     circular::circular(zero = 0, rotation = "counter") %>%
     circular::density.circular(
-      bw = suppressWarnings(opt_circ_bw(traj$angle, method = "nrd", kappa.est="trigmoments")),
+      bw = suppressWarnings(
+        opt_circ_bw(traj$angle, method = "nrd", kappa.est = "trigmoments")
+      ),
       kernel = "vonmises",
       na.rm = TRUE,
-      control.circular = list(rotation = "counter", zero =0)
+      control.circular = list(rotation = "counter", zero = 0)
     )
   marginal_angle_dens$x <- full2half_circ(marginal_angle_dens$x)
   marginal_angle_dens$y <- as.double(marginal_angle_dens$y)
 
   #set the breaks for the gridlines of the plot
-  y_breaks <- pretty(c(0, max(traj$steplength, na.rm = TRUE)), n = 6)
+  y_breaks <-
+    pretty(c(0, max(traj$steplength, na.rm = TRUE)), n = 6)
   y_breaks <- c(y_breaks, tail(y_breaks, 1) + y_breaks[2])
   x_breaks <- seq(-0.75 * pi, pi, 0.25 * pi)
 
@@ -593,33 +663,50 @@ circ_plot <- function(traj=NULL, theta=NULL, x=NULL) {
     as.data.frame()
 
   #set positions of radius labels
-  radius_label_pos <-  cbind(x = rep(c(-1,1),length(y_breaks))[2:(length(y_breaks) - 1)]*0.875 * pi,
-                             y = y_breaks[2:(length(y_breaks) - 1)]) %>%
+  radius_label_pos <-
+    cbind(x = rep(c(-1, 1), length(y_breaks))[2:(length(y_breaks) - 1)] *
+            0.875 * pi,
+          y = y_breaks[2:(length(y_breaks) - 1)]) %>%
     as.data.frame()
 
   #set positions of angle labels
   max_rad <- max(y_breaks)
-  angle_label_pos <-  cbind(x = x_breaks,
-                            y = c(1.3, 1.3, 1.3, 1.15, 1.3, 1.3, 1.3, 1.15)*marginal_angle_dens$y[map(x_breaks,~which.min(abs(marginal_angle_dens$x-.x)))%>%unlist()]) %>%
+  angle_label_pos <-  cbind(
+    x = x_breaks,
+    y = c(1.3, 1.3, 1.3, 1.15, 1.3, 1.3, 1.3, 1.15) *
+      marginal_angle_dens$y[map(x_breaks,  ~ which.min(abs(marginal_angle_dens$x -
+                                                             .x))) %>% unlist()]
+  ) %>%
     as.data.frame()
 
   #convert to cartesian coordinates to determine plot-margins
   angle_label_pos_cart <- angle_label_pos
-  angle_label_pos_cart$x <- angle_label_pos$y*sin(angle_label_pos$x)
-  angle_label_pos_cart$y <- angle_label_pos$y*cos(angle_label_pos$x)
+  angle_label_pos_cart$x <-
+    angle_label_pos$y * sin(angle_label_pos$x)
+  angle_label_pos_cart$y <-
+    angle_label_pos$y * cos(angle_label_pos$x)
 
-  panel_size <- max(max(abs(angle_label_pos_cart$x)),max(abs(angle_label_pos_cart$y)))
-  top_correction <- panel_size-abs(max(angle_label_pos_cart$y))
-  right_correction <- panel_size-abs(max(angle_label_pos_cart$x))
-  bottom_correction <- panel_size-abs(min(angle_label_pos_cart$y))
-  left_correction <- panel_size-abs(min(angle_label_pos_cart$x))
+  panel_size <-
+    max(max(abs(angle_label_pos_cart$x)), max(abs(angle_label_pos_cart$y)))
+  top_correction <- panel_size - abs(max(angle_label_pos_cart$y))
+  right_correction <- panel_size - abs(max(angle_label_pos_cart$x))
+  bottom_correction <- panel_size - abs(min(angle_label_pos_cart$y))
+  left_correction <- panel_size - abs(min(angle_label_pos_cart$x))
 
 
   #set theme
 
   circ_plot_layers <- list(
-    geom_hline( yintercept = y_breaks[seq(2,length(y_breaks),2)], colour = "darkgreen", size = 0.2),
-    geom_hline( yintercept = y_breaks[seq(1,length(y_breaks),2)], colour = "darkred", size = 0.2),
+    geom_hline(
+      yintercept = y_breaks[seq(2, length(y_breaks), 2)],
+      colour = "darkgreen",
+      size = 0.2
+    ),
+    geom_hline(
+      yintercept = y_breaks[seq(1, length(y_breaks), 2)],
+      colour = "darkred",
+      size = 0.2
+    ),
     #geom_vline(xintercept = x_breaks, colour = "grey90", size = 0.2),
     coord_polar(start = pi, clip = "off"),
 
@@ -647,13 +734,13 @@ circ_plot <- function(traj=NULL, theta=NULL, x=NULL) {
 
     theme(
       panel.grid = element_blank(),
-      panel.border=element_blank(),
+      panel.border = element_blank(),
       axis.ticks.x = element_blank(),
       axis.title = element_blank(),
       axis.text = element_blank(),
       axis.ticks.y = element_blank(),
       axis.text.y = element_blank(),
-     # plot.margin = unit(c(-10-5*top_correction, -10-5*right_correction, -10-5*bottom_correction, -10-5*left_correction), "pt")
+      # plot.margin = unit(c(-10-5*top_correction, -10-5*right_correction, -10-5*bottom_correction, -10-5*left_correction), "pt")
     ),
 
     geom_segment(
@@ -682,25 +769,26 @@ circ_plot <- function(traj=NULL, theta=NULL, x=NULL) {
     #neither does element_text(margin = margin())
     #The font size has different units for axes and labels, that's why I divide by 2.834646 below
     geom_label(
-      data = radius_label_pos[seq(1,nrow(radius_label_pos),2),],
+      data = radius_label_pos[seq(1, nrow(radius_label_pos), 2),],
       aes(.data$x, .data$y, label = .data$y),
       size = 10 / 2.834646,
-      color ="darkgreen",
+      color = "darkgreen",
       label.size = 0
     ),
     geom_label(
-      data = radius_label_pos[seq(2,nrow(radius_label_pos),2),],
+      data = radius_label_pos[seq(2, nrow(radius_label_pos), 2),],
       aes(.data$x, .data$y, label = .data$y),
       size = 10 / 2.834646,
-      color ="darkred",
+      color = "darkred",
       label.size = 0
     ),
 
     geom_label(
       data = angle_label_pos,
       aes(.data$x, .data$y),
-      label = c(expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
-                           0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
+      label = c(
+        expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
+                   0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
       ),
       size = 10 / 2.834646,
       label.size = 0
@@ -712,11 +800,18 @@ circ_plot <- function(traj=NULL, theta=NULL, x=NULL) {
 
   p <- ggplot() +
     circ_plot_layers +
-    geom_point(data = traj, aes(y = .data$steplength, x = as.numeric(.data$angle)),alpha=0.5,size=0.3) +
-    geom_line(data = marginal_angle_dens,
-              aes(y = .data$y, x = .data$x),
-              colour = "black",
-              size = 0.2) +
+    geom_point(
+      data = traj,
+      aes(y = .data$steplength, x = as.numeric(.data$angle)),
+      alpha = 0.5,
+      size = 0.3
+    ) +
+    geom_line(
+      data = marginal_angle_dens,
+      aes(y = .data$y, x = .data$x),
+      colour = "black",
+      size = 0.2
+    ) +
     geom_ribbon(
       data = marginal_angle_dens,
       aes(
@@ -738,13 +833,12 @@ circ_plot <- function(traj=NULL, theta=NULL, x=NULL) {
 #' is drawn from a copula to quickly visualize it.
 #'
 #' @param traj a \link[base]{data.frame} containing the trajectory produced by e.g.
-#' \code{\link{make_traj}()}, which must contain the columns
+#' \code{\link{traj_sim}()}, which must contain the columns
 #' \code{traj$cop_u} and \code{traj$cop_v}.
-#' @param copula (alternatively) a '\code{\linkS4class{cyl_copula}}' object
-#' or a '\code{\linkS4class{Copula}}' object
-#' of the package '\pkg{copula}'.
-#' @param n an \link[base]{integer}, the number of points to be plotted. Default is
-#'  \code{nrow(traj)} or, if a copula is provided, 10000.
+#' @param u (alternatively) \link[base]{numeric} \link[base]{vector} of first
+#' components of pseudo-observations or draws from a copula.
+#' @param v (alternatively) \link[base]{numeric} \link[base]{vector} of second
+#' components of pseudo-observations or draws from a copula.
 #'
 #' @return A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 #'
@@ -754,85 +848,95 @@ circ_plot <- function(traj=NULL, theta=NULL, x=NULL) {
 #' \code{n} steps are randomly selected from the trajectory and plotted.
 #'
 #' @examples set.seed(123)
-#' traj <- make_traj(100,
+#' traj <- traj_sim(100,
 #'   copula = cyl_quadsec(0.1),
 #'   marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
 #'   marginal_lin = list(name = "weibull", coef = list(shape = 3))
 #' )
-#' cop_scat_plot(traj = traj, n = 50)
-#' cop_scat_plot(copula = cyl_quadsec(0.1), n = 50)
+#' plot_cop_scat(traj = traj)
+#'
+#' sample <- rcylcop(100,cyl_quadsec(0.1))
+#' plot_cop_scat(u = sample[,1], v = sample[,2])
 #'
 #' @references \insertRef{Hodelappl}{cylcop}
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{traj_plot}()},
-#' \code{\link{circ_plot}()}, \code{\link{cop_plot}()}, \code{\link{scat_plot}()}.
+#' @seealso \code{\link{plot_track}()},
+#' \code{\link{plot_joint_circ}()}, \code{\link{plot_cop_surf}()}, \code{\link{plot_joint_scat}()}.
 #'
 #' @export
 #'
-cop_scat_plot <- function(traj = NULL, copula = NULL, n=NULL) {
+plot_cop_scat <- function(traj = NULL,
+                          u = NULL,
+                          v = NULL) {
   tryCatch({
-    check_arg_all(list(check_argument_type(traj,
-                                           type=c("data.frame", "list")),
-                       check_argument_type(traj,
-                                           type="NULL")
+    check_arg_all(list(
+      check_argument_type(traj,
+                          type = c("data.frame", "list")),
+      check_argument_type(traj,
+                          type = "NULL")
     )
-    ,2)
-    check_arg_all(list(check_argument_type(copula,
-                                           type="Copula"),
-                       check_argument_type(copula,
-                                           type="cyl_copula"),
-                       check_argument_type(copula,
-                                           type="NULL")
+    , 2)
+    check_arg_all(list(
+      check_argument_type(u,
+                          type = "numeric",
+                          lower = 0,
+                          upper =1),
+      check_argument_type(u,
+                          type = "NULL")
     )
-    ,3)
-    check_arg_all(list(check_argument_type(n,
-                                           type="numeric",
-                                           integer=T,
-                                           length=1,
-                                           lower=1),
-                       check_argument_type(n,
-                                           type="NULL")
+    , 2)
+    check_arg_all(list(
+      check_argument_type(v,
+                          type = "numeric",
+                          lower = 0,
+                          upper =1),
+      check_argument_type(v,
+                          type = "NULL")
     )
-    ,2)
+    , 2)
   },
   error = function(e) {
     error_sound()
     rlang::abort(conditionMessage(e))
+  })
+
+  if ((is.null(u) &&
+       !is.null(v)) || (!is.null(u) && is.null(v))) {
+    stop(error_sound(), "Specify pseudo-observations u AND v!")
   }
-  )
-
-  if((is.null(traj) && is.null(copula)) || (!is.null(traj) && !is.null(copula)) ){
-    stop(error_sound(), "Specify either the trajectory or a copula")
+  if (is.null(traj) && (is.null(u) || is.null(v))) {
+    stop(error_sound(),
+         "Specify either the trajectory or pseudo-observations!")
+  }
+  if (!is.null(traj) && (!is.null(u) || !is.null(v))) {
+    stop(error_sound(),
+         "Specify either the trajectory or pseudo-observations!")
+  }
+  if (length(u) != length(v)) {
+    stop(error_sound(), "u and v must have the same length!")
   }
 
 
+  if (!is.null(u)) {
+    traj <- data.frame(cop_u = u, cop_v = v)
+  }
 
-  if (!is.null(copula)){
-    if(is.null(n)){
-      n <- 10000
-    }
-    sample <- rcylcop(n,copula)
-    trajectory <- data.frame(cop_u=sample[,1], cop_v=sample[,2])
-  } else{
-    if(!all(c("cop_u","cop_v") %in% colnames(traj))){
-      stop(error_sound(), "trajectory must contain the columns 'cop_u' and 'cop_v'")
-    }
-    if(is.null(n)){
-      trajectory <- traj
-    }else{
-      if(n>nrow(traj)){
-        stop(error_sound(), "n must not be be larger than the number of rows in traj.")
-      }
-      ind <- sample(seq(1,nrow(traj)),size=n,replace=FALSE)
-      trajectory <- traj[ind,]
-    }
+  if (!all(c("cop_u", "cop_v") %in% colnames(traj))) {
+    stop(error_sound(),
+         "trajectory must contain the columns 'cop_u' and 'cop_v'")
+  }
 
+  if (any(is.na(traj$cop_u)) || any(is.na(traj$cop_v))) {
+    traj <-
+      traj[-c(union(which(is.na(traj$cop_u)), which(is.na(
+        traj$cop_v
+      )))),]
   }
 
   plot_theme <- list(
-    geom_point(size=0.01,alpha=0.5),
+    geom_point(size = 0.01, alpha = 0.5),
     theme(legend.position = "none"),
     theme_bw(),
     xlab("v"),
@@ -847,9 +951,13 @@ cop_scat_plot <- function(traj = NULL, copula = NULL, n=NULL) {
   )
 
   p <-
-    ggplot(trajectory, aes(x = .data$cop_v, y = .data$cop_u)) +
-    scale_y_continuous(breaks = seq(0, 1, 0.2),limits=c(0,1),expand=c(0,0)) +
-    scale_x_continuous(limits=c(0,1),expand=c(0,0))+
+    ggplot(traj, aes(x = .data$cop_v, y = .data$cop_u)) +
+    scale_y_continuous(
+      breaks = seq(0, 1, 0.2),
+      limits = c(0, 1),
+      expand = c(0, 0)
+    ) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     plot_theme +
     coord_fixed()
   return(suppressWarnings(cowplot::ggdraw(p)))
@@ -883,29 +991,29 @@ cop_scat_plot <- function(traj = NULL, copula = NULL, n=NULL) {
 #'
 #' @examples
 #' if(interactive()){
-#'  cop_plot(copula::frankCopula(2),
+#'  plot_cop_surf(copula::frankCopula(2),
 #'    type="pdf",
 #'    plot_type="ggplot",
 #'    resolution = 5
 #'  )
-#'  cop_plot(copula::frankCopula(2),
+#'  plot_cop_surf(copula::frankCopula(2),
 #'    type="cdf",
 #'    plot_type="ggplot",
 #'    resolution = 5
 #'  )
 #'
 #' #opens a new window
-#'   cop_plot(cyl_quadsec(0.1),
+#'   plot_cop_surf(cyl_quadsec(0.1),
 #'     type="pdf",
 #'     plot_type="rgl"
 #'   )
-#'   cop_plot(cyl_quadsec(0.1),
+#'   plot_cop_surf(cyl_quadsec(0.1),
 #'     type="pdf",
 #'     plot_type="rgl",
 #'     n_gridlines = 60
 #'   )
 #'
-#'   cop_plot(cyl_quadsec(0.1),
+#'   plot_cop_surf(cyl_quadsec(0.1),
 #'     type="pdf",
 #'     plot_type="plotly",
 #'     n_gridlines = 10,
@@ -917,67 +1025,83 @@ cop_scat_plot <- function(traj = NULL, copula = NULL, n=NULL) {
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
-#' \code{\link{circ_plot}()}, \code{\link{scat_plot}()}.
+#' @seealso \code{\link{plot_cop_scat}()}, \code{\link{plot_track}()},
+#' \code{\link{plot_joint_circ}()}, \code{\link{plot_joint_scat}()}.
 #'
 #' @export
 #'
-cop_plot <- function(copula,
+plot_cop_surf <- function(copula,
                      type = "pdf",
                      plot_type = "rgl",
                      resolution = 50,
                      n_gridlines = 11) {
-
   #validate input
   tryCatch({
-    check_arg_all(list(check_argument_type(copula,
-                                           type="Copula"),
-                       check_argument_type(copula,
-                                           type="cyl_copula")
+    check_arg_all(list(
+      check_argument_type(copula,
+                          type = "Copula"),
+      check_argument_type(copula,
+                          type = "cyl_copula")
     )
-    ,2)
-    check_arg_all(check_argument_type(argument = type,
-                                      type = "character",
-                                      values = c("pdf", "cdf"),
-                                      length=1)
-                  ,1)
-    check_arg_all(check_argument_type(plot_type,
-                                      type = "character",
-                                      values = c("rgl", "plotly", "ggplot"),
-                                      length=1)
-                  ,1)
-    check_arg_all(check_argument_type(resolution,
-                                      type="numeric",
-                                      integer=T,
-                                      length=1,
-                                      lower=1)
-                  ,1)
-    check_arg_all(check_argument_type(n_gridlines,
-                                      type="numeric",
-                                      integer=T,
-                                      length=1,
-                                      lower=0)
-                  ,1)
+    , 2)
+    check_arg_all(check_argument_type(
+      argument = type,
+      type = "character",
+      values = c("pdf", "cdf"),
+      length = 1
+    )
+    ,
+    1)
+    check_arg_all(check_argument_type(
+      plot_type,
+      type = "character",
+      values = c("rgl", "plotly", "ggplot"),
+      length = 1
+    )
+    ,
+    1)
+    check_arg_all(
+      check_argument_type(
+        resolution,
+        type = "numeric",
+        integer = T,
+        length = 1,
+        lower = 1
+      )
+      ,
+      1
+    )
+    check_arg_all(
+      check_argument_type(
+        n_gridlines,
+        type = "numeric",
+        integer = T,
+        length = 1,
+        lower = 0
+      )
+      ,
+      1
+    )
   },
   error = function(e) {
     error_sound()
     rlang::abort(conditionMessage(e))
-  }
-  )
+  })
 
-#check input
+  #check input
 
-   if (type == "pdf")
+  if (type == "pdf")
     fun <- dcylcop
   else if (type == "cdf")
     fun <- pcylcop
   else
     stop(error_sound(), "Type must be either cdf or pdf")
 
-  if(cylcop.env$silent==F)  printCop(copula)
+  if (cylcop.env$silent == F)
+    printCop(copula)
 
 
-# Generate matrix of values
+  # Generate matrix of values
 
   u <- seq(0, 1, length.out = resolution)
   v <- seq(0, 1, length.out = resolution)
@@ -997,7 +1121,6 @@ cop_plot <- function(copula,
   # v_grid[length(v_grid)] <- 0.99999999
 
   if (plot_type == "rgl" || plot_type == "plotly") {
-
     mat <- as.matrix(expand.grid(u = u, v = v))
 
     #set time for progress bar
@@ -1006,14 +1129,17 @@ cop_plot <- function(copula,
 
     #calculate first and last slice of values to get an idea of the time it takes on average
 
-    outp <- rep(NA, resolution^2)
-    outp[1:resolution] <- fun(mat[1:resolution,],copula)
-    outp[(nrow(mat)-resolution+1):nrow(mat)] <- fun(mat[(nrow(mat)-resolution+1):nrow(mat),],copula)
+    outp <- rep(NA, resolution ^ 2)
+    outp[seq_len(resolution)] <-
+      fun(mat[seq_len(resolution),], copula)
+    outp[(nrow(mat) - resolution + 1):nrow(mat)] <-
+      fun(mat[(nrow(mat) - resolution + 1):nrow(mat),], copula)
 
 
-    if(cylcop.env$silent==F){
+    if (cylcop.env$silent == F) {
       #generate progressbar
-      time <- (proc.time() - ptm)[3] * resolution / 2 %>% as.integer()
+      time <-
+        (proc.time() - ptm)[3] * resolution / 2 %>% as.integer()
       if (time > 10) {
         message(
           "estimated time for calculation of surface: ",
@@ -1028,38 +1154,53 @@ cop_plot <- function(copula,
 
     #calculate rest of grid
     for (i in seq(2, resolution - 1)) {
-      outp[((i-1)*resolution+1):(i*resolution)] <- fun(mat[((i-1)*resolution+1):(i*resolution),],copula)
-      if (time > 10 && cylcop.env$silent==F){
+      outp[((i - 1) * resolution + 1):(i * resolution)] <-
+        fun(mat[((i - 1) * resolution + 1):(i * resolution),], copula)
+      if (time > 10 && cylcop.env$silent == F) {
         utils::setTxtProgressBar(pb, i)
-        if(i==resolution/2) waiting_sound()
+        if (i == resolution / 2)
+          waiting_sound()
       }
     }
-    if (time > 10 && cylcop.env$silent==F){
+    if (time > 10 && cylcop.env$silent == F) {
       close(pb)
       done_sound()
     }
 
-    quant_995 <- quantile(outp,probs = 0.995)
+    quant_995 <- quantile(outp, probs = 0.995)
     max_outp <- max(outp)
-    if(max_outp>(2*quant_995)){
-      outp[which(outp>quant_995)] <- quant_995
+    if (max_outp > (2 * quant_995)) {
+      outp[which(outp > quant_995)] <- quant_995
       warning(
         warning_sound(),
-        paste0("Maximum of ", type, " is ", round(max_outp,2),
-               "; for better visulatization,\n values larger than ",
-               round(quant_995,2), " (99.5 percentile) are cut off.")
+        paste0(
+          "Maximum of ",
+          type,
+          " is ",
+          round(max_outp, 2),
+          "; for better visulatization,\n values larger than ",
+          round(quant_995, 2),
+          " (99.5 percentile) are cut off."
+        )
       )
     }
 
-    mat <- matrix(outp, ncol = resolution, nrow=resolution, byrow = F)
+    mat <-
+      matrix(outp,
+             ncol = resolution,
+             nrow = resolution,
+             byrow = F)
 
 
 
     #if gridlines are at already calculated gridvalues, no need to recalculate them
     if ((resolution - 1) %% (n_gridlines - 1) == 0) {
-      if(n_gridlines==0) mat_grid <- u_grid else{
-        mat_grid <- mat[seq(1, resolution, (resolution - 1) / (n_gridlines - 1)),
-            seq(1, resolution, (resolution - 1) / (n_gridlines - 1))]
+      if (n_gridlines == 0)
+        mat_grid <- u_grid
+      else{
+        mat_grid <-
+          mat[seq(1, resolution, (resolution - 1) / (n_gridlines - 1)),
+              seq(1, resolution, (resolution - 1) / (n_gridlines - 1))]
       }
     }
 
@@ -1068,24 +1209,32 @@ cop_plot <- function(copula,
       time <- time / (resolution ^ 2)
 
       #Calculate timing
-      if (time * (n_gridlines ^ 2) > 10 && cylcop.env$silent==F) {
+      if (time * (n_gridlines ^ 2) > 10 && cylcop.env$silent == F) {
         message(
           "gridlines are not a multiple of the surface points and have to be newly calculated.\nThis will take ",
           floor(time * (n_gridlines ^ 2) / 60),
           " minutes, ",
-          round((time * (n_gridlines ^ 2)) - 60 * floor(time * (n_gridlines ^ 2) / 60)),
+          round((time * (
+            n_gridlines ^ 2
+          )) - 60 * floor(time * (
+            n_gridlines ^ 2
+          ) / 60)),
           " seconds"
         )
       }
 
       #calculate values for gridlines
       mat_grid <- as.matrix(expand.grid(u = u_grid, v = v_grid))
-      quant_995 <- quantile(outp,probs = 0.995)
-      outp_grid <- fun(mat_grid,copula)
-      if(max_outp>(2*quant_995)){
-        outp_grid[which(outp_grid>quant_995)] <- quant_995
+      quant_995 <- quantile(outp, probs = 0.995)
+      outp_grid <- fun(mat_grid, copula)
+      if (max_outp > (2 * quant_995)) {
+        outp_grid[which(outp_grid > quant_995)] <- quant_995
       }
-      mat_grid <- matrix(outp_grid, ncol = n_gridlines, nrow=n_gridlines, byrow = F)
+      mat_grid <-
+        matrix(outp_grid,
+               ncol = n_gridlines,
+               nrow = n_gridlines,
+               byrow = F)
     }
 
     #------------Make surface plot with rgl------
@@ -1110,11 +1259,13 @@ cop_plot <- function(copula,
         if (length(copula@parameters) > 1) {
           for (i in 2:length(copula@parameters)) {
             parameter_summary <-
-              paste(parameter_summary,
-                    ", ",
-                    copula@param.names[i],
-                    " = ",
-                    round(copula@parameters[i],3))
+              paste(
+                parameter_summary,
+                ", ",
+                copula@param.names[i],
+                " = ",
+                round(copula@parameters[i], 3)
+              )
           }
         }
         title <-
@@ -1140,23 +1291,24 @@ cop_plot <- function(copula,
           "C(u,v)",
         expand = 0
       ) +      rgl::light3d(theta = 0, phi = 30) +
-        rgl::title3d(main = title)+
-        (if(n_gridlines>0){rgl::surface3d(
-          u_grid,
-          v_grid,
-          mat_grid,
-          color = "black",
-          lit = FALSE,
-          front = "lines",
-          back = "lines"
-        )} )
+        rgl::title3d(main = title) +
+        (if (n_gridlines > 0) {
+          rgl::surface3d(
+            u_grid,
+            v_grid,
+            mat_grid,
+            color = "black",
+            lit = FALSE,
+            front = "lines",
+            back = "lines"
+          )
+        })
     }
 
 
     #------------Make interactive surface plot with plotly------
 
     else if (plot_type == "plotly") {
-
       #set color gradient
       col <- vector("list", 50)
       for (i in 1:50) {
@@ -1203,11 +1355,13 @@ cop_plot <- function(copula,
         if (length(copula@parameters) > 1) {
           for (i in 2:length(copula@parameters)) {
             parameter_summary <-
-              paste(parameter_summary,
-                    ", ",
-                    copula@param.names[i],
-                    " = ",
-                    round(copula@parameters[i],3))
+              paste(
+                parameter_summary,
+                ", ",
+                copula@param.names[i],
+                " = ",
+                round(copula@parameters[i], 3)
+              )
           }
         }
         title <-
@@ -1246,7 +1400,7 @@ cop_plot <- function(copula,
 
 
       # Add gridlines
-      if(n_gridlines>0){
+      if (n_gridlines > 0) {
         for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
           p <-
             add_trace(
@@ -1264,7 +1418,7 @@ cop_plot <- function(copula,
                 reverscale = FALSE
               )
             )
-          }
+        }
         for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
           p <-
             add_trace(
@@ -1331,37 +1485,47 @@ cop_plot <- function(copula,
     }
   }
 
-#------------Make heatmap with ggplot------
+  #------------Make heatmap with ggplot------
   else{
-
-# Calculate values on grid. Different grid layout, than plotly and rgl
+    # Calculate values on grid. Different grid layout, than plotly and rgl
 
     outp <- expand.grid(u = u, v = v)
     #outp$z <- pmap_dbl(outp,  ~ fun(c(.x, .y), copula))
-    outp$z <-  fun(as.matrix(outp[,1:2]), copula)
-    quant_995 <- quantile(outp$z,probs = 0.995)
+    outp$z <-  fun(as.matrix(outp[, 1:2]), copula)
+    quant_995 <- quantile(outp$z, probs = 0.995)
     max_outp <- max(outp$z)
-    if(max_outp>(2*quant_995)){
-      outp$z[which(outp$z>quant_995)] <- quant_995
+    if (max_outp > (2 * quant_995)) {
+      outp$z[which(outp$z > quant_995)] <- quant_995
       warning(
         warning_sound(),
-        paste0("Maximum of ", type, " is ", round(max_outp,2),
-               "; for better visulatization,\n values larger than ",
-               round(quant_995,2), " (99.5 percentile) are cut off.")
+        paste0(
+          "Maximum of ",
+          type,
+          " is ",
+          round(max_outp, 2),
+          "; for better visulatization,\n values larger than ",
+          round(quant_995, 2),
+          " (99.5 percentile) are cut off."
+        )
       )
     }
 
-# Make plot
+    # Make plot
 
     p <- ggplot(outp, aes(v, u)) +
-      geom_raster(aes(fill = .data$z),interpolate = T,hjust=0,vjust=0) +
+      geom_raster(
+        aes(fill = .data$z),
+        interpolate = T,
+        hjust = 0,
+        vjust = 0
+      ) +
       coord_fixed() +
       theme_bw() +
       labs(fill = if (type == "pdf")
         "c(u,v)"
         else
           "C(u,v)") +
-      scale_fill_gradientn(colours = inferno(1000),limits=c(0, max(outp$z))) +
+      scale_fill_gradientn(colours = inferno(1000), limits = c(0, max(outp$z))) +
       theme(
         panel.background = element_rect(fill = NA),
         panel.ontop = TRUE,
@@ -1385,14 +1549,14 @@ cop_plot <- function(copula,
         size = 0.8,
         alpha = 0.25
       ) +
-      scale_x_continuous(limits=c(0,1),expand=c(0,0)) +
-      scale_y_continuous(limits=c(0,1),expand=c(0,0))
+      scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+      scale_y_continuous(limits = c(0, 1), expand = c(0, 0))
     suppressWarnings(plot(p))
   }
 }
 
 
-#' Cricular Boxplot of Turn Angles and Step Lengths
+#' Circular Boxplot of Turn Angles and Step Lengths
 #'
 #' This function produces circular boxplots (a '\code{\link[ggplot2]{ggplot}}' object)
 #' of the turn angles corresponding to specific quantiles of the step lengths.
@@ -1404,7 +1568,7 @@ cop_plot <- function(copula,
 #' The median of the turn angles is defined as the center of the shortest arc
 #' that connects all points. The length of the whiskers is 1.5 times the interquartile range.
 #' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
-#' \code{\link{make_traj}()}. It must contain
+#' \code{\link{traj_sim}()}. It must contain
 #'  the columns \code{traj$angle} and \code{traj$steplength}.
 #' @param theta (alternatively) \link[base]{numeric} \link[base]{vector} of angles
 #' (measurements of a circular variable) or "circular" component of pseudo-observations.
@@ -1429,12 +1593,12 @@ cop_plot <- function(copula,
 #' If entered "by hand", the named list describing the marginal linear distribution
 #' (for \code{marginal_lin}) must contain 2 entries:
 #' \enumerate{
-#'    \item{name:
+#'    \item{\code{name}:
 #' a \link[base]{character} string denoting the name of the linear distribution,
 #' i.e. the name of its
 #'    distribution function without the "p",
 #'   e.g. "norm" for normal distribution.}
-#'    \item{coef: a named list containing the parameters of the distribution
+#'    \item{\code{coef}: a named list containing the parameters of the distribution
 #'    given in \code{"name"}.}
 #' }
 #'
@@ -1442,14 +1606,14 @@ cop_plot <- function(copula,
 #'
 #' @examples set.seed(1234)
 #'
-#' traj <- make_traj(100,
+#' traj <- traj_sim(100,
 #'   copula = cyl_rect_combine(copula::frankCopula(6)),
 #'   marginal_circ = list(name= "vonmises", coef=list(0, 2)),
 #'   marginal_lin = list(name = "weibull", coef=list(shape=3))
 #' )
 #'
-#' plot1 <- circ_box_plot(traj)
-#' plot2 <- circ_box_plot(traj,
+#' plot1 <- plot_joint_box(traj)
+#' plot2 <- plot_joint_box(traj,
 #'   marginal_lin=list(name = "weibull", coef=list(shape=3))
 #')
 #'
@@ -1457,517 +1621,732 @@ cop_plot <- function(copula,
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{cop_scat_plot}()}, \code{\link{traj_plot}()},
-#' \code{\link{circ_plot}()}, \code{\link{cop_plot}()}.
+#' @seealso \code{\link{plot_cop_scat}()}, \code{\link{plot_track}()},
+#' \code{\link{plot_joint_circ}()}, \code{\link{plot_cop_surf}()}.
 #'
 #' @export
 #'
-circ_box_plot <- function(traj=NULL, theta = NULL, x = NULL, levels=5, marginal_lin=NULL,
-                          spacing=0.3, legend_pos="right") {
-  #validate input
-  tryCatch({
-    check_arg_all(list(check_argument_type(traj,
-                                           type=c("data.frame", "list")),
-                       check_argument_type(traj,
-                                           type="NULL")
-    )
-    ,2)
-    check_arg_all(list(check_argument_type(theta,
-                                           type="numeric"),
-                       check_argument_type(theta,
-                                           type="NULL"))
-                  ,2)
-    check_arg_all(list(check_argument_type(x,
-                                           type="numeric"),
-                       check_argument_type(x,
-                                           type="NULL"))
-                  ,2)
-    check_arg_all(check_argument_type(levels,
-                                      type="numeric",
-                                      length = 1,
-                                      integer = T,
-                                      lower = 1)
-                  ,1)
-    check_arg_all(list(check_argument_type(marginal_lin,
-                                           type="list"),
-                       check_argument_type(marginal_lin,
-                                           type="density"),
-                       check_argument_type(marginal_lin,
-                                           type="NULL"))
-                  ,3)
-    check_arg_all(check_argument_type(spacing,
-                                      type="numeric",
-                                      length = 1,
-                                      lower = 0)
-                  ,1)
-    check_arg_all(check_argument_type(legend_pos,
-                                      type="character",
-                                      length = 1,
-                                      values=c("left","right","top","bottom"))
-                  ,1)
-  },
-  error = function(e) {
-    error_sound()
-    rlang::abort(conditionMessage(e))
-  }
-  )
-  if((is.null(theta) && !is.null(x))||(!is.null(theta) && is.null(x))){
-    stop(error_sound(), "Specify angles AND step lengths")
-  }
-  if(is.null(traj) &&(is.null(theta)||is.null(x))){
-    stop(error_sound(), "Specify either the trajectory or angles and steplengths")
-  }
-  if(!is.null(traj) && (!is.null(theta)|| !is.null(x))){
-    stop(error_sound(), "Specify either the trajectory or angles and steplengths")
-  }
-if(!is.null(marginal_lin)){
-  if("density" %in% is(marginal_lin)){
-    parameter_lin <- marginal_lin
-    marginal_lin <- "dens"
-  }else{
-    if(!all(c("name", "coef") %in% names(marginal_lin))){
+plot_joint_box <-
+  function(traj = NULL,
+           theta = NULL,
+           x = NULL,
+           levels = 5,
+           marginal_lin = NULL,
+           spacing = 0.3,
+           legend_pos = "right") {
+    #validate input
+    tryCatch({
+      check_arg_all(list(
+        check_argument_type(traj,
+                            type = c("data.frame", "list")),
+        check_argument_type(traj,
+                            type = "NULL")
+      )
+      , 2)
+      check_arg_all(list(
+        check_argument_type(theta,
+                            type = "numeric"),
+        check_argument_type(theta,
+                            type = "NULL")
+      )
+      , 2)
+      check_arg_all(list(
+        check_argument_type(x,
+                            type = "numeric"),
+        check_argument_type(x,
+                            type = "NULL")
+      )
+      , 2)
+      check_arg_all(
+        check_argument_type(
+          levels,
+          type = "numeric",
+          length = 1,
+          integer = T,
+          lower = 1,
+          upper = 15
+        )
+        ,
+        1
+      )
+      check_arg_all(list(
+        check_argument_type(marginal_lin,
+                            type = "list"),
+        check_argument_type(marginal_lin,
+                            type = "density"),
+        check_argument_type(marginal_lin,
+                            type = "NULL")
+      )
+      ,
+      3)
+      check_arg_all(check_argument_type(
+        spacing,
+        type = "numeric",
+        length = 1,
+        lower = 0,
+        upper = 10
+      )
+      ,
+      1)
+      check_arg_all(check_argument_type(
+        legend_pos,
+        type = "character",
+        length = 1,
+        values = c("left", "right", "top", "bottom")
+      )
+      ,
+      1)
+    },
+    error = function(e) {
+      error_sound()
+      rlang::abort(conditionMessage(e))
+    })
+
+    expand <- 1
+    # IQR_fac: positive value determining the lengths of the whiskers of
+    # the boxplots as factor of their interquartile ranges. All points falling outside the whiskers
+    # are considered outliers.
+    IQR_fac <- 1.5
+    levels <- as.integer(levels)
+
+    if (IQR_fac < 0) {
+      stop("The length of the boxplot whiskers must be larger than 0")
+    }
+
+    if ((is.null(theta) &&
+         !is.null(x)) || (!is.null(theta) && is.null(x))) {
+      stop(error_sound(), "Specify angles AND step lengths")
+    }
+    if (is.null(traj) && (is.null(theta) || is.null(x))) {
       stop(error_sound(),
-           "marginal_lin must be a density object or list containing
+           "Specify either the trajectory or angles and steplengths")
+    }
+    if (!is.null(traj) && (!is.null(theta) || !is.null(x))) {
+      stop(error_sound(),
+           "Specify either the trajectory or angles and steplengths")
+    }
+    if (!is.null(marginal_lin)) {
+      if ("density" %in% is(marginal_lin)) {
+        parameter_lin <- marginal_lin
+        marginal_lin <- "dens"
+      } else{
+        if (!all(c("name", "coef") %in% names(marginal_lin))) {
+          stop(
+            error_sound(),
+            "marginal_lin must be a density object or list containing
              the entries 'name' and 'coef'."
+          )
+        }
+        if (!is.character(marginal_lin$name)) {
+          stop(error_sound(),
+               "In marginal_lin: name must be of type character.")
+        }
+        if (!is.list(marginal_lin$coef)) {
+          stop(error_sound(),
+               "In marginal_lin: coef must be of type list.")
+        }
+        parameter_lin <- marginal_lin$coef
+        marginal_lin <- marginal_lin$name
+      }
+    } else{
+      parameter_lin <- NULL
+      marginal_lin <- NULL
+    }
+
+    if (!is.null(theta)) {
+      traj <- data.frame(angle = theta, steplength = x)
+    }
+
+    if (any(is.na(traj$angle)) || any(is.na(traj$steplength))) {
+      traj <-
+        traj[-c(union(which(is.na(traj$angle)), which(is.na(
+          traj$steplength
+        )))),]
+    }
+
+    plot_data <-
+      calc_plot_data(
+        traj = traj,
+        marginal_lin = marginal_lin,
+        parameter_lin = parameter_lin,
+        IQR_fac = IQR_fac,
+        spacing = spacing,
+        levels = levels,
+        expand = expand
       )
-    }
-    if(!is.character(marginal_lin$name)){
-      stop(error_sound(),
-           "In marginal_lin: name must be of type character."
-      )
-    }
-    if(!is.list(marginal_lin$coef)){
-      stop(error_sound(),
-           "In marginal_lin: coef must be of type list."
-      )
-    }
-    parameter_lin <- marginal_lin$coef
-    marginal_lin <- marginal_lin$name
-  }
-}else{
-  parameter_lin <- NULL
-  marginal_lin <- NULL
-}
 
-  if(!is.null(theta)){
-    traj <- data.frame(angle=theta, steplength=x)
+    make_plot(
+      box = plot_data$box,
+      box_border = plot_data$box_border,
+      medians = plot_data$medians,
+      whiskers = plot_data$whiskers,
+      endbars = plot_data$endbars,
+      outliers = plot_data$outliers,
+      dat_jitter = plot_data$dat_jitter,
+      quant = plot_data$quant,
+      spacing = spacing,
+      levels = levels,
+      legend_pos = legend_pos,
+      expand = expand
+    )
   }
 
-  expand <- 1
-  # IQR_fac: positive value determining the lengths of the whiskers of
-  # the boxplots as factor of their interquartile ranges. All points falling outside the whiskers
-  # are considered outliers.
-  IQR_fac <- 1.5
+calc_plot_data <-
+  function(traj,
+           marginal_lin,
+           parameter_lin,
+           IQR_fac,
+           spacing,
+           levels,
+           expand) {
+    box_heights <-
+      cbind(seq(spacing, (levels - 1 + (spacing * levels)), length.out = levels),
+            seq((1 + spacing), (levels + (spacing * levels)), length.out = levels))
 
-  if(any(is.na(traj$angle)) || any(is.na(traj$steplength))){
-  traj <- traj[-c(union(which(is.na(traj$angle)),which(is.na(traj$steplength)))),]
-  }
+    quant <-
+      quantile(traj$steplength, seq(0, 1, length.out = (levels + 1))[-1])
 
-  if(is.null(marginal_lin)){
-    if(!is.null(parameter_lin)){
-      stop("Parameters for the marginal distribution are specified
-           but the name of the distribution is missing!")
+    if (!is.null(marginal_lin)) {
+      r <- get_marg(marginal_lin)$r
+      marginal_dist_sample <-
+        do.call(r, c(n = 100000, parameter_lin))
+      quant <-
+        quantile(marginal_dist_sample, seq(0, 1, length.out = (levels + 1))[-1])
     }
-  }
 
-  if(!is.null(marginal_lin)){
-    if(is.null(parameter_lin)){
-      stop("Parameters for the marginal distirbution are missing!")
+    traj$quant <- 1
+    for (i in 2:levels) {
+      traj$quant[traj$steplength > quant[(i - 1)]] <- i
     }
-  }
-  levels <- as.integer(levels)
-  if(levels<1 || levels > 15){
-    stop("The number of step length quantiles must be between 1 and 15!")
-  }
+    traj$quant <- as.factor(traj$quant)
+    quant_ang <- matrix(ncol = 3, nrow = levels)
+    for (i in seq_len(levels)) {
+      angle <- half2full_circ(traj$angle[traj$quant == i])
+      quant_ang[i, 2] <-
+        circular::median.circular(circular::circular(angle, modulo = "2pi", zero = 0))
+      opposite_median <- (quant_ang[i, 2] + pi) %% (2 * pi)
+      if (opposite_median < quant_ang[i, 2]) {
+        angle_above_median1 <- which(angle > quant_ang[i, 2])
+        angle_above_median2 <- which(angle < opposite_median)
+        angle[angle_above_median2] <-
+          angle[angle_above_median2] + (2 * pi)
+        angle_above_median <-
+          c(angle_above_median1, angle_above_median2)
+        quant_ang[i, 3] <- median(angle[angle_above_median])
+        angle[angle_above_median2] <-
+          angle[angle_above_median2] - (2 * pi)
+        if (quant_ang[i, 3] > (2 * pi))
+          quant_ang[i, 3] <- quant_ang[i, 3] - (2 * pi)
+        quant_ang[i, 1] <- median(angle[-angle_above_median])
 
-  if(spacing<0 || spacing > 10){
-    stop("The spacing must be between 0 and 10!")
-  }
-
-  if(IQR_fac<0){
-    stop("The length of the boxplot whiskers must be larger than 0")
-  }
-
-  if(!legend_pos %in% c("top", "bottom", "left", "right")){
-    stop("The legend position must be either 'left', 'right', 'top', or 'bottom'")
-  }
-
-  box_heights<-cbind(seq(spacing, (levels-1+(spacing*levels)),length.out = levels),
-                     seq((1+spacing),(levels+(spacing*levels)),length.out = levels))
-  #set the breaks for the gridlines of the plot
-  y_breaks <- sort(c(c(box_heights),(max(box_heights)+spacing)))
-  x_breaks <- seq(-0.75 * pi, pi, 0.25 * pi)
-
-  quant <- quantile(traj$steplength,seq(0,1,length.out = (levels+1))[-1])
-
-  if(!is.null(marginal_lin)){
-    r <- get_marg(marginal_lin)$r
-    marginal_dist_sample <- do.call(r, c(n=1000000,parameter_lin))
-    quant <- quantile(marginal_dist_sample,seq(0,1,length.out = (levels+1))[-1])
-  }
-
-  traj$quant<-1
-  for (i in 2:levels) {
-    traj$quant[traj$steplength>quant[(i-1)]]<-i
-  }
-  traj$quant<-as.factor(traj$quant)
-  quant_ang<-matrix(ncol=3,nrow=levels)
-  for (i in 1:levels) {
-    angle <- half2full_circ(traj$angle[traj$quant==i])
-    quant_ang[i,2] <- circular::median.circular(circular::circular(angle,modulo = "2pi", zero = 0))
-    opposite_median <- (quant_ang[i,2]+pi)%%(2*pi)
-    if(opposite_median<quant_ang[i,2]){
-      angle_above_median1 <- which(angle>quant_ang[i,2])
-      angle_above_median2 <- which(angle<opposite_median)
-      angle[angle_above_median2]<-angle[angle_above_median2]+(2*pi)
-      angle_above_median<-c(angle_above_median1,angle_above_median2)
-      quant_ang[i,3]<-median(angle[angle_above_median])
-      angle[angle_above_median2]<-angle[angle_above_median2]-(2*pi)
-      if(quant_ang[i,3]>(2*pi)) quant_ang[i,3]<-quant_ang[i,3]-(2*pi)
-      quant_ang[i,1]<-median(angle[-angle_above_median])
-
+      }
+      if (opposite_median >= quant_ang[i, 2]) {
+        angle_below_median1 <- which(angle < quant_ang[i, 2])
+        angle_below_median2 <- which(angle > opposite_median)
+        angle[angle_below_median2] <-
+          angle[angle_below_median2] - (2 * pi)
+        angle_below_median <-
+          c(angle_below_median1, angle_below_median2)
+        quant_ang[i, 1] <- median(angle[angle_below_median])
+        angle[angle_below_median2] <-
+          angle[angle_below_median2] + (2 * pi)
+        if (quant_ang[i, 1] < 0)
+          quant_ang[i, 1] <- quant_ang[i, 1] + (2 * pi)
+        quant_ang[i, 3] <- median(angle[-angle_below_median])
+      }
+      quant_ang[i,] <- full2half_circ(quant_ang[i,])
+      if (quant_ang[i, 1] > quant_ang[i, 3]) {
+        temp <- quant_ang[i, 1]
+        quant_ang[i, 1] <- quant_ang[i, 3]
+        quant_ang[i, 3] <- temp
+      }
     }
-    if(opposite_median>=quant_ang[i,2]){
-      angle_below_median1 <- which(angle<quant_ang[i,2])
-      angle_below_median2 <- which(angle>opposite_median)
-      angle[angle_below_median2]<-angle[angle_below_median2]-(2*pi)
-      angle_below_median<-c(angle_below_median1,angle_below_median2)
-      quant_ang[i,1]<-median(angle[angle_below_median])
-      angle[angle_below_median2]<-angle[angle_below_median2]+(2*pi)
-      if(quant_ang[i,1]<0) quant_ang[i,1]<-quant_ang[i,1]+(2*pi)
-      quant_ang[i,3]<-median(angle[-angle_below_median])
-    }
-    quant_ang[i,] <- full2half_circ(quant_ang[i,])
-    if(quant_ang[i,1]>quant_ang[i,3]){
-      temp<-quant_ang[i,1]
-      quant_ang[i,1]<-quant_ang[i,3]
-      quant_ang[i,3]<-temp
-    }
-  }
 
-  box<-vector(mode = "list", length = levels)
-  box_border_x <- vector(mode = "list", length = levels)
-  box_border_y <- vector(mode = "list", length = levels)
-  medians <- vector(mode = "list", length = levels)
-  whiskers <- vector(mode = "list", length = levels)
-  endbars <- vector(mode = "list", length = levels)
-  outliers <- vector(mode = "list", length = levels)
-  dat_jitter <- vector(mode = "list", length = levels)
-  clockwise <- rep(T,levels)
-  for (i in 1:levels) {
-    if(quant_ang[i,1]<0 && quant_ang[i,2]>0 && quant_ang[i,2]>quant_ang[i,3]){
-      box[[i]] <- rbind(cbind(-pi,quant_ang[i,1], box_heights[i,1], box_heights[i,2]),
-                        cbind(pi,quant_ang[i,2], box_heights[i,1], box_heights[i,2]),
-                        cbind(quant_ang[i,3],quant_ang[i,2], box_heights[i,1], box_heights[i,2]))
-      clockwise[i] <- F
-    }
-    else if(quant_ang[i,2]<0 && quant_ang[i,3]>0 && quant_ang[i,1]>=quant_ang[i,2]){
-      box[[i]]<-rbind(cbind(quant_ang[i,1], quant_ang[i,2],box_heights[i,1], box_heights[i,2]),
-                      cbind(quant_ang[i,2],-pi,box_heights[i,1], box_heights[i,2]),
-                      cbind(pi,quant_ang[i,3], box_heights[i,1], box_heights[i,2]))
-      clockwise[i] <- F
-    }
-    else if(quant_ang[i,3]<0 && quant_ang[i,2]>0 && quant_ang[i,1]>=quant_ang[i,2]){
-      box[[i]]<-rbind(cbind(quant_ang[i,1], quant_ang[i,2],box_heights[i,1], box_heights[i,2]),
-                      cbind(quant_ang[i,2],pi,box_heights[i,1], box_heights[i,2]),
-                      cbind(-pi,quant_ang[i,3], box_heights[i,1], box_heights[i,2]))
-      clockwise[i] <- T
-    }
-    else if(quant_ang[i,1]>0 && quant_ang[i,2]<0&&quant_ang[i,2]<quant_ang[i,3]){
-      box[[i]] <- rbind(cbind(pi,quant_ang[i,1], box_heights[i,1], box_heights[i,2]),
-                        cbind(-pi,quant_ang[i,2], box_heights[i,1], box_heights[i,2]),
-                        cbind(quant_ang[i,3],quant_ang[i,2], box_heights[i,1], box_heights[i,2]))
-      clockwise[i] <- T
-    }
-    else{
-      box[[i]]<-rbind(cbind(quant_ang[i,1],quant_ang[i,2], box_heights[i,1], box_heights[i,2]),
-                      cbind(quant_ang[i,2],quant_ang[i,3], box_heights[i,1], box_heights[i,2]))
-      if(quant_ang[i,1]<quant_ang[i,3]) {
+    box <- vector(mode = "list", length = levels)
+    box_border_x <- vector(mode = "list", length = levels)
+    box_border_y <- vector(mode = "list", length = levels)
+    medians <- vector(mode = "list", length = levels)
+    whiskers <- vector(mode = "list", length = levels)
+    endbars <- vector(mode = "list", length = levels)
+    outliers <- vector(mode = "list", length = levels)
+    dat_jitter <- vector(mode = "list", length = levels)
+    clockwise <- rep(T, levels)
+    for (i in seq_len(levels)) {
+      if (quant_ang[i, 1] < 0 &&
+          quant_ang[i, 2] > 0 &&
+          quant_ang[i, 2] > quant_ang[i, 3]) {
+        box[[i]] <-
+          rbind(
+            cbind(-pi, quant_ang[i, 1], box_heights[i, 1], box_heights[i, 2]),
+            cbind(pi, quant_ang[i, 2], box_heights[i, 1], box_heights[i, 2]),
+            cbind(quant_ang[i, 3], quant_ang[i, 2], box_heights[i, 1], box_heights[i, 2])
+          )
+        clockwise[i] <- F
+      }
+      else if (quant_ang[i, 2] < 0 &&
+               quant_ang[i, 3] > 0 &&
+               quant_ang[i, 1] >= quant_ang[i, 2]) {
+        box[[i]] <-
+          rbind(
+            cbind(quant_ang[i, 1], quant_ang[i, 2], box_heights[i, 1], box_heights[i, 2]),
+            cbind(quant_ang[i, 2],-pi, box_heights[i, 1], box_heights[i, 2]),
+            cbind(pi, quant_ang[i, 3], box_heights[i, 1], box_heights[i, 2])
+          )
+        clockwise[i] <- F
+      }
+      else if (quant_ang[i, 3] < 0 &&
+               quant_ang[i, 2] > 0 &&
+               quant_ang[i, 1] >= quant_ang[i, 2]) {
+        box[[i]] <-
+          rbind(
+            cbind(quant_ang[i, 1], quant_ang[i, 2], box_heights[i, 1], box_heights[i, 2]),
+            cbind(quant_ang[i, 2], pi, box_heights[i, 1], box_heights[i, 2]),
+            cbind(-pi, quant_ang[i, 3], box_heights[i, 1], box_heights[i, 2])
+          )
+        clockwise[i] <- T
+      }
+      else if (quant_ang[i, 1] > 0 &&
+               quant_ang[i, 2] < 0 &&
+               quant_ang[i, 2] < quant_ang[i, 3]) {
+        box[[i]] <-
+          rbind(
+            cbind(pi, quant_ang[i, 1], box_heights[i, 1], box_heights[i, 2]),
+            cbind(-pi, quant_ang[i, 2], box_heights[i, 1], box_heights[i, 2]),
+            cbind(quant_ang[i, 3], quant_ang[i, 2], box_heights[i, 1], box_heights[i, 2])
+          )
         clockwise[i] <- T
       }
       else{
-        clockwise[i] <- F
+        box[[i]] <-
+          rbind(
+            cbind(quant_ang[i, 1], quant_ang[i, 2], box_heights[i, 1], box_heights[i, 2]),
+            cbind(quant_ang[i, 2], quant_ang[i, 3], box_heights[i, 1], box_heights[i, 2])
+          )
+        if (quant_ang[i, 1] < quant_ang[i, 3]) {
+          clockwise[i] <- T
+        }
+        else{
+          clockwise[i] <- F
+        }
       }
-    }
-    box_border_x[[i]] <- cbind(rep(box[[i]][,1],2),rep(box[[i]][,2],2), c(box[[i]][,3],box[[i]][,4]),c(box[[i]][,3],box[[i]][,4]))
-    box_border_y[[i]] <- rbind(c(rep(quant_ang[i,1],2),box_heights[i,1],box_heights[i,2]),
-                               c(rep(quant_ang[i,3],2),box_heights[i,1],box_heights[i,2]))
-    inter_quart_range <- IQR_fac*abs(add_angles(quant_ang[i,3], (-1*quant_ang[i,1])))
+      box_border_x[[i]] <-
+        cbind(rep(box[[i]][, 1], 2),
+              rep(box[[i]][, 2], 2),
+              c(box[[i]][, 3], box[[i]][, 4]),
+              c(box[[i]][, 3], box[[i]][, 4]))
+      box_border_y[[i]] <-
+        rbind(c(rep(quant_ang[i, 1], 2), box_heights[i, 1], box_heights[i, 2]),
+              c(rep(quant_ang[i, 3], 2), box_heights[i, 1], box_heights[i, 2]))
+      inter_quart_range <-
+        IQR_fac * abs(add_angles(quant_ang[i, 3], (-1 * quant_ang[i, 1])))
 
-    whiskers_start <- c(quant_ang[i,1],quant_ang[i,3])
-    if(clockwise[i]==T){
-      whiskers_max <- add_angles(whiskers_start,c(-inter_quart_range,inter_quart_range))
-    }
-    else{
-      whiskers_max <- add_angles(whiskers_start,c(inter_quart_range,-inter_quart_range))
-    }
-    opposite_median <- add_angles(quant_ang[i,2],pi)
-    if(inter_quart_range>=(2*pi)){
-      whiskers_max <- rep(opposite_median,2)
-    }
-    if(!is.null(within_angles(angle1=whiskers_start[2],
-                              angle2=whiskers_max[2],
-                              data=opposite_median,
-                              clockwise = clockwise[i]))){
-      whiskers_max[2]<-opposite_median
-    }
-    if(!is.null(within_angles(angle1=whiskers_start[1],
-                              angle2=whiskers_max[1],
-                              data=opposite_median,
-                              clockwise = !clockwise[i]))){
-      whiskers_max[1]<-opposite_median
-    }
+      whiskers_start <- c(quant_ang[i, 1], quant_ang[i, 3])
+      if (clockwise[i] == T) {
+        whiskers_max <-
+          add_angles(whiskers_start,
+                     c(-inter_quart_range, inter_quart_range))
+      }
+      else{
+        whiskers_max <-
+          add_angles(whiskers_start,
+                     c(inter_quart_range,-inter_quart_range))
+      }
+      opposite_median <- add_angles(quant_ang[i, 2], pi)
+      if (inter_quart_range >= (2 * pi)) {
+        whiskers_max <- rep(opposite_median, 2)
+      }
+      if (!is.null(
+        within_angles(
+          angle1 = whiskers_start[2],
+          angle2 = whiskers_max[2],
+          data = opposite_median,
+          clockwise = clockwise[i]
+        )
+      )) {
+        whiskers_max[2] <- opposite_median
+      }
+      if (!is.null(
+        within_angles(
+          angle1 = whiskers_start[1],
+          angle2 = whiskers_max[1],
+          data = opposite_median,
+          clockwise = !clockwise[i]
+        )
+      )) {
+        whiskers_max[1] <- opposite_median
+      }
 
-    angles<-traj$angle[traj$quant==i]
-    ind1 <- within_angles(angle1=whiskers_start[1],
-                          angle2=whiskers_max[1],
-                          data=angles,
-                          clockwise = !clockwise[i])
-    whiskers_max[1] <- angles[ind1][which.min(abs(add_angles(whiskers_max[1], (-1*angles[ind1]))))]
-    ind2 <- within_angles(angle1=whiskers_start[2],
-                          angle2=whiskers_max[2],
-                          data=angles,
-                          clockwise = clockwise[i])
-    whiskers_max[2] <- angles[ind2][which.min(abs(add_angles(whiskers_max[2], (-1*angles[ind2]))))]
-    ind3 <- within_angles(angle1=quant_ang[i,1],
-                          angle2=quant_ang[i,3],
-                          data=angles,
-                          clockwise = clockwise[i])
-    avg_height <- (box_heights[i,1]+box_heights[i,2])/2
+      angles <- traj$angle[traj$quant == i]
+      ind1 <- within_angles(
+        angle1 = whiskers_start[1],
+        angle2 = whiskers_max[1],
+        data = angles,
+        clockwise = !clockwise[i]
+      )
+      whiskers_max[1] <-
+        angles[ind1][which.min(abs(add_angles(whiskers_max[1], (-1 * angles[ind1]))))]
+      ind2 <- within_angles(
+        angle1 = whiskers_start[2],
+        angle2 = whiskers_max[2],
+        data = angles,
+        clockwise = clockwise[i]
+      )
+      whiskers_max[2] <-
+        angles[ind2][which.min(abs(add_angles(whiskers_max[2], (-1 * angles[ind2]))))]
+      ind3 <- within_angles(
+        angle1 = quant_ang[i, 1],
+        angle2 = quant_ang[i, 3],
+        data = angles,
+        clockwise = clockwise[i]
+      )
+      avg_height <- (box_heights[i, 1] + box_heights[i, 2]) / 2
 
-    angles_a<-traj$angle[3:4353][traj$quant[3:4353]==i]
-    ind1_a <- within_angles(angle1=whiskers_start[1],
-                            angle2=whiskers_max[1],
-                            data=angles_a,
-                            clockwise = !clockwise[i])
-    ind2_a <- within_angles(angle1=whiskers_start[2],
-                            angle2=whiskers_max[2],
-                            data=angles_a,
-                            clockwise = clockwise[i])
-    ind3_a <- within_angles(angle1=quant_ang[i,1],
-                            angle2=quant_ang[i,3],
-                            data=angles_a,
-                            clockwise = clockwise[i])
+      angles_a <- traj$angle[3:4353][traj$quant[3:4353] == i]
+      ind1_a <- within_angles(
+        angle1 = whiskers_start[1],
+        angle2 = whiskers_max[1],
+        data = angles_a,
+        clockwise = !clockwise[i]
+      )
+      ind2_a <- within_angles(
+        angle1 = whiskers_start[2],
+        angle2 = whiskers_max[2],
+        data = angles_a,
+        clockwise = clockwise[i]
+      )
+      ind3_a <- within_angles(
+        angle1 = quant_ang[i, 1],
+        angle2 = quant_ang[i, 3],
+        data = angles_a,
+        clockwise = clockwise[i]
+      )
 
-    outliers[[i]] <- cbind(c(angles[-c(ind1,ind2,ind3)]),rep(avg_height,length(angles[-c(ind1,ind2,ind3)])))
-    dat_jitter[[i]] <- cbind(c(angles_a[c(ind1_a,ind2_a,ind3_a)]),runif(length(angles_a[c(ind1_a,ind2_a,ind3_a)]),(avg_height-0.3),(avg_height+0.3)),i)
-    endbars[[i]] <- cbind(c(whiskers_max),c(whiskers_max),rep((avg_height-0.4),2),rep((avg_height+0.4),2))
-    if(whiskers_start[1]< whiskers_max[1] && clockwise[i]==T){
-      whiskers[[i]]<-rbind(c(whiskers_start[1],-pi,avg_height,avg_height),
-                           c(pi,whiskers_max[1],avg_height,avg_height))
+      outliers[[i]] <-
+        cbind(c(angles[-c(ind1, ind2, ind3)]), rep(avg_height, length(angles[-c(ind1, ind2, ind3)])))
+      dat_jitter[[i]] <-
+        cbind(c(angles_a[c(ind1_a, ind2_a, ind3_a)]), runif(length(angles_a[c(ind1_a, ind2_a, ind3_a)]), (avg_height -
+                                                                                                            0.3), (avg_height + 0.3)), i)
+      endbars[[i]] <-
+        cbind(c(whiskers_max), c(whiskers_max), rep((avg_height - 0.4), 2), rep((avg_height +
+                                                                                   0.4), 2))
+      if (whiskers_start[1] < whiskers_max[1] &&
+          clockwise[i] == T) {
+        whiskers[[i]] <- rbind(
+          c(whiskers_start[1],-pi, avg_height, avg_height),
+          c(pi, whiskers_max[1], avg_height, avg_height)
+        )
+      }
+      else if (whiskers_start[1] > whiskers_max[1] &&
+               clockwise[i] == F) {
+        whiskers[[i]] <- rbind(
+          c(whiskers_start[1], pi, avg_height, avg_height),
+          c(-pi, whiskers_max[1], avg_height, avg_height)
+        )
+      }
+      else{
+        whiskers[[i]] <-
+          rbind(c(whiskers_start[1], whiskers_max[1], avg_height, avg_height))
+      }
+      if (whiskers_start[2] > whiskers_max[2] &&
+          clockwise[i] == T) {
+        whiskers[[i]] <- rbind(whiskers[[i]],
+                               rbind(
+                                 c(whiskers_start[2], pi, avg_height, avg_height),
+                                 c(-pi, whiskers_max[2], avg_height, avg_height)
+                               ))
+      }
+      else if (whiskers_start[2] < whiskers_max[2] &&
+               clockwise[i] == F) {
+        whiskers[[i]] <- rbind(whiskers[[i]],
+                               rbind(
+                                 c(whiskers_start[2],-pi, avg_height, avg_height),
+                                 c(pi, whiskers_max[2], avg_height, avg_height)
+                               ))
+      }
+      else{
+        whiskers[[i]] <- rbind(whiskers[[i]],
+                               rbind(
+                                 c(whiskers_start[2], whiskers_max[2], avg_height, avg_height)
+                               ))
+      }
+
+      medians[[i]] <-
+        rbind(c(rep(quant_ang[i, 2], 2), box_heights[i, 1], box_heights[i, 2]))
     }
-    else if(whiskers_start[1]>whiskers_max[1] && clockwise[i]==F){
-      whiskers[[i]]<-rbind(c(whiskers_start[1],pi,avg_height,avg_height),
-                           c(-pi,whiskers_max[1],avg_height,avg_height))
-    }
-    else{
-      whiskers[[i]]<-rbind(c(whiskers_start[1],whiskers_max[1],avg_height,avg_height))
-    }
-    if(whiskers_start[2]>whiskers_max[2] && clockwise[i]==T){
-      whiskers[[i]]<-rbind(whiskers[[i]],
-                           rbind(c(whiskers_start[2],pi,avg_height,avg_height),
-                                 c(-pi,whiskers_max[2],avg_height,avg_height)))
-    }
-    else if(whiskers_start[2]<whiskers_max[2] && clockwise[i]==F){
-      whiskers[[i]]<-rbind(whiskers[[i]],
-                           rbind(c(whiskers_start[2],-pi,avg_height,avg_height),
-                                 c(pi,whiskers_max[2],avg_height,avg_height)))
-    }
-    else{
-      whiskers[[i]]<-rbind(whiskers[[i]],
-                           rbind(c(whiskers_start[2],whiskers_max[2],avg_height,avg_height)))
-    }
-
-    medians[[i]] <- rbind(c(rep(quant_ang[i,2],2),box_heights[i,1],box_heights[i,2]))
-  }
-  box <- do.call(rbind,args = box)
-  label<-as.factor(c(box[,4]))
-  levels(label)<-seq(1,levels)
-  box<-data.frame(xmin=c(box[,1]),xmax=c(box[,2]),ymin=c(box[,3]),ymax=c(box[,4]),
-                  label=label)
-  box_border_x <- do.call(rbind,args = box_border_x)
-  box_border_y <- do.call(rbind,args = box_border_y)
-  box_border <- rbind(box_border_x, box_border_y)
-  box_border<-data.frame(x=c(box_border[,1]),xend=c(box_border[,2]),y=c(box_border[,3]),yend=c(box_border[,4]))
-  medians <- do.call(rbind,args = medians)
-  medians <- data.frame(x=c(medians[,1]),xend=c(medians[,2]),y=c(medians[,3]),yend=c(medians[,4]))
-  whiskers <- do.call(rbind,args = whiskers)
-  whiskers <- data.frame(x=c(whiskers[,1]),xend=c(whiskers[,2]),y=c(whiskers[,3]),yend=c(whiskers[,4]))
-  outliers <- do.call(rbind,args = outliers)
-  outliers <- data.frame(x=c(outliers[,1]),y=c(outliers[,2]))
-  endbars <- do.call(rbind,args = endbars)
-  endbars <- data.frame(x=c(endbars[,1]),xend=c(endbars[,2]),y=c(endbars[,3]),yend=c(endbars[,4]))
-  dat_jitter <- do.call(rbind,args = dat_jitter)
-  dat_jitter <- data.frame(x=c(dat_jitter[,1]),y=c(dat_jitter[,2]),size=(c(dat_jitter[,3])/levels*0.2*expand))
-
-  #set theme
-
-  circ_plot_layers <- list(
-    coord_polar(start = pi, clip = "off"),
-
-    scale_x_continuous(limits = c(-pi, pi),
-                       breaks = x_breaks,
-                       labels = c(expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
-                                             0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
-                       )
-    ),
-
-    scale_y_continuous(breaks = y_breaks[1:(length(y_breaks))]),
-    geom_hline(
-      yintercept = y_breaks[(length(y_breaks))],
-      colour = "grey60",
-      size = 0.3*expand
-    ),
-
-    theme_bw(),
-
-    # theme(
-    #   axis.title.x = element_text(size = expand*12, colour = "black"),
-    #   axis.title.y = element_text(size = expand*16, colour = "black"),
-    #   axis.text = element_text(size = expand*12, colour = "black"),
-    #   axis.line.x=element_line(colour = "black",size=expand*0.3),
-    #   axis.line.y=element_line(colour = "black",size=expand*0.3),
-    #   axis.ticks = element_line(colour = "black",size=expand*0.3),
-    #   axis.ticks.length = unit(expand*0.1,"cm"),
-    #   # panel.border = element_rect(size=expand*expand*0.3),
-    #   axis.line = element_line(colour = "black"),
-    #   panel.grid=element_blank()
-
-    theme(
-      panel.grid = element_blank(),
-      axis.title = element_blank(),
-      axis.text = element_text(size = expand*12, colour = "black"),
-      axis.ticks.y = element_blank(),
-      axis.text.y = element_blank(),
-      panel.border = element_blank(),
-      legend.title=element_text(size = expand*12, colour = "black"),
-      legend.text=element_text(size = expand*12, colour = "black"),
-      legend.position=legend_pos,
-      legend.text.align = 0
-    ),
-    if(legend_pos=="bottom"){
-      guides(fill=guide_legend(nrow=levels,byrow=TRUE))
-    },
-    # scale_fill_discrete(name = paste0("Step length \n",levels,"-quantile"),
-    #                     labels = paste0(seq(1,levels),": (",format(round(c(0.00,quant[1:(levels-1)]), digits=2), nsmall = 2),
-    #                                     ",",format(round(c(quant[1:levels]), digits=2), nsmall = 2),"]")),
-    scale_fill_viridis(name = paste0("Step Length \n",levels,"-Quantile"),
-                       labels = parse(text=paste0(seq(1,levels),
-                                                  c('^st','^nd','^rd',rep('^th',levels))[1:levels],
-                                                  ' ~ ": (',
-                                                  format(round(c(0.0,quant[1:(levels-1)]), digits=1), nsmall = 1),
-                                                  ', ',
-                                                  format(round(c(quant[1:levels]), digits=1), nsmall = 1),']"')),
-                       # labels = str2expression(paste0(seq(1,levels),c("^st","^nd","^rd",rep("^th",levels))[1:levels],"u")),
-                       alpha = 1, begin = 0.2, end = 0.95, direction = -1,
-                       discrete = TRUE, option = "inferno"),
-    geom_segment(
-      aes(
-        x = x_breaks,
-        y = 0,
-        xend = x_breaks,
-        yend = y_breaks[(length(y_breaks))]
-      ),
-      colour = "grey90",
-      size = 0.3*expand
-    ),
-    #for position of axis labels
-    geom_hline(
-      yintercept = y_breaks[(length(y_breaks))]+0.5*expand,
-      colour = "white",
-      alpha=0,
-      size = 0.3*expand
+    box <- do.call(rbind, args = box)
+    label <- as.factor(c(box[, 4]))
+    levels(label) <- seq(1, levels)
+    box <-
+      data.frame(
+        xmin = c(box[, 1]),
+        xmax = c(box[, 2]),
+        ymin = c(box[, 3]),
+        ymax = c(box[, 4]),
+        label = label
+      )
+    box_border_x <- do.call(rbind, args = box_border_x)
+    box_border_y <- do.call(rbind, args = box_border_y)
+    box_border <- rbind(box_border_x, box_border_y)
+    box_border <-
+      data.frame(
+        x = c(box_border[, 1]),
+        xend = c(box_border[, 2]),
+        y = c(box_border[, 3]),
+        yend = c(box_border[, 4])
+      )
+    medians <- do.call(rbind, args = medians)
+    medians <-
+      data.frame(
+        x = c(medians[, 1]),
+        xend = c(medians[, 2]),
+        y = c(medians[, 3]),
+        yend = c(medians[, 4])
+      )
+    whiskers <- do.call(rbind, args = whiskers)
+    whiskers <-
+      data.frame(
+        x = c(whiskers[, 1]),
+        xend = c(whiskers[, 2]),
+        y = c(whiskers[, 3]),
+        yend = c(whiskers[, 4])
+      )
+    outliers <- do.call(rbind, args = outliers)
+    outliers <-
+      data.frame(x = c(outliers[, 1]), y = c(outliers[, 2]))
+    endbars <- do.call(rbind, args = endbars)
+    endbars <-
+      data.frame(
+        x = c(endbars[, 1]),
+        xend = c(endbars[, 2]),
+        y = c(endbars[, 3]),
+        yend = c(endbars[, 4])
+      )
+    dat_jitter <- do.call(rbind, args = dat_jitter)
+    dat_jitter <-
+      data.frame(
+        x = c(dat_jitter[, 1]),
+        y = c(dat_jitter[, 2]),
+        size = (c(dat_jitter[, 3]) / levels * 0.2 * expand)
+      )
+    out <- list(
+      box = box,
+      box_border = box_border,
+      medians = medians,
+      whiskers = whiskers,
+      endbars = endbars,
+      outliers = outliers,
+      dat_jitter = dat_jitter,
+      quant = quant
     )
-  )
+    return(out)
+  }
+
+make_plot <-
+  function(box,
+           box_border,
+           medians,
+           whiskers,
+           endbars,
+           outliers,
+           dat_jitter,
+           quant,
+           spacing,
+           levels,
+           legend_pos,
+           expand) {
+    box_heights <-
+      cbind(seq(spacing, (levels - 1 + (spacing * levels)), length.out = levels),
+            seq((1 + spacing), (levels + (spacing * levels)), length.out = levels))
+    #set the breaks for the gridlines of the plot
+    y_breaks <-
+      sort(c(c(box_heights), (max(box_heights) + spacing)))
+    x_breaks <- seq(-0.75 * pi, pi, 0.25 * pi)
+    #set theme
+    circ_plot_layers <- list(
+      coord_polar(start = pi, clip = "off"),
+
+      scale_x_continuous(
+        limits = c(-pi, pi),
+        breaks = x_breaks,
+        labels = c(
+          expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
+                     0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
+        )
+      ),
+
+      scale_y_continuous(breaks = y_breaks[seq_along(y_breaks)]),
+      geom_hline(
+        yintercept = y_breaks[(length(y_breaks))],
+        colour = "grey60",
+        size = 0.3 * expand
+      ),
+
+      theme_bw(),
+      theme(
+        panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_text(size = expand * 12, colour = "black"),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        panel.border = element_blank(),
+        legend.title = element_text(size = expand * 12, colour = "black"),
+        legend.text = element_text(size = expand * 12, colour = "black"),
+        legend.position = legend_pos,
+        legend.text.align = 0
+      ),
+      if (legend_pos == "bottom") {
+        guides(fill = guide_legend(nrow = levels, byrow = TRUE))
+      },
+      # scale_fill_discrete(name = paste0("Step length \n",levels,"-quantile"),
+      #                     labels = paste0(seq(1,levels),": (",format(round(c(0.00,quant[1:(levels-1)]), digits=2), nsmall = 2),
+      #                                     ",",format(round(c(quant[1:levels]), digits=2), nsmall = 2),"]")),
+      scale_fill_viridis(
+        name = paste0("Step Length \n", levels, "-Quantile"),
+        labels = parse(text = paste0(
+          seq(1, levels),
+          c('^st', '^nd', '^rd', rep('^th', levels))[seq_len(levels)],
+          ' ~ ": (',
+          format(round(c(0.0, quant[seq_len(levels -
+                                              1)]), digits = 1), nsmall = 1),
+          ', ',
+          format(round(c(quant[seq_len(levels)]), digits =
+                         1), nsmall = 1),
+          ']"'
+        )),
+        # labels = str2expression(paste0(seq(1,levels),c("^st","^nd","^rd",rep("^th",levels))[1:levels],"u")),
+        alpha = 1,
+        begin = 0.2,
+        end = 0.95,
+        direction = -1,
+        discrete = TRUE,
+        option = "inferno"
+      ),
+      geom_segment(
+        aes(
+          x = x_breaks,
+          y = 0,
+          xend = x_breaks,
+          yend = y_breaks[(length(y_breaks))]
+        ),
+        colour = "grey90",
+        size = 0.3 * expand
+      ),
+      #for position of axis labels
+      geom_hline(
+        yintercept = y_breaks[(length(y_breaks))] + 0.5 * expand,
+        colour = "white",
+        alpha = 0,
+        size = 0.3 * expand
+      )
+    )
 
 
-  # plot
+    # plot
 
-  ggplot() +
-    circ_plot_layers +
-    geom_rect(data=box, aes(xmin=.data$xmin,
-                            xmax=.data$xmax,
-                            ymin=.data$ymin,
-                            ymax=.data$ymax,
-                            fill=.data$label),alpha=0.6)+
-    geom_segment(data=box_border,
-                 aes(
-                   x = .data$x,
-                   y = .data$y,
-                   xend = .data$xend,
-                   yend = .data$yend
-                 ))+
-    geom_segment(data=medians,
-                 aes(
-                   x = .data$x,
-                   y = .data$y,
-                   xend = .data$xend,
-                   yend = .data$yend
-                 ),
-                 size=0.5*expand)+
-    geom_segment(data=whiskers,
-                 aes(
-                   x = .data$x,
-                   y = .data$y,
-                   xend = .data$xend,
-                   yend = .data$yend
-                 ),
-                 size=0.4*expand)+
-    geom_segment(data=endbars,
-                 aes(
-                   x = .data$x,
-                   y = .data$y,
-                   xend = .data$xend,
-                   yend = .data$yend
-                 ),
-                 size=0.4*expand)+
-    geom_point(data=outliers,
-               aes(
-                 x = .data$x,
-                 y = .data$y),
-               color="red",
-               size=0.6*expand
-    )+
-    geom_point(data=dat_jitter,
-               aes(
-                 x = .data$x,
-                 y = .data$y,
-                 size=.data$size*0.001),
-               color="black",
-               alpha=0.3,
-               show.legend = FALSE
-    )+
-    scale_size_continuous(range = c(0.05, 1))
-}
-
-add_angles <- function(angle1,angle2){
-  angle_sum <- angle1+angle2
-  for (i in 1:length(angle_sum)) {
-
-    if(angle_sum[i]>pi) angle_sum[i] <- -pi+(angle_sum[i]-pi)
-    else if(angle_sum[i] < -pi) angle_sum[i] <- pi - (-pi-angle_sum[i])
+    ggplot() +
+      circ_plot_layers +
+      geom_rect(
+        data = box,
+        aes(
+          xmin = .data$xmin,
+          xmax = .data$xmax,
+          ymin = .data$ymin,
+          ymax = .data$ymax,
+          fill = .data$label
+        ),
+        alpha = 0.6
+      ) +
+      geom_segment(data = box_border,
+                   aes(
+                     x = .data$x,
+                     y = .data$y,
+                     xend = .data$xend,
+                     yend = .data$yend
+                   )) +
+      geom_segment(
+        data = medians,
+        aes(
+          x = .data$x,
+          y = .data$y,
+          xend = .data$xend,
+          yend = .data$yend
+        ),
+        size = 0.5 * expand
+      ) +
+      geom_segment(
+        data = whiskers,
+        aes(
+          x = .data$x,
+          y = .data$y,
+          xend = .data$xend,
+          yend = .data$yend
+        ),
+        size = 0.4 * expand
+      ) +
+      geom_segment(
+        data = endbars,
+        aes(
+          x = .data$x,
+          y = .data$y,
+          xend = .data$xend,
+          yend = .data$yend
+        ),
+        size = 0.4 * expand
+      ) +
+      geom_point(
+        data = outliers,
+        aes(x = .data$x,
+            y = .data$y),
+        color = "red",
+        size = 0.6 * expand
+      ) +
+      geom_point(
+        data = dat_jitter,
+        aes(
+          x = .data$x,
+          y = .data$y,
+          size = .data$size * 0.001
+        ),
+        color = "black",
+        alpha = 0.3,
+        show.legend = FALSE
+      ) +
+      scale_size_continuous(range = c(0.05, 1))
+  }
+add_angles <- function(angle1, angle2) {
+  angle_sum <- angle1 + angle2
+  for (i in seq_along(angle_sum)) {
+    if (angle_sum[i] > pi)
+      angle_sum[i] <- -pi + (angle_sum[i] - pi)
+    else if (angle_sum[i] < -pi)
+      angle_sum[i] <- pi - (-pi - angle_sum[i])
   }
   return(angle_sum)
 }
 
-within_angles <- function(angle1, angle2, data, clockwise){
-  if(clockwise==TRUE){
-    if(angle2>angle1){
-      within_angle <- which(data>=angle1 & data<=angle2)
+within_angles <- function(angle1, angle2, data, clockwise) {
+  if (clockwise == TRUE) {
+    if (angle2 > angle1) {
+      within_angle <- which(data >= angle1 & data <= angle2)
     }
-    else if(angle2<angle1){
-      within_angle <- c(within_angles(angle1,pi,data,T),within_angles(-pi,angle2,data,T))
-    }
-  }
-  if(clockwise==FALSE){
-    if(angle2<angle1){
-      within_angle <- which(data>=angle2 & data<=angle1)
-    }
-    else if(angle2>angle1){
-      within_angle <- c(within_angles(angle1,-pi,data,F),within_angles(pi,angle2,data,F))
+    else if (angle2 < angle1) {
+      within_angle <-
+        c(within_angles(angle1, pi, data, T),
+          within_angles(-pi, angle2, data, T))
     }
   }
-  if(!any(within_angle)) within_angle <- NULL
+  if (clockwise == FALSE) {
+    if (angle2 < angle1) {
+      within_angle <- which(data >= angle2 & data <= angle1)
+    }
+    else if (angle2 > angle1) {
+      within_angle <-
+        c(within_angles(angle1,-pi, data, F),
+          within_angles(pi, angle2, data, F))
+    }
+  }
+  if (!any(within_angle))
+    within_angle <- NULL
   return(within_angle)
 }
 
@@ -1993,57 +2372,70 @@ within_angles <- function(angle1, angle2, data, clockwise){
 #'   kappa = c(5, 2),
 #'   prop = c(4, 2)
 #' )
-#' plot1 <- circ_hist(theta)
+#' plot1 <- plot_circ_hist(theta)
 #'
 #' @references \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{scat_plot}()}.
+#' @seealso \code{\link{plot_joint_scat}()}.
 #'
 #' @export
 #'
-circ_hist <- function(theta, nbars=20) {
+plot_circ_hist <- function(theta, nbars = 20) {
   # validate input
   tryCatch({
-    check_arg_all(check_argument_type(theta,
-                                           type="numeric",
-                                           lower=-pi,
-                                           upper=pi)
-                  ,1)
-    check_arg_all(check_argument_type(nbars,
-                                      type="numeric",
-                                      length = 1,
-                                      integer = T,
-                                      lower = 1)
-                  ,1)
+    check_arg_all(check_argument_type(
+      theta,
+      type = "numeric",
+      lower = -pi,
+      upper = pi
+    )
+    ,
+    1)
+    check_arg_all(check_argument_type(
+      nbars,
+      type = "numeric",
+      length = 1,
+      integer = T,
+      lower = 2
+    )
+    ,
+    1)
   },
   error = function(e) {
     error_sound()
     rlang::abort(conditionMessage(e))
-  }
-  )
-theta <- theta/pi
-  theta_hist <- graphics::hist(theta,breaks=seq(-1,1,length.out=(nbars+1)),plot=FALSE)
-  df_rect <- data.frame(xmin = theta_hist$breaks[1:(length(theta_hist$breaks)-1)],
-                        xmax = theta_hist$breaks[2:length(theta_hist$breaks)],
-                        ymax=theta_hist$counts,
-                        ymin=rep(0,nbars))
+  })
+  theta <- theta / pi
+  theta_hist <-
+    graphics::hist(theta,
+                   breaks = seq(-1, 1, length.out = (nbars + 1)),
+                   plot = FALSE)
+  df_rect <-
+    data.frame(
+      xmin = theta_hist$breaks[1:(length(theta_hist$breaks) - 1)],
+      xmax = theta_hist$breaks[2:length(theta_hist$breaks)],
+      ymax = theta_hist$counts,
+      ymin = rep(0, nbars)
+    )
 
   breaks <- pretty(0:max(theta_hist$counts))
   max_plot <- max(breaks)
-  min_plot <- -0.2*max_plot
+  min_plot <- -0.2 * max_plot
 
-  df_line_x_major <- data.frame(x = seq(-0.75,1,0.25),
-                                xend = seq(-0.75,1,0.25),
-                                y=rep((0.75*min_plot),8),
-                                yend=rep((max_plot*1.1),8))
+  df_line_x_major <- data.frame(
+    x = seq(-0.75, 1, 0.25),
+    xend = seq(-0.75, 1, 0.25),
+    y = rep((0.75 * min_plot), 8),
+    yend = rep((max_plot * 1.1), 8)
+  )
   df_line_x_minor <- df_line_x_major
-  df_line_x_minor$x <- df_line_x_minor$x-0.125
-  df_line_x_minor$xend <- df_line_x_minor$xend-0.125
+  df_line_x_minor$x <- df_line_x_minor$x - 0.125
+  df_line_x_minor$xend <- df_line_x_minor$xend - 0.125
 
 
   p <- ggplot() +
     geom_segment(
-      data=df_line_x_major,
+      data = df_line_x_major,
       aes(
         x = .data$x,
         y = .data$y,
@@ -2052,9 +2444,9 @@ theta <- theta/pi
       ),
       colour = "grey40",
       size = 0.5
-    )+
+    ) +
     geom_segment(
-      data=df_line_x_minor,
+      data = df_line_x_minor,
       aes(
         x = .data$x,
         y = .data$y,
@@ -2063,49 +2455,69 @@ theta <- theta/pi
       ),
       colour = "grey60",
       size = 0.2
-    )+
-    geom_rect(data=df_rect,aes(xmin=.data$xmin,xmax=.data$xmax,ymin=.data$ymin,ymax=.data$ymax), color="black", size=0.5, fill="grey60")+
-    coord_polar(start=pi) +
-    xlab("theta")+theme_bw()+
-    scale_x_continuous(
-      breaks=seq(-1,1,0.25))+
-    scale_y_continuous(
-      breaks=breaks,limits = c(min_plot,(max_plot*1.2)) )+
+    ) +
+    geom_rect(
+      data = df_rect,
+      aes(
+        xmin = .data$xmin,
+        xmax = .data$xmax,
+        ymin = .data$ymin,
+        ymax = .data$ymax
+      ),
+      color = "black",
+      size = 0.5,
+      fill = "grey60"
+    ) +
+    coord_polar(start = pi) +
+    xlab("theta") + theme_bw() +
+    scale_x_continuous(breaks = seq(-1, 1, 0.25)) +
+    scale_y_continuous(breaks = breaks, limits = c(min_plot, (max_plot *
+                                                                1.2))) +
     geom_label(
-      data = data.frame(x=c(-0.75,-0.5,-0.25,0,0.25,0.5,0.75,1),y=rep((max_plot*1.2),8)),
+      data = data.frame(
+        x = c(-0.75,-0.5,-0.25, 0, 0.25, 0.5, 0.75, 1),
+        y = rep((max_plot * 1.2), 8)
+      ),
       aes(.data$x, .data$y),
-      label = c(expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
-                           0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
+      label = c(
+        expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
+                   0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
       ),
       size = 10 / 2.834646,
       label.size = 0
-    )+
+    ) +
 
-    geom_hline( yintercept = breaks[seq(2,length(breaks),2)], colour = "darkgreen", size = 0.2)+
-    geom_hline( yintercept = breaks[seq(1,length(breaks),2)], colour = "darkred", size = 0.2)+
+    geom_hline(yintercept = breaks[seq(2, length(breaks), 2)],
+               colour = "darkgreen",
+               size = 0.2) +
+    geom_hline(yintercept = breaks[seq(1, length(breaks), 2)],
+               colour = "darkred",
+               size = 0.2) +
     geom_label(
-      data = data.frame(x=rep(-0.95,length(breaks[seq(2,length(breaks),2)])),y=breaks[seq(2,length(breaks),2)]),
+      data = data.frame(x = rep(-0.95, length(breaks[seq(2, length(breaks), 2)])), y =
+                          breaks[seq(2, length(breaks), 2)]),
       aes(.data$x, .data$y),
-      label = breaks[seq(2,length(breaks),2)],
+      label = breaks[seq(2, length(breaks), 2)],
       size = 10 / 2.834646,
       label.size = 0,
-      fill="white",
-      alpha=0.7,
-      color="darkgreen"
-    )+
+      fill = "white",
+      alpha = 0.7,
+      color = "darkgreen"
+    ) +
     geom_label(
-      data = data.frame(x=rep(0.95,length(breaks[seq(1,length(breaks),2)])),y=breaks[seq(1,length(breaks),2)]),
+      data = data.frame(x = rep(0.95, length(breaks[seq(1, length(breaks), 2)])), y =
+                          breaks[seq(1, length(breaks), 2)]),
       aes(.data$x, .data$y),
-      label = breaks[seq(1,length(breaks),2)],
+      label = breaks[seq(1, length(breaks), 2)],
       size = 10 / 2.834646,
       label.size = 0,
-      fill="white",
-      alpha=0.7,
-      color="darkred"
-    )+
+      fill = "white",
+      alpha = 0.7,
+      color = "darkred"
+    ) +
     theme(
-      panel.grid=element_blank(),
-      panel.border=element_blank(),
+      panel.grid = element_blank(),
+      panel.border = element_blank(),
       axis.ticks.x = element_blank(),
       axis.title = element_blank(),
       axis.text = element_blank(),

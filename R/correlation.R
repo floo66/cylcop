@@ -23,7 +23,7 @@
 #' cor_cyl(theta = sample[,1], x = sample[,2])
 #'
 #' #the correlation coefficient is independent of the marginal distribution.
-#' sample <- make_traj(100,
+#' sample <- traj_sim(100,
 #'   cop,
 #'   marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
 #'   marginal_lin = list(name = "weibull", coef = list(shape = 2))
@@ -45,7 +45,7 @@
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{mi_cyl}()}, \code{\link{optCor}()}.
+#' @seealso \code{\link{mi_cyl}()}, \code{\link{fit_cylcop_cor}()}.
 #'
 #' @export
 #'
@@ -161,7 +161,7 @@ cor_cyl <- function(theta, x) {
 #' )
 #'
 #' #the correlation coefficient is independent of the marginal distribution.
-#'  sample <- make_traj(100,
+#'  sample <- traj_sim(100,
 #'   cop,
 #'   marginal_circ = list(name = "vonmises", coef  = list(0, 1)),
 #'   marginal_lin = list(name = "weibull", coef = list(shape = 2))
@@ -205,7 +205,7 @@ cor_cyl <- function(theta, x) {
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{cor_cyl}()}, \code{\link{optCor}()}.
+#' @seealso \code{\link{cor_cyl}()}, \code{\link{fit_cylcop_cor}()}.
 #'
 #' @export
 #'

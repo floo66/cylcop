@@ -36,30 +36,30 @@
 #' If entered "by hand", the named lists describing the parametric distributions
 #' (\code{marginal_circ} and \code{marginal_lin}) must contain 2 entries:
 #' \enumerate{
-#'    \item{name:
+#'    \item{\code{name}:
 #' a \link[base]{character} string denoting the name of the distribution.
 #' For the circular distribution, it can be \code{"vonmises"}, \code{"vonmisesmix"}, or
 #'   \code{"wrappedcauchy"}. For the linear distribution, it must be a
 #'   string denoting the name of a linear distribution in the environment, i.e. the name of its
 #'    distribution function without the "p",
 #'   e.g. "norm" for normal distribution}
-#'    \item{coef: For the circular distribution coef is a (named) \link[base]{list} of
+#'    \item{\code{coef}: For the circular distribution \code{coef} is a (named) \link[base]{list} of
 #' parameters of the circular
 #' marginal distribution as taken by the functions
 #' \code{\link[circular]{qvonmises}()}, \code{\link{qvonmisesmix}()},
-#' or \code{\link{qwrappedcauchy}()}. For the linear distribution, coef is
+#' or \code{\link{qwrappedcauchy}()}. For the linear distribution, \code{coef} is
 #' a named list containing the parameters of the distribution given in \code{"name"}.}
 #' }
 #'
 #'
 #' @return A \link[base]{data.frame} containing the trajectory. It has 6 columns
-#' containing the x and y coordintates, the step lengths, the turn angles, and
+#' containing the x and y coordinates, the turn angles, the step lengths, and
 #' the values sampled from the copula.
 #'
 #' @examples require(circular)
 #' set.seed(123)
 #'
-#' traj <- make_traj(n = 5,
+#' traj <- traj_sim(n = 5,
 #' copula = cyl_quadsec(0.1),
 #' marginal_circ = list(name="vonmises",coef=list(0, 1)),
 #' marginal_lin = list(name="weibull",coef=list(shape=3))
@@ -79,7 +79,7 @@
 #' steplengths <- rlnorm(100, 0, 0.3)
 #' marg_stepl <- fit_steplength(x = steplengths, parametric = "lnorm")
 #'
-#' make_traj(n = 5,
+#' traj_sim(n = 5,
 #' copula = cyl_quadsec(0.1),
 #' marginal_circ = marg_ang,
 #' marginal_lin = marg_stepl,
@@ -87,12 +87,13 @@
 #' pos_2 = c(5,5)
 #' )
 #'
-#' @seealso \code{\link{fit_steplength}()}, \code{\link{fit_angle}()},
-#' \code{\link{traj_plot}()}, \code{\link{cop_scat_plot}()},
-#' \code{\link{scat_plot}()}, \code{\link{circ_plot}()}.
+#' @seealso \code{\link{traj_get}()},
+#' \code{\link{fit_steplength}()}, \code{\link{fit_angle}()},
+#' \code{\link{plot_track}()}, \code{\link{plot_cop_scat}()},
+#' \code{\link{plot_joint_scat}()}, \code{\link{plot_joint_circ}()}.
 #' @export
 #'
-make_traj <-
+traj_sim <-
   function(n,
            copula,
            marginal_circ,
@@ -247,10 +248,10 @@ make_traj <-
       data.frame(
         pos_x = c(0, pos_2[1], rep(NA, n - 2)),
         pos_y = c(0, pos_2[2], rep(NA, n - 2)),
-        steplength = c(NA, 1, rep(NA, n - 2)),
-        angle = rep(NA, n),
-        cop_v = rep(NA, n),
-        cop_u = rep(NA, n)
+        angle = c(NA, 1, rep(NA, n - 2)),
+        steplength = rep(NA, n),
+        cop_u = rep(NA, n),
+        cop_v = rep(NA, n)
       )
 
 
@@ -269,16 +270,16 @@ make_traj <-
     ptm <- proc.time()
     time <- 0
 
-    for(i in 1:length(step_start)){
+    for(i in seq_along(step_start)){
       cop_sample <- rcylcop((step_end[i]-step_start[i]+1), copula)
       if(marginal_lin!="dens") {step_vec <- do.call(marg_lin$q, c(list(p=cop_sample[,2]), parameter_lin))}
       else{step_vec <- do.call(marg_lin$q,list(cop_sample[,2], parameter_lin))}
       if(marginal_circ!="dens"){suppressWarnings(angle_vec <- do.call(marg_circ$q, c(list(p=cop_sample[,1]), parameter_circ)))}
       else{angle_vec <- do.call(marg_circ$q,list(cop_sample[,1], parameter_circ))}
-      traj[step_start[i]:step_end[i],3] <- step_vec
-      traj[step_start[i]:step_end[i],4] <- angle_vec
-      traj[step_start[i]:step_end[i],5] <- cop_sample[,2]
-      traj[step_start[i]:step_end[i],6] <- cop_sample[,1]
+      traj[step_start[i]:step_end[i],3] <- angle_vec
+      traj[step_start[i]:step_end[i],4] <- step_vec
+      traj[step_start[i]:step_end[i],5] <- cop_sample[,1]
+      traj[step_start[i]:step_end[i],6] <- cop_sample[,2]
 
       step_in_batch <- 1
       x_pos_vec <- rep(0,length(step_start[i]:step_end[i]))
@@ -342,5 +343,116 @@ make_traj <-
     if(ignore_first){
       traj <- traj[3:n,]
     }
+    return(traj)
+  }
+
+
+#' Get a Trajectory from Coordinates
+#'
+#' The function calculates step lengths and turn angles from x- and y-coordinates
+#' and calculates pseudo-observations from those step lengths and turn angles.
+#'
+#' @param x_coords \link[base]{vector} of \link[base]{numeric} values
+#' containing the x-coordinates of a trajectory.
+#' @param y_coords \link[base]{vector} of \link[base]{numeric} values
+#' containing the y-coordinates of a trajectory.
+#'
+#'
+#' @return A \link[base]{data.frame} containing the trajectory. It has 6 columns
+#' containing the x and y coordinates, the turn angles, the step lengths, and
+#' the pseudo-observations.
+#'
+#' @examples
+#' set.seed(123)
+#'
+#' traj <- traj_sim(n = 5,
+#' copula = cyl_quadsec(0.1),
+#' marginal_circ = list(name="vonmises",coef=list(0, 1)),
+#' marginal_lin = list(name="weibull",coef=list(shape=3))
+#' )
+#'
+#' traj_from_coords <- traj_get(traj[,1], traj[,2])
+#'
+#'
+#' @seealso \code{\link{traj_sim}()}.
+#' @export
+#'
+traj_get <-
+  function(x_coords, y_coords) {
+
+#    validate input
+    tryCatch({
+      check_arg_all(check_argument_type(x_coords,
+                                        type="numeric"),1)
+      check_arg_all(check_argument_type(y_coords,
+                                        type="numeric"),1)
+    },
+    error = function(e) {
+      error_sound()
+      rlang::abort(conditionMessage(e))
+    }
+    )
+
+    if(is.matrix(x_coords) || is.matrix(y_coords)){
+      stop(
+        error_sound(),
+        "x_coords and y_coords must be vectors, not matrices."
+      )
+    }
+
+    if(any(is.na(x_coords)) || any(is.na(y_coords))){
+      stop(
+        error_sound(),
+        "x_coords and y_coords contain NA's."
+      )
+    }
+
+    if(length(x_coords) != length(y_coords)){
+      stop(
+        error_sound(),
+        "x_coords and y_coords must have the same length."
+      )
+    }
+
+    if(length(x_coords)<3){
+      stop(
+        error_sound(),
+        "Provide at least 3 coordinates."
+      )
+    }
+
+    steplength <- x_coords
+    steplength[1] <- NA
+    steplength[2] <- sqrt((x_coords[2]-x_coords[1])^2+
+                            (y_coords[2]-y_coords[1])^2)
+    angle <- x_coords
+    angle[1:2] <- NA
+    for (i in 1:(length(x_coords)-2)) {
+      steplength[i+1] <- sqrt((x_coords[i+2]-x_coords[i+1])^2+
+                                (y_coords[i+2]-y_coords[i+1])^2)
+      bear1 <- bearing(c(x_coords[i],y_coords[i]),
+                       c(x_coords[i+1],y_coords[i+1]),
+                       fullcirc = TRUE)
+      bear2 <- bearing(c(x_coords[i+1],y_coords[i+1]),
+                       c(x_coords[i+2],y_coords[i+2]),
+                       fullcirc = TRUE)
+      angle[i+2] <- full2half_circ((bear2-bear1)%% (2 * pi))
+    }
+
+    pseudo_obs <- copula::pobs(cbind(angle[-c(1,2)], steplength[-c(1,2)]),
+                               ties.method = "average")
+
+
+    traj <-
+      data.frame(
+        pos_x = x_coords,
+        pos_y = y_coords,
+        steplength = steplength,
+        angle = angle,
+        cop_v = c(NA,NA,pseudo_obs[,2]),
+        cop_u = c(NA,NA,pseudo_obs[,1])
+      )
+
+
     return(traj)
   }

@@ -55,7 +55,7 @@ setClass("cyl_cubsec", contains = "cyl_copula")
 #' @examples
 #' cop <- cyl_cubsec(a = 0.1, b = -0.1)
 #' if(interactive()){
-#'  cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot")
 #' }
 #'
 #' @references \insertRef{Nelsen1997}{cylcop}
@@ -87,8 +87,8 @@ cyl_cubsec <- function(a = 1 / (2 * pi),
     rlang::abort(conditionMessage(e))
   }
   )
-  lowbnd = c(-1 / (2 * pi), -1 / (2 * pi))
-  upbnd = c(1 / (2 * pi), 1 / (2 * pi))
+  lowbnd <-  c(-1 / (2 * pi), -1 / (2 * pi))
+  upbnd <-  c(1 / (2 * pi), 1 / (2 * pi))
 
   new(
     "cyl_cubsec",
@@ -295,10 +295,10 @@ setMethod("ccylcop", signature("cyl_cubsec"), function(u,
 #-----Change attributes of existing cyl_cubsec object.-------------------------------------------
 #
 #'
-#' @rdname setCopParam
+#' @rdname set_cop_param
 # @describeIn cyl_cubsec-class Change attributes of existing object.
 #' @export
-setMethod("setCopParam", "cyl_cubsec", function(copula, param_val, param_name) {
+setMethod("set_cop_param", "cyl_cubsec", function(copula, param_val, param_name) {
   if (is.null(param_name))
     param_name <- copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)

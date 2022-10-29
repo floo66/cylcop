@@ -44,7 +44,6 @@ angles <- rvonmisesmix(n,
 )
 mle.vonmisesmix(theta = angles)
 mle.vonmisesmix(theta = angles, mu = c(0, pi))
-mle.vonmisesmix(theta = angles, ncomp=3)
 
 }
 \references{

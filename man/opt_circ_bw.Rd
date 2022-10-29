@@ -24,9 +24,9 @@ This function basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}
 and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
  package, simplifying their inputs. For more control,
 these '\pkg{circular}' functions could be used directly.
-The normal reference distribution (nrd) method of finding the bandwidth
+The normal reference distribution (\code{"nrd"}) method of finding the bandwidth
 parameter might give very bad results,
- especially for multimodal population distributions.
+ especially for multi-modal population distributions.
 In these cases it can help to set \code{kappa.est = "trigmoments"}.
 }
 \details{

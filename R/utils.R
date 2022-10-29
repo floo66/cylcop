@@ -64,7 +64,7 @@ bearing <- function(point1, point2, fullcirc = FALSE) {
 
 #' Calculate the Next Position in a Trajectory from a Turn Angle and a Step Length
 #'
-#' The xy-coordinates of a position in 2-D space is calculated from the angle
+#' The x-y-coordinates of a position in 2-D space is calculated from the angle
 #' between that position and the 2 previous ones in the trajectory and the
 #' distance between that position and the previous one.
 #'
@@ -136,7 +136,7 @@ angstep2xy <- function(angle, steplength, prevp1, prevp2) {
 #' to an angle on the full circle  (i.e. in the interval \eqn{[0, 2\pi)}).
 #'
 #' @param angle \link[base]{numeric} value of an angle or a
-#' \code{\link{circular}}-objekt in \eqn{[-\pi, \pi)}.
+#' \code{\link{circular}}-object in \eqn{[-\pi, \pi)}.
 #'
 #' @return The \link[base]{numeric} value of the angle in \eqn{[0, 2\pi)}.
 #' @export
@@ -170,7 +170,7 @@ half2full_circ <- function(angle) {
 #' to an angle on the half circle  (i.e. in the interval \eqn{[-\pi, \pi)}).
 #'
 #' @param angle \link[base]{numeric} value of an angle or a
-#' \code{\link{circular}}-objekt in \eqn{[0, 2\pi)}.
+#' \code{\link{circular}}-object in \eqn{[0, 2\pi)}.
 #'
 #' @return The \link[base]{numeric} value of the angle in \eqn{[-\pi, \pi)}.
 #' @export
@@ -243,7 +243,7 @@ print_param <-
     # If the parameters in params are not named, replace the default parameters consecutively
 
     if (length(params) != 0 && is.null(names(params))) {
-      for (i in 1:length(params)) {
+      for (i in seq_along(params)) {
         if(!is.numeric(params[[i]]) && !is.character(params[[i]])){
           params[[i]]<-"object"
         }
@@ -256,7 +256,7 @@ print_param <-
 
     else if (length(params) != 0 &&
              !"" %in% names(params) && !is.null(names(params))) {
-      for (i in 1:length(params)) {
+      for (i in seq_along(params)) {
         if (!names(params)[i] %in% names(args)) {
           stop(error_sound(),
                names(params)[i],
@@ -533,7 +533,7 @@ check_argument_type <- function(argument,
   if (!is.null(lower)) {
     if (is.matrix(argument) && length(lower) == ncol(argument)) {
       lower_cond <- rep(T, length(lower))
-      for (i in 1:length(lower)) {
+      for (i in seq_along(lower)) {
         lower_cond[i] <- all(lower[i] <= argument[, i])
       }
     } else{
@@ -552,7 +552,7 @@ check_argument_type <- function(argument,
   if (!is.null(upper)) {
     if (is.matrix(argument) && length(upper) == ncol(argument)) {
       upper_cond <- rep(T, length(upper))
-      for (i in 1:length(upper)) {
+      for (i in seq_along(upper)) {
         upper_cond[i] <- all(upper[i] >= argument[, i])
       }
     } else{
@@ -587,7 +587,7 @@ check_arg_all <- function(arg_type, type_num) {
     cond_lst <-  arg_type
   } else{
     type_ind <- F
-    for (i in 1:type_num) {
+    for (i in seq_len(type_num)) {
       if (isTRUE(arg_type[[i]]$type_cond)) {
         type_ind <- i
       }
