@@ -6,10 +6,12 @@
 \usage{
 fit_steplength(
   x,
-  parametric = c("beta", "cauchy", "chi-squared", "exponential", "gamma", "lognormal",
-    "logistic", "normal", "t", "weibull", FALSE),
+  parametric = c("beta", "cauchy", "chi-squared", "chisq", "exponential", "exp", "gamma",
+    "lognormal", "lnorm", "lognorm", "logistic", "normal", "t", "weibull", "normalmix",
+    "weibullmix", "gammamix", "lnormmix", FALSE),
   start = NULL,
-  bandwidth = NULL
+  bandwidth = NULL,
+  ncomp = 2
 )
 }
 \arguments{
@@ -19,21 +21,29 @@ random variable in \eqn{[0,\infty)}.}
 \item{parametric}{either a \link[base]{character} string describing what distribution
 should be fitted (\code{"beta"}, \code{"cauchy"}, \code{"chi-squared"},
 \code{"exponential"}, \code{"gamma"}, \code{"lognormal"}, \code{"logistic"},
-\code{"normal"}, \code{"t"}, or \code{"weibull"}), or the \link[base]{logical}
+\code{"normal"}, \code{"t"}, \code{"weibull"},\code{"normalmix"},
+\code{"weibullmix"}, \code{"gammamix"}, or \code{"lnormmix"}),
+or the \link[base]{logical}
 \code{FALSE} if a non-parametric estimation (kernel density) should be made.}
 
 \item{start}{(optional, except when \code{parametric = "chi-squared"})
-named \link[base]{list} containing the parameters to be optimized with inital
+named \link[base]{list} containing the parameters to be optimized with initial
 values.}
 
 \item{bandwidth}{\link[base]{numeric} value for the kernel density bandwidth.
-Default is  \code{cylcop::\link{opt_lin_bw}(x, "adhoc")}.}
+Default is  \code{cylcop::\link{opt_lin_bw}(x, "nrd")}.}
+
+\item{ncomp}{\link[base]{integer}, number of components of the mixed distribution.
+Only has an effect if \code{parametric \%in\% c("normalmix", "weibullmix", "gammamix",
+"lnormmix")}.}
 }
 \value{
-If a parametric estimate is made, a \link[base]{list} containing the
-estimated parameters, their standard errors and the log-likelihood is returned.
-If a non-parametric estimate is made, , the output is a list, and comes directly
-from the function \code{GoFKernel::\link[GoFKernel]{density.reflected}()} of the '\pkg{GoFKernel}'
+If a parametric estimate is made, a \link[base]{list} is returned
+containing the estimated parameters, their standard errors,
+the log-likelihood, the AIC and the name of the distribution.
+If a non-parametric estimate is made, the output is a a '\code{\link[stats]{density}}' object,
+which is obtained with the function
+\code{GoFKernel::\link[GoFKernel]{density.reflected}()} of the '\pkg{GoFKernel}'
 package.
 }
 \description{
@@ -48,7 +58,7 @@ set.seed(123)
 silent_curr <- cylcop_get_option("silent")
 cylcop_set_option(silent = TRUE)
 
-n <- 10000
+n <- 100 #n (number of samples) is set small for performance.
 
 x <- rweibull(n, shape = 10)
 

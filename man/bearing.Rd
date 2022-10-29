@@ -4,7 +4,7 @@
 \alias{bearing}
 \title{Compass Bearing of a Line Between 2 Points}
 \usage{
-bearing(point1, point2, fullcirc = TRUE)
+bearing(point1, point2, fullcirc = FALSE)
 }
 \arguments{
 \item{point1}{\link[base]{numeric} \link[base]{vector} holding the
@@ -29,5 +29,5 @@ between 2 points where north is 0. Angles increase in clockwise direction.
 }
 \examples{
 bearing(c(3,5), c(1,4))
-bearing(c(3,5), c(1,4), fullcirc = FALSE)
+bearing(c(3,5), c(1,4), fullcirc = TRUE)
 }

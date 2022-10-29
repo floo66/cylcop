@@ -18,8 +18,30 @@
 #'
 #' @examples
 #' bearing(c(3,5), c(1,4))
-#' bearing(c(3,5), c(1,4), fullcirc = FALSE)
-bearing <- function(point1, point2, fullcirc = TRUE) {
+#' bearing(c(3,5), c(1,4), fullcirc = TRUE)
+bearing <- function(point1, point2, fullcirc = FALSE) {
+
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(point1,
+                                      type="numeric",
+                                      length = 2)
+                  ,1)
+    check_arg_all(check_argument_type(point2,
+                                      type="numeric",
+                                      length = 2)
+                  ,1)
+    check_arg_all(check_argument_type(fullcirc,
+                                      type="logical",
+                                      length=1)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   if (all(point1 == point2)) {
     warning(
       "Distance between points is 0, cannot calculate bearing. Arbitratily assigned it an angle of 0"
@@ -42,7 +64,7 @@ bearing <- function(point1, point2, fullcirc = TRUE) {
 
 #' Calculate the Next Position in a Trajectory from a Turn Angle and a Step Length
 #'
-#' The xy-coordinates of a position in 2-D space is calculated from the angle
+#' The x-y-coordinates of a position in 2-D space is calculated from the angle
 #' between that position and the 2 previous ones in the trajectory and the
 #' distance between that position and the previous one.
 #'
@@ -63,6 +85,31 @@ bearing <- function(point1, point2, fullcirc = TRUE) {
 #'  angstep2xy(1.5*pi, 2, prevp1 = c(1, 4), prevp2 = c(2, 7.5))
 #'  angstep2xy(-0.5*pi, 2, c(1, 4), c(2, 7.5))
 angstep2xy <- function(angle, steplength, prevp1, prevp2) {
+  tryCatch({
+    check_arg_all(list(check_argument_type(angle,
+                                      type="numeric",
+                                      length = 1),
+                       check_argument_type(angle,
+                                           type="circular"))
+                  ,2)
+    check_arg_all(check_argument_type(steplength,
+                                      type="numeric",
+                                      length = 1)
+                  ,1)
+    check_arg_all(check_argument_type(prevp1,
+                                      type="numeric",
+                                      length = 2)
+                  ,1)
+    check_arg_all(check_argument_type(prevp2,
+                                      type="numeric",
+                                      length = 2)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   #convert angle to \eqn{[0, 2\pi)} if necessary
   angle <-
     tryCatch(
@@ -71,7 +118,7 @@ angstep2xy <- function(angle, steplength, prevp1, prevp2) {
         as.double(angle)
     )
 
-  prevbear <- bearing(prevp2, prevp1)
+  prevbear <- bearing(prevp2, prevp1, fullcirc = TRUE)
   newbear <- (prevbear + angle) %% (2 * pi)
 
   ##calculate changes in x and y coordinates from position-1 to position
@@ -89,7 +136,7 @@ angstep2xy <- function(angle, steplength, prevp1, prevp2) {
 #' to an angle on the full circle  (i.e. in the interval \eqn{[0, 2\pi)}).
 #'
 #' @param angle \link[base]{numeric} value of an angle or a
-#' \code{\link{circular}}-objekt in \eqn{[-\pi, \pi)}.
+#' \code{\link{circular}}-object in \eqn{[-\pi, \pi)}.
 #'
 #' @return The \link[base]{numeric} value of the angle in \eqn{[0, 2\pi)}.
 #' @export
@@ -101,6 +148,19 @@ angstep2xy <- function(angle, steplength, prevp1, prevp2) {
 #' half2full_circ(0.5 * pi) / pi
 #'
 half2full_circ <- function(angle) {
+  tryCatch({
+    check_arg_all(list(check_argument_type(angle,
+                                           type="numeric"),
+                       check_argument_type(angle,
+                                           type="circular"))
+                  ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   (as.double(angle) + (2 * pi)) %% (2 * pi)
 }
 
@@ -110,7 +170,7 @@ half2full_circ <- function(angle) {
 #' to an angle on the half circle  (i.e. in the interval \eqn{[-\pi, \pi)}).
 #'
 #' @param angle \link[base]{numeric} value of an angle or a
-#' \code{\link{circular}}-objekt in \eqn{[0, 2\pi)}.
+#' \code{\link{circular}}-object in \eqn{[0, 2\pi)}.
 #'
 #' @return The \link[base]{numeric} value of the angle in \eqn{[-\pi, \pi)}.
 #' @export
@@ -124,10 +184,19 @@ half2full_circ <- function(angle) {
 #'
 #'
 full2half_circ <- function(angle) {
-  if (any(angle < 0)) {
-    stop(error_sound(),
-         "An angle is negative. Did you mean to convert half to full instead?")
+  tryCatch({
+    check_arg_all(list(check_argument_type(angle,
+                                           type="numeric"),
+                       check_argument_type(angle,
+                                           type="circular"))
+                  ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
   }
+  )
+
   angle <- as.double(angle %% (2 * pi)) %>%
     modify_if(~ .x > pi, ~ .x - (2 * pi))
   return(angle)
@@ -174,7 +243,7 @@ print_param <-
     # If the parameters in params are not named, replace the default parameters consecutively
 
     if (length(params) != 0 && is.null(names(params))) {
-      for (i in 1:length(params)) {
+      for (i in seq_along(params)) {
         if(!is.numeric(params[[i]]) && !is.character(params[[i]])){
           params[[i]]<-"object"
         }
@@ -187,7 +256,7 @@ print_param <-
 
     else if (length(params) != 0 &&
              !"" %in% names(params) && !is.null(names(params))) {
-      for (i in 1:length(params)) {
+      for (i in seq_along(params)) {
         if (!names(params)[i] %in% names(args)) {
           stop(error_sound(),
                names(params)[i],
@@ -264,6 +333,17 @@ get_marg <- function(marg_type) {
 #' @export
 #'
 cylcop_set_option <- function(silent=FALSE){
+  tryCatch({
+    check_arg_all(check_argument_type(silent,
+                                           type="logical",
+                                           length = 1)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   assign("silent", silent, envir=cylcop.env)
 }
 
@@ -360,4 +440,268 @@ done_sound <- function() {
   #   sound::play(sound::loadSample(system.file("extdata", "done.wav", package = "cylcop")))
   # }
   # else{}
+}
+
+check_argument_type <- function(argument,
+                                type = c("numeric",
+                                         "logical",
+                                         "character",
+                                         "Copula",
+                                         "cyl_copula",
+                                         "list",
+                                         "matrix",
+                                         "NULL",
+                                         "density",
+                                         "density.circular",
+                                         "circular",
+                                         "data.frame"),
+                                integer =F,
+                                length = NULL,
+                                ncol = NULL,
+                                values = NULL,
+                                lower = NULL,
+                                upper = NULL) {
+  cond_lst <- list(
+    arg_name = deparse(substitute(argument)),
+    type_cond = T,
+    length_cond = T,
+    ncol_cond = T,
+    value_cond = T,
+    lower_cond = T,
+    upper_cond = T,
+    NULL_cond = T,
+    integer_cond = T,
+    all_good=F
+  )
+  if(rlang::is_missing(argument)){
+    stop(        paste0("Argument ",
+      deparse(substitute(argument)),
+      " is missing without any default value."
+    ))
+  }
+
+  cond1 <- all(type %in% is(argument))
+  possible_types <- c("numeric",
+                      "logical",
+                      "character",
+                      "Copula",
+                      "cyl_copula",
+                      "list",
+                      "matrix",
+                      "NULL",
+                      "density",
+                      "density.circular",
+                      "circular",
+                      "data.frame")
+
+  unwanted_types <- possible_types[-match(type,possible_types)]
+  cond2 <- !any(unwanted_types %in% is(argument))
+
+
+  if (!cond1 || !cond2) {
+    cond_lst$type_cond <- paste(type,collapse=", ",sep="")
+    return(cond_lst)
+  }
+
+  if (!is.null(length)) {
+    if (!length == length(argument)) {
+      cond_lst$length_cond <- length
+      return(cond_lst)
+    }
+  }
+
+  if (!is.null(ncol)) {
+    if (!ncol == ncol(argument)) {
+      cond_lst$ncol_cond <- ncol
+      return(cond_lst)
+    }
+  }
+
+  if(integer && any(type %in% c("numeric", "matrix"))){
+    cond_lst$integer_cond <- is.logical(all.equal(c(argument), as.integer(argument)))
+  }
+
+  if (!is.null(values)) {
+    if (!all(argument %in% values)) {
+      cond_lst$value_cond <- values
+      return(cond_lst)
+    }
+  }
+
+
+  lower_cond <- T
+  if (!is.null(lower)) {
+    if (is.matrix(argument) && length(lower) == ncol(argument)) {
+      lower_cond <- rep(T, length(lower))
+      for (i in seq_along(lower)) {
+        lower_cond[i] <- all(lower[i] <= argument[, i])
+      }
+    } else{
+      lower_cond <- (lower <= argument)
+    }
+
+    if (!all(lower_cond)) {
+      cond_lst$lower_cond <- lower
+      return(cond_lst)
+    }
+
+
+  }
+
+  upper_cond <- T
+  if (!is.null(upper)) {
+    if (is.matrix(argument) && length(upper) == ncol(argument)) {
+      upper_cond <- rep(T, length(upper))
+      for (i in seq_along(upper)) {
+        upper_cond[i] <- all(upper[i] >= argument[, i])
+      }
+    } else{
+      upper_cond <- (upper >= argument)
+    }
+    if (!all(upper_cond)) {
+      cond_lst$upper_cond <- upper
+      return(cond_lst)
+    }
+  }
+
+  cond_lst$all_good <- T
+  return(cond_lst)
+
+}
+
+
+check_arg_all <- function(arg_type, type_num) {
+  if (type_num < 2) {
+    if(arg_type$all_good) return()
+    if (!isTRUE(arg_type$type_cond)) {
+      stop(
+
+        paste0(
+          arg_type$arg_name,
+          " must be of type ",
+          arg_type$type_cond,
+          "."
+        )
+      )
+    }
+    cond_lst <-  arg_type
+  } else{
+    type_ind <- F
+    for (i in seq_len(type_num)) {
+      if (isTRUE(arg_type[[i]]$type_cond)) {
+        type_ind <- i
+      }
+    }
+    if (isFALSE(type_ind)) {
+      type_message <- arg_type[[1]]$type_cond
+      for (i in 2:type_num) {
+        type_message <- paste(type_message, "\nor", arg_type[[i]]$type_cond)
+      }
+      stop(
+           paste0(arg_type[[1]]$arg_name, " must be of type ", type_message, "."))
+    }
+    cond_lst <-  arg_type[[type_ind]]
+  }
+
+
+  if(cond_lst$all_good) return()
+  if (!isTRUE(cond_lst$length_cond)) {
+    stop(
+
+      paste0(
+        cond_lst$arg_name,
+        " must be of length ",
+        cond_lst$length_cond,
+        "."
+      )
+    )
+  }
+  if (!isTRUE(cond_lst$ncol_cond)) {
+    stop(
+
+      paste0(
+        cond_lst$arg_name,
+        " must have ",
+        cond_lst$ncol_cond,
+        " columns."
+      )
+    )
+  }
+  if (!isTRUE(cond_lst$integer_cond)) {
+    stop(
+      paste0(
+        cond_lst$arg_name,
+        " must be an integer."
+      )
+    )
+  }
+
+  if (!isTRUE(cond_lst$value_cond)) {
+    stop(
+      paste0(
+        c(
+          cond_lst$arg_name,
+          " can only take the following values: ",
+          paste(cond_lst$value_cond,collapse=", ",sep=""),
+          "."
+        ),
+        collapse = ""
+      ))
+  }
+
+  if (!isTRUE(cond_lst$lower_cond)) {
+    if (length(cond_lst$lower_cond) < 2) {
+      stop(
+
+        paste0(
+          cond_lst$arg_name,
+          " must be larger than ",
+          cond_lst$lower_cond,
+          "."
+        )
+      )
+    } else{
+      lower_message <- cond_lst$lower_cond[1]
+      for (i in 2:length(cond_lst$lower_cond)) {
+        lower_message <-  paste0(lower_message, ", ", cond_lst$lower_cond[i])
+      }
+      stop(
+
+        paste0(
+          cond_lst$arg_name,
+          " must be larger than ",
+          lower_message,
+          "."
+        )
+      )
+    }
+  }
+
+  if (!isTRUE(cond_lst$upper_cond)) {
+    if (length(cond_lst$upper_cond) < 2) {
+      stop(
+
+        paste0(
+          cond_lst$arg_name,
+          " must be smaller than ",
+          cond_lst$upper_cond,
+          "."
+        )
+      )
+    } else{
+      upper_message <- cond_lst$upper_cond[1]
+      for (i in 2:length(cond_lst$upper_cond)) {
+        upper_message <- paste0(upper_message, ", ", cond_lst$upper_cond[i])
+      }
+      stop(
+
+        paste0(
+          cond_lst$arg_name,
+          " must be smaler than ",
+          upper_message,
+          "."
+        )
+      )
+    }
+  }
 }

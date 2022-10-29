@@ -4,13 +4,13 @@
 \alias{opt_circ_bw}
 \title{Find the Optimal Bandwidth for a Circular Kernel Density Estimate}
 \usage{
-opt_circ_bw(theta, loss = c("KullbackLeibler", "adhoc"), kappa.est = "ML")
+opt_circ_bw(theta, method = c("cv", "nrd"), kappa.est = "trigmoments")
 }
 \arguments{
 \item{theta}{\link[base]{numeric} \link[base]{vector} of angles in \eqn{[-\pi, \pi)}.}
 
-\item{loss}{\link[base]{character} string describing the loss function,
-either \code{"KullbackLeibler"} (leading to a maximum likelihood estimate), or \code{"adhoc"}
+\item{method}{\link[base]{character} string describing the method,
+either \code{"cv"} (cross-validation), or \code{"nrd"}
  leading to a rule-of-thumb estimate.}
 
 \item{kappa.est}{\link[base]{character} string describing how the spread is estimated.
@@ -20,49 +20,62 @@ Either maximum likelihood \code{"ML"}, or trigonometric moment \code{"trigmoment
 A \link[base]{numeric} value, the optimized bandwidth.
 }
 \description{
-This function is basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}()}
+This function basically wraps \code{circular::\link[circular]{bw.cv.ml.circular}()}
 and \code{circular::\link[circular]{bw.nrd.circular}()} of the '\pkg{circular}'
  package, simplifying their inputs. For more control,
 these '\pkg{circular}' functions could be used directly.
-The ad-hoc method of finding the bandwidth parameter might give very bad results,
- especially for multimodal population distributions.
-In these cases it can help to set \code{kappa.est = trigmoments}.
+The normal reference distribution (\code{"nrd"}) method of finding the bandwidth
+parameter might give very bad results,
+ especially for multi-modal population distributions.
+In these cases it can help to set \code{kappa.est = "trigmoments"}.
+}
+\details{
+\code{method="nrd"} is somewhat similar to the linear case (see
+\code{\link{fit_steplength}()}). Instead of matching a normal distribution to
+the data and then calculating its optimal bandwidth, a von Mises distribution is used.
+To match that von Mises distribution to the data we can either find its concentration
+parameter kappa using maximum likelihood (\code{kappa.est="ML"}) or by trigonometric moment
+matching (\code{kappa.est="trigmoments"}). When the data is multimodal, fitting a
+(unimodal) von Mises distribution using maximum likelihood will probably give bad
+results. Using \code{kappa.est="trigmoments"} potentially works better in those cases.
+
+As an alternative, the bandwidth can be found by maximizing the cross-validation likelihood
+(\code{method="cv"}). However, with this leave-one-out cross-validation scheme, at every
+likelihood optimization step, \eqn{n(n-1)} von Mises densities need to be calculated, where
+\eqn{n=}\code{length(theta)}. Therefore, this method can become quite slow with
+large sample sizes.
 }
 \examples{
 require(circular)
 require(graphics)
 set.seed(123)
-n <- 100  #n (number of samples) is set small for performance. Increase n to
-# a value larger than 1000 to see the effects of multimodality
+n <- 10  #n (number of samples) is set small for performance. Increase n to
+         # a value larger than 1000 to see the effects of multimodality
 
-angles <- circular::rmixedvonmises(n,
-  mu1 = circular::circular(0),
-  mu2 = circular::circular(pi),
-  kappa1 = 2,
-  kappa2 = 1,
-  prop = 0.5
+angles <- rvonmisesmix(n,
+  mu = c(0,pi),
+  kappa = c(2,1),
+  prop = c(0.5,0.5)
 )
-angles <- as.double(angles)
-bw1 <- opt_circ_bw(theta = angles, loss="adhoc")
-bw2 <- opt_circ_bw(theta = angles, loss="adhoc", kappa.est = "trigmoments")
-bw3 <- opt_circ_bw(theta = angles, loss="KullbackLeibler")
+bw1 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "ML")
+bw2 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "trigmoments")
+bw3 <- opt_circ_bw(theta = angles, method="cv")
 
 dens1 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw1)
 dens2 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw2)
 dens3 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw3)
-true_dens <- circular::dmixedvonmises(
-  circular(seq(-pi,pi,0.001)),
-  mu1 = circular::circular(0),
-  mu2 = circular::circular(pi),
-  kappa1 = 2,
-  kappa2 = 1,
-  prop = 0.5
+true_dens <- dvonmisesmix(
+  seq(-pi,pi,0.001),
+  mu = c(0,pi),
+  kappa = c(2,1),
+  prop = c(0.5,0.5)
 )
-
-plot(seq(-pi, pi, 0.001), true_dens, type = "l")
-lines(as.double(dens1$x), as.double(dens1$y), col = "red")
-lines(as.double(dens2$x), as.double(dens2$y), col = "green")
-lines(as.double(dens3$x), as.double(dens3$y), col = "blue")
+if(interactive()){
+ plot(seq(-pi, pi, 0.001), true_dens, type = "l")
+ lines(as.double(dens1$x), as.double(dens1$y), col = "red")
+ lines(as.double(dens2$x), as.double(dens2$y), col = "green")
+ lines(as.double(dens3$x), as.double(dens3$y), col = "blue")
+}
 
 }
 \seealso{

@@ -1,31 +1,33 @@
 #' Density, Distribution, Quantiles and Random Number Generation for the Wrapped
 #' Cauchy Distribution
 #'
-#' The distribution function \code{pwrappedcauchy()} and quantiles
-#'  \code{qwrappedcauchy()}of the wrapped Cauchy distribution can
-#' not be obtained analytically. They are therefore missing in the
+#' The distribution function (\code{pwrappedcauchy()}) and quantiles
+#'  (\code{qwrappedcauchy()}) of the wrapped Cauchy distribution cannot
+#'  be obtained analytically. They are therefore missing in the
 #' '\pkg{circular}' package and are obtained here numerically.
-#' Random number generation \code{rwrappedcauchy()} and density
-#' \code{dwrappedcauchy()} don't need a numerical
-#' approximation and are provided here just for consistency in parametrization
-#'  with the other wrapped Cauchy functions. One could also convert \code{scale} to \code{rho}
-#' (\code{rho = exp(-scale)}) and use \code{circular::\link[circular]{rwrappedcauchy}(rho)}.
-#'  In fact, for the density, one usually SHOULD convert \code{scale} to \code{rho}
-#' (\code{rho = exp(-scale)}) and use \code{circular::\link[circular]{dwrappedcauchy}(rho)}
-#'  which does not make a numerical approximation and is therefore faster than
-#' \code{cylcop::dwrappedcauchy()}.
+#' Random number generation (\code{rwrappedcauchy()}) and density
+#' (\code{dwrappedcauchy()}) don't need a numerical
+#' approximation and are provided here for consistency in parametrization
+#'  with the other wrapped Cauchy functions.
 #'
-#' The density is calculated by wrapping the Cauchy distribution \eqn{K} times
-#'  around the circle in each direction and summing the density at each point of
-#'   the circle. E.g. the density of the wrapped Cauchy distribution
-#'   at angle \eqn{\theta} is calculated as  the sum of the Cauchy density at
-#'   \eqn{\theta+2 \pi k}, where the integer \eqn{k} goes from \eqn{-K} to \eqn{K}.
-#'   The distribution function is obtained similarly and the quantiles are calculated
-#'   by numerical inversion.
+#' One could alternatively  convert \code{scale} to \code{rho} via
+#' \code{rho = exp(-scale)} and use
+#' \code{circular::\link[circular]{rwrappedcauchy}(theta, mu=location rho=rho)} or
+#' \code{circular::\link[circular]{dwrappedcauchy}(theta, mu=location rho=rho)}.
+#'
+#' The wrapped Cauchy cdf, for which there is no analytical expression,
+#' is calculated by wrapping the Cauchy distribution \eqn{K} times
+#'  around the circle in each direction and summing the Cauchy cdfs at each point of
+#'   the circle. Let \eqn{\Omega} follow a Cauchy distribution and
+#'   \eqn{\Theta} a wrapped Cauchy distribution, where \eqn{\Theta} can take values
+#'   \eqn{\theta \in [-\pi,\pi)}.
+#'    \eqn{Pr(\Theta \le \theta)} is approximated as
+#'    \deqn{\sum^K_{k=-K}Pr(\Omega \le \theta+2\pi k)-Pr(\Omega \le -\pi+2\pi k).}
+#'    The quantiles are calculated by numerical inversion.
 #'
 #' @param location \link[base]{numeric} value, the mean of the distribution.
 #' @param scale \link[base]{numeric} value, the parameter tuning the spread of the
-#' density.
+#' density. It must be non-negative.
 #' @param theta \link[base]{numeric} \link[base]{vector} giving the angles where
 #' the density or distribution function is evaluated.
 #' @param p \link[base]{numeric} \link[base]{vector} giving the probabilities where
@@ -37,13 +39,18 @@
 #' @param check_prec \link[base]{logical}, whether to check if the precision of
 #' the numerical approximation with the current parameters is higher than 99\%.
 #'
-#' @returns \code{dwrappedcauchy()}) and \code{pwrappedcauchy()}) give a
+#' @return
+#' \itemize{
+#' \item{\code{dwrappedcauchy()}}{ gives a \link[base]{vector} of length \code{length(theta)}
+#'  containing the density at \code{theta}.}
+#' \item{\code{pwrappedcauchy()}}{ gives a
 #' \link[base]{vector} of length \code{length(theta)} containing
-#' the density or distribution function at the corresponding values of \code{theta}.
-#' \code{qwrappedcauchy()} gives a \link[base]{vector} of length \code{length(p)}
-#'containing the quantiles at the corresponding values of \code{p}.
-#'\code{rwrappedcauchy()} generates a \link[base]{vector} of length \code{n}
-#' containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.
+#' the distribution function at the corresponding values of \code{theta}.}
+#' \item{\code{qwrappedcauchy()}}{ gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.}
+#' \item{\code{rwrappedcauchy()}}{ generates a \link[base]{vector} of length \code{n}
+#' containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.}
+#'}
 #'
 #' @examples set.seed(123)
 #'
@@ -61,7 +68,7 @@
 #' @seealso \code{circular::\link[circular]{dwrappedcauchy}()},
 #' \code{circular::\link[circular]{rwrappedcauchy}()}.
 #'
-#' @aliases rwrappedcauchy pwrappedcauchy rdwrappedcauchy qwrappedcauchy
+#' @aliases rwrappedcauchy pwrappedcauchy dwrappedcauchy qwrappedcauchy
 #'
 NULL
 
@@ -73,6 +80,27 @@ NULL
 rwrappedcauchy <- function(n,
                            location = 0,
                            scale = 1) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      integer=T,
+                                      length=1,
+                                      lower=1)
+                  ,1)
+    check_arg_all(check_argument_type(location,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   cauchy_sample <- rcauchy(n, location = location, scale = scale)
   temp <- cbind(cos(cauchy_sample), sin(cauchy_sample))
 
@@ -90,20 +118,30 @@ rwrappedcauchy <- function(n,
 #'
 dwrappedcauchy <- function(theta,
                            location = 0,
-                           scale = 1,
-                           K = 100,
-                           check_prec = FALSE) {
-  warning(
-    warning_sound(),
-    "dwrappedcauchy() gives a numerical approximation. For a faster, analytical result use circular::dwrappedcauchy()"
+                           scale = 1) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(theta,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(location,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
   )
 
-  if (check_prec)
-    check_precision(scale, K)
+  rho <- exp(-scale)
+  pdf <-
+    (1 - rho ^ 2) / ((2 * pi) * (1 + rho ^ 2 - 2 * rho * cos(theta - location)))
 
-  pdf <- rep(0, length(theta))
-  for (k in-K:K)
-    pdf <- pdf + dcauchy(theta + 2 * pi * k, location = location, scale = scale)
   return(pdf)
 }
 
@@ -120,6 +158,32 @@ pwrappedcauchy <- function(theta,
                            scale = 1,
                            K = 100,
                            check_prec = FALSE) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(theta,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(location,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(K,
+                                      type="numeric",
+                                      lower=1,
+                                      integer=T)
+                  ,1)
+    check_arg_all(check_argument_type(check_prec,
+                                      type="logical")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   if (check_prec)
     check_precision(scale, K)
 
@@ -143,6 +207,34 @@ qwrappedcauchy <- function(p,
                            scale = 1,
                            K = 100,
                            check_prec = FALSE) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(p,
+                                      type="numeric",
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(check_argument_type(location,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(check_argument_type(scale,
+                                      type="numeric",
+                                      lower=0)
+                  ,1)
+    check_arg_all(check_argument_type(K,
+                                      type="numeric",
+                                      lower=1,
+                                      integer=T)
+                  ,1)
+    check_arg_all(check_argument_type(check_prec,
+                                      type="logical")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   if (any(p < 0) || any(p > 1)) {
     stop(error_sound(),
          "The entries of p must be between 0 and 1.")
@@ -151,7 +243,7 @@ qwrappedcauchy <- function(p,
     check_precision(scale, K)
 
   qq = p
-  for (i in 1:length(p))
+  for (i in seq_along(p))
   {
     ff = function (theta) {
       pwrappedcauchy(theta,

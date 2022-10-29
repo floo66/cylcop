@@ -26,11 +26,11 @@
 \alias{pcylcop,matrix,cyl_vonmises-method}
 \title{Distribution, Density, and Random Number Generation for Circular-Linear Copulas'}
 \usage{
-pcylcop(u, copula, ...)
+pcylcop(u, copula)
 
-rcylcop(n, copula, ...)
+rcylcop(n, copula)
 
-dcylcop(u, copula, log = FALSE, ...)
+dcylcop(u, copula, log = FALSE)
 
 \S4method{dcylcop}{matrix,Copula}(u, copula)
 
@@ -76,17 +76,15 @@ as second the linear dimension}
 \item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'.
 or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 
-\item{...}{additional arguments}
-
 \item{n}{number of random samples to be generated with \code{rcylcop()}.}
 
 \item{log}{\link[base]{logical} indicating if the logarithm of the density
-should be returned.}
+should be returned (\code{dcylcop()}).}
 }
 \value{
 The functions \code{pcylcop()} and \code{dcylcop()} give a \link[base]{vector} of
 length \code{nrow(u)} containing the distribution and the density, respectively,
- at the corresponding values of \code{u}. Te function \code{rcylcop()} generates a
+ at the corresponding values of \code{u}. The function \code{rcylcop()} generates a
  \link[base]{matrix} with 2 columns and \code{n} rows containing
 the random samples.
 }
@@ -95,7 +93,9 @@ Calculate the distribution (\code{pcylcop()}), the density (\code{dcylcop()}),
 and generate random
 samples (\code{rcylcop()}) of a '\code{\linkS4class{cyl_copula}}' object or a
 '\code{\linkS4class{Copula}}' object (package '\pkg{copula}', only 2-dimensional).
-For '\code{\linkS4class{Copula}}' objects \code{pcylcop()} and \code{rcylcop()}
+}
+\details{
+For '\code{\linkS4class{Copula}}' objects, \code{pcylcop()} and \code{rcylcop()}
 just call the functions of the '\pkg{copula}' package
 \code{\link[copula]{pCopula}()} and \code{\link[copula]{rCopula}()}, respectively.
 The density is, however, calculated differently in \code{dcylcop()} and

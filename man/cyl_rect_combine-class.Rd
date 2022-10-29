@@ -47,9 +47,9 @@ parameters.}
   the rectangles.}
 
 \item{\code{background.cop}}{'\code{\linkS4class{cyl_vonmises}}' or
-'\code{\linkS4class{Copula}}' object of the package '\pkg{copula}'
-(does not lead to an overall symmetric circular-linear copula). The copula
-  where no rectangles overlay the unit square.}
+'\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
+the copula where no rectangles overlay the unit square. If this copula is not
+symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.}
 
 \item{\code{flip_up}}{\link[base]{logical} value indicating whether the copula (\code{sym.cop}) is
 rotated 90 degrees in the upper or lower rectangle.}

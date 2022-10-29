@@ -23,10 +23,14 @@ Constructs a circular-linear copula of class
 }
 \examples{
 cop <- cyl_rot_combine(copula = copula::frankCopula(param = 3), shift = TRUE)
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 cop <- cyl_rot_combine(copula = copula::claytonCopula(param = 10), shift = FALSE)
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 }
 \references{

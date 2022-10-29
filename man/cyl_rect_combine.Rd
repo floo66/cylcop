@@ -17,19 +17,19 @@ cyl_rect_combine(
 '\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object, the copula in
   the rectangles.}
 
-\item{background}{'\code{\linkS4class{cyl_vonmises}}' or
-'\code{\linkS4class{Copula}}' object of the package '\pkg{copula}'
-(does not lead to an overall symmetric circular-linear copula), the copula
-  where no rectangles overlay the unit square.}
+\item{background}{'\code{\linkS4class{cyl_copula}}' or
+'\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
+the copula where no rectangles overlay the unit square. If this copula is not
+symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.}
 
-\item{low_rect}{\link[base]{numeric} \link[base]{vector} containing the
+\item{low_rect}{\link[base]{numeric} \link[base]{vector} of length 2 containing the
 lower and upper edge (u-value) of the lower rectangle.}
 
-\item{up_rect}{\link[base]{numeric} \link[base]{vector} containing the lower
+\item{up_rect}{\link[base]{numeric} \link[base]{vector} of length 2 containing the lower
 and upper edge (u-value) of the upper rectangle, or the character string
 "symmetric" if it should be the mirror image (with respect to u=0.5) of the lower rectangle.}
 
-\item{flip_up}{\link[base]{logical} value indicating whether the copula (\code{sym.cop})
+\item{flip_up}{\link[base]{logical} value indicating whether the copula (\code{copula})
 is rotated 90 degrees in the upper (\code{flip_up = TRUE}) or lower rectangle.}
 }
 \value{
@@ -43,7 +43,9 @@ Constructs a circular-linear copula of class
 
 #symmetric rectangles spanning entire unit square
 cop <- cyl_rect_combine(copula::frankCopula(2))
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 #symmetric rectangles, independence copula as background
 cop <- cyl_rect_combine(copula::frankCopula(2),
@@ -51,7 +53,9 @@ cop <- cyl_rect_combine(copula::frankCopula(2),
   up_rect = "symmetric",
   flip_up = FALSE
 )
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 #symmetric rectangles, cy_quadsec-copula as background
 cop <- cyl_rect_combine(copula::normalCopula(0.3),
@@ -59,13 +63,20 @@ cop <- cyl_rect_combine(copula::normalCopula(0.3),
   up_rect = "symmetric",
   background = cyl_quadsec(-0.1)
 )
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 #asymmetric rectangles, von Mises copula as background.
 #!!Not a symmetric circular linear copula!!
-cop <- cyl_rect_combine(copula::normalCopula(0.3), low_rect = c(0.1, 0.4),
-up_rect = c(0.5, 0.7), background = cyl_vonmises(mu = pi, kappa = 0.3))
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+cop <- cyl_rect_combine(copula::normalCopula(0.3),
+  low_rect = c(0.1, 0.4),
+  up_rect = c(0.5, 0.7),
+  background = cyl_vonmises(mu = pi, kappa = 0.3)
+)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 }
 \references{

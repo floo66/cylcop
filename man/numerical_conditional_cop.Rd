@@ -20,7 +20,7 @@ the copula conditional on the element in the second column.}
 }
 \value{
 A vector containing the values of the distribution of the copula at
-\code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+\code{u[,-cond_on]} conditional on the values of \code{u[,cond_on]}.
 }
 \description{
 Numerically Calculate the Conditional Copula

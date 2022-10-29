@@ -5,9 +5,12 @@
 #' samples (\code{rdens()}) of a kernel density estimate as returned by
 #' \code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.
 #'
-#' @param density \link[base]{list} containing information about the kernel density
-#'   estimate. The structure of the list must be as returned by
-#'   \code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.
+#' @param density a '\code{\link[stats]{density}}' object (for linear kernel density estimates)
+#' or a '\code{\link[circular]{density.circular}}' object
+#' (for circular kernel density estimates) containing information about the kernel density
+#'   estimate. These objects can be obtained using
+#'   \code{\link{fit_angle}(..., parametric = FALSE)} or
+#'   \code{\link{fit_steplength}(..., parametric = FALSE)}.
 #' @param x \link[base]{numeric} \link[base]{vector} giving the points where
 #' the density or distribution function is evaluated.
 #' @param p \link[base]{numeric} \link[base]{vector} giving the probabilities where
@@ -26,6 +29,15 @@
 #'
 #' steps <- rweibull(10, shape=3)
 #' dens <- fit_steplength(x = steps, parametric = FALSE)
+#' ddens(c(0.1,0.3), dens)
+#' pdens(c(0.1,0.3), dens)
+#' qdens(c(0.1,0.3), dens)
+#' rdens(4, dens)
+#'
+#' angles <- full2half_circ(
+#'   circular::rvonmises(10, mu = circular::circular(0), kappa = 2)
+#' )
+#' dens <- fit_angle(theta = angles, parametric = FALSE)
 #' ddens(c(0.1,0.3), dens)
 #' pdens(c(0.1,0.3), dens)
 #' qdens(c(0.1,0.3), dens)
@@ -50,6 +62,26 @@ NULL
 #' @export
 #'
 rdens <- function(n, density) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      length=1,
+                                      integer=T,
+                                      lower=1)
+                  ,1)
+    check_arg_all(list(check_argument_type(density,
+                                           type="density.circular"),
+                       check_argument_type(density,
+                                           type="density"))
+    ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   # Draw a points from the domain of the KDE
   sample <- sample(as.double(density$x),
          n,
@@ -59,7 +91,12 @@ rdens <- function(n, density) {
   #Now draw from the kernel distributions at these points,
   #with kappa (for vonmises) or sd (for Gaussian) equal to the bandwidth
   kernel<-get_marg(density$kernel)
-  map(sample, ~kernel$r(1,sample,dens$bw)) %>% unlist()
+  if("density.circular" %in% is(density)){
+   out <-  map(sample, ~full2half_circ(kernel$r(1, circular::circular(.x), density$bw))) %>% unlist()
+  }else{
+    out <- map(sample, ~kernel$r(1, .x, density$bw)) %>% unlist()
+  }
+  return(out)
 }
 
 
@@ -70,6 +107,23 @@ rdens <- function(n, density) {
 #' @export
 #'
 ddens <- function(x, density) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(list(check_argument_type(density,
+                                           type="density.circular"),
+                       check_argument_type(density,
+                                           type="density"))
+                  ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   dens_interpol<-stats::approxfun(density$x,density$y)
   map_dbl(x,~dens_interpol(.x))
 }
@@ -82,6 +136,22 @@ ddens <- function(x, density) {
 #' @export
 #'
 pdens <- function(x, density) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(x,
+                                      type="numeric")
+                  ,1)
+    check_arg_all(list(check_argument_type(density,
+                                           type="density.circular"),
+                       check_argument_type(density,
+                                           type="density"))
+                  ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
 
   # could do something like this (below) to precisely calculate the cdf, but this is quite slow,
   # better use linear interpolation
@@ -111,6 +181,24 @@ pdens <- function(x, density) {
 #' @export
 #'
 qdens <- function(p, density) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(p,
+                                      type="numeric",
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(list(check_argument_type(density,
+                                           type="density.circular"),
+                       check_argument_type(density,
+                                           type="density"))
+                  ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   density$x <- as.double(density$x)
   density$y <- as.double(density$y)
   delx <-
@@ -120,7 +208,7 @@ qdens <- function(p, density) {
     l <- 0L
     r <- length(density$x)
     while (abs(r - l) > 1) {
-      m = floor((l + r) / 2)
+      m <- floor((l + r) / 2)
       prob <- sum(density$y[1:m]) * delx
       if (prob < p)
         l <- m

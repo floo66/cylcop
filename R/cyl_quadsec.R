@@ -6,10 +6,10 @@ NULL
 #' An S4 Class of Bivariate Copulas with Quadratic Sections
 #'
 #' This class contains bivariate circular-linear copulas with quadratic sections
-#'  in the linear dimension. They are periodic in the circular dimension, u,
-#'  and symmetric with respect to u=0.5. I.e the can capture correlation in data
-#'  where there is symmetry between positive and negative angles. These copulas
-#'  are described by one parameter, \code{a}.
+#' in the linear dimension. They are periodic in the circular dimension, \eqn{u},
+#' and symmetric with respect to \eqn{u=0.5}. Therefore,
+#' they can capture correlation in data where there is symmetry between positive
+#' and negative angles. These copulas are described by one parameter, \code{a}.
 #'
 #' @section Objects from the Class:
 #' Objects are created by \code{\link{cyl_quadsec}()}.
@@ -53,7 +53,9 @@ setClass("cyl_quadsec", contains = "cyl_copula")
 #'
 #' @examples
 #' cop <- cyl_quadsec(a = 0.1)
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot")
+#' }
 #'
 #' @references \insertRef{Quesada-Molina1995}{cylcop}
 #'
@@ -62,9 +64,23 @@ setClass("cyl_quadsec", contains = "cyl_copula")
 #' \insertRef{Hodelmethod}{cylcop}
 #'
 cyl_quadsec <- function(a = 1 / (2 * pi)) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(a,
+                                      type="numeric",
+                                      length = 1,
+                                      lower=-1 / (2 * pi),
+                                      upper=1 / (2 * pi))
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
 
-  lowbnd = -1 / (2 * pi)
-  upbnd = 1 / (2 * pi)
+  lowbnd <-  -1 / (2 * pi)
+  upbnd <-  1 / (2 * pi)
 
   new(
     "cyl_quadsec",
@@ -176,10 +192,10 @@ setMethod("ccylcop", signature("cyl_quadsec"), function(u,
 
 #-----Change attributes of existing cyl_quadsec object.-------------------------------------------
 #
-#' @rdname setCopParam
+#' @rdname set_cop_param
 # @describeIn cyl_quadsec-class Change attributes of existing object.
 #' @export
-setMethod("setCopParam", "cyl_quadsec", function(copula, param_val, param_name) {
+setMethod("set_cop_param", "cyl_quadsec", function(copula, param_val, param_name) {
   if(is.null(param_name)) param_name<-copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)
   copula@parameters[param_num] <- param_val

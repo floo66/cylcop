@@ -61,10 +61,14 @@ setClass("cyl_rot_combine",
 #'
 #' @examples
 #' cop <- cyl_rot_combine(copula = copula::frankCopula(param = 3), shift = TRUE)
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' cop <- cyl_rot_combine(copula = copula::claytonCopula(param = 10), shift = FALSE)
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' @references \insertRef{Nelsen2006}{cylcop}
 #'
@@ -73,6 +77,20 @@ setClass("cyl_rot_combine",
 #' \insertRef{Hodelmethod}{cylcop}
 #'
 cyl_rot_combine <- function(copula, shift = FALSE) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(copula,
+                                           type="Copula")
+    ,1)
+    check_arg_all(check_argument_type(shift,
+                                      type="logical")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   #If the underlying linear-linear copula is a rotated copula, the parameters are not in copula, but copula@copula
   if (any(is(copula) == "rotCopula")) {
     base_copula <- copula@copula
@@ -250,10 +268,10 @@ setMethod("ccylcop", signature("cyl_rot_combine"), function(u,
 
 #-----Change attributes of existing cyl_rot_combine object.-------------------------------------------
 #
-#' @rdname setCopParam
+#' @rdname set_cop_param
 # @describeIn cyl_rot_combine-class Change attributes of existing object.
 #' @export
-setMethod("setCopParam", "cyl_rot_combine", function(copula, param_val, param_name) {
+setMethod("set_cop_param", "cyl_rot_combine", function(copula, param_val, param_name) {
   if(is.null(param_name)) param_name<-copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)
   copula@parameters[param_num] <- param_val

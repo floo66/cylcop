@@ -14,7 +14,7 @@ NULL
 #' the copula conditional on the element in the second column.
 #'
 #' @return A vector containing the values of the distribution of the copula at
-#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+#' \code{u[,-cond_on]} conditional on the values of \code{u[,cond_on]}.
 #'
 #' @examples cop <- cyl_quadsec(0.1)
 #' u <- cbind(c(0.3, 0.1), c(0.7, 0.3))
@@ -29,6 +29,31 @@ NULL
 #' @export
 #'
 numerical_conditional_cop <- function(u, copula, cond_on){
+  #validate input
+  tryCatch({
+    check_arg_all(list(check_argument_type(u, type="numeric",
+                                           length=2,
+                                           lower=0,
+                                           upper=1),
+                       check_argument_type(u, type="matrix",
+                                           ncol=2,
+                                           lower=0,
+                                           upper=1))
+                  ,2)
+    check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
+                       check_argument_type(copula, type="Copula"))
+                  ,2)
+    check_arg_all(check_argument_type(cond_on,
+                                      type="numeric",
+                                      values = c(1,2))
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   u <- matrix(ncol=2,u)
   v <- u[, 2, drop = F]
   u <- u[, 1, drop = F]
@@ -89,6 +114,31 @@ numerical_conditional_cop <- function(u, copula, cond_on){
 #' @export
 #'
 numerical_inv_conditional_cop <- function(u, copula, cond_on){
+
+  tryCatch({
+    check_arg_all(list(check_argument_type(u, type="numeric",
+                                           length=2,
+                                           lower=0,
+                                           upper=1),
+                       check_argument_type(u, type="matrix",
+                                           ncol=2,
+                                           lower=0,
+                                           upper=1))
+                  ,2)
+    check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
+                       check_argument_type(copula, type="Copula"))
+                  ,2)
+    check_arg_all(check_argument_type(cond_on,
+                                      type="numeric",
+                                      values = c(1,2))
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   u <- matrix(ncol=2,u)
   length <- nrow(u)
   v <- u[, 2, drop = F]
@@ -97,7 +147,7 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
 
 
   if(cond_on==2){
-    for (i in 1:length) {
+    for (i in seq_len(length)) {
       cond_func_v <- function(u){
         integrand <- function(x) {
           dcylcop(c(x[1], v[i,]), copula)
@@ -116,7 +166,7 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
     }
   }
   else if(cond_on==1){
-    for (i in 1:length) {
+    for (i in seq_len(length)) {
       cond_func_u <- function(v){
         integrand <- function(y) {
           dcylcop(c(u[i,], y[1]), copula)

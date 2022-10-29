@@ -1,9 +1,11 @@
-
 #' Estimate Copula Parameters from Correlation Measures
 #'
-#' See individual methods for more detailed explanations. Kendall's tau is only
-#' available for '\code{\linkS4class{cyl_rect_combine}}' copulas,
-#' for which it is the recommended method to use.
+#' This function implements a simple search of the parameter space of a
+#' '\code{\linkS4class{cyl_copula}}' object to find the
+#' parameter values that lead to a correlation that is closest to the correlation
+#' in the data (\code{theta} and \code{x}). In some special cases of
+#' '\code{\linkS4class{cyl_rect_combine}}' copulas, the parameter can be
+#' obtained analytically from Kendall's tau of the data.
 #'
 #' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'.
 #' @param theta \link[base]{numeric} \link[base]{vector} of angles
@@ -15,43 +17,61 @@
 #' @param n \link[base]{numeric} value, the number of sample points at each
 #' optimization step.
 #' @param method \link[base]{character} string describing what correlation metric
-#'  to use. Either a rank-based circular-linear coefficient (\code{"cor_cyl"}),
+#'  to use. Either a rank-based circular-linear correlation coefficient (\code{"cor_cyl"}),
 #' mutual information (\code{"mi_cyl"}), or Kendall's tau (\code{"tau"}).
 #'
 #' @param ... Additional parameters (see individual methods).
+#'
+#' @details The code assumes that the correlation captured by the copula increases
+#' monotonously with the copula parameter values. It starts with a parameter value close
+#' to the minimum for that copula and calculates the correlation for a sample of size \code{n}
+#' from that copula. Next, the parameter is doubled and again the correlation for a sample
+#' of size \code{n} calculated. After this exponential search pattern, a binary search
+#' is implemented similarly between the bounds found with the exponential search. For this
+#' binary search, the interval between those bounds is split into small intervals of length
+#' \code{acc}. Thus, smaller values of \code{acc} lead to higher accuracy.
+#'
+#' If a '\code{\linkS4class{cyl_rect_combine}}' copula has rectangles spanning
+#' the entire unit square and as background the independence copula, Kendall's tau can be used
+#' to analytically calculate the parameter value leading to the correlation of the data.
+#' No search is necessary in this case. This makes it the recommended method to use
+#' for those '\code{\linkS4class{cyl_rect_combine}}' copulas.
+#' \code{optCor()} is an alias for \code{fit_cylcop_cor}.
+#'
+#' See also individual methods (below) for more detailed explanations.
 #'
 #' @return \link[base]{numeric} \link[base]{vector} containing the estimated
 #' parameter value(s).
 #'
 #' @examples set.seed(123)
 #'
-#' sample <- rcylcop(1000, cyl_rect_combine(copula::frankCopula(2)))
-#' optCor(cyl_rect_combine(copula::frankCopula()),
+#' sample <- rcylcop(100, cyl_rect_combine(copula::frankCopula(2)))
+#' fit_cylcop_cor(cyl_rect_combine(copula::frankCopula()),
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   method = "tau"
 #' )
 #'
-#' optCor(cyl_rect_combine(copula::frankCopula()),
+#' fit_cylcop_cor(cyl_rect_combine(copula::frankCopula()),
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   method = "mi_cyl",
-#'   n = 1000
+#'   n = 100
 #' )
 #'
-#' optCor(cyl_rect_combine(copula::claytonCopula()),
+#' fit_cylcop_cor(cyl_rect_combine(copula::claytonCopula()),
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   method = "tau"
 #' )
 #'
-#' optCor(cyl_quadsec(), theta = sample[,1], x = sample[,2], method = "mi_cyl")
-#' optCor(cyl_quadsec(), theta = sample[,1], x = sample[,2], method = "cor_cyl")
-#' optCor(cyl_quadsec(),
+#' fit_cylcop_cor(cyl_quadsec(), theta = sample[,1], x = sample[,2], method = "mi_cyl")
+#' fit_cylcop_cor(cyl_quadsec(), theta = sample[,1], x = sample[,2], method = "cor_cyl")
+#' fit_cylcop_cor(cyl_quadsec(),
 #'   theta = sample[,1],
 #'   x = sample[,2],
 #'   method = "cor_cyl",
-#'   n = 1000,
+#'   n = 100,
 #'   acc = 0.001
 #' )
 #'
@@ -59,20 +79,70 @@
 #'
 #' \insertRef{Hodelmethod}{cylcop}
 #'
-#' @seealso \code{\link{mi_cyl}()}, \code{\link{cor_cyl}()}, \code{\link{optML}()},
+#' @seealso \code{\link{mi_cyl}()}, \code{\link{cor_cyl}()}, \code{\link{fit_cylcop_ml}()},
 #' \code{\link{opt_auto}()}, \code{copula::\link[copula]{fitCopula}()}.
 #'
 #' @export
 #'
-setGeneric("optCor",
+setGeneric("fit_cylcop_cor",
            function(copula,
                     theta,
                     x,
                     acc = NULL,
                     n = 10000,
-                    method = c("cor_cyl", "mi_cyl", "tau"),
-                    ...)
-             standardGeneric("optCor"),
+                    method,
+                    ...){
+             missing_flag <- FALSE
+             if(rlang::is_missing(method)){
+               method <- "tau"
+               missing_flag <- TRUE
+                 }
+             #validate input
+             tryCatch({
+               check_arg_all(check_argument_type(copula,
+                                                 type="cyl_copula")
+               ,1)
+               check_arg_all(check_argument_type(theta,
+                                                 type="numeric")
+                             ,1)
+               check_arg_all(check_argument_type(x,
+                                                 type="numeric")
+                             ,1)
+
+               check_arg_all(list(check_argument_type(acc,
+                                                      type="NULL"),
+                                  check_argument_type(acc,
+                                                      type="numeric",
+                                                      length=1,
+                                                      lower=0))
+               ,2)
+               check_arg_all(check_argument_type(n,
+                                                 type="numeric",
+                                                 length = 1,
+                                                 integer=T,
+                                                 lower=1)
+                             ,1)
+               check_arg_all(check_argument_type(method,
+                                                 type="character",
+                                                 values=c("cor_cyl", "mi_cyl", "tau"),
+                                                 length=1)
+                             ,1)
+             },
+             error = function(e) {
+               error_sound()
+               rlang::abort(conditionMessage(e))
+             }
+             )
+             if(length(theta)!=length(x)){
+               stop(
+                 error_sound(),
+                 "theta and x must have the same length."
+               )
+             }
+
+             if(missing_flag) method <- "missing"
+
+             standardGeneric("fit_cylcop_cor")},
            signature = "copula")
 
 
@@ -81,7 +151,7 @@ setGeneric("optCor",
 #
 # It only makes sense to optimize kappa, mu does not influence correlation
 #
-#' @describeIn  optCor only parameter \code{"kappa"} can be optimized, since parameter
+#' @describeIn  fit_cylcop_cor only parameter \code{"kappa"} can be optimized, since parameter
 #' \code{"mu"} does not influence the correlation.
 #
 # @param copula A \code{cyl_vonmises} object
@@ -98,13 +168,14 @@ setGeneric("optCor",
 # @return The estimated value of kappa.
 #' @export
 #'
-setMethod("optCor", "cyl_vonmises", function(copula,
+setMethod("fit_cylcop_cor", "cyl_vonmises", function(copula,
                                              theta,
                                              x,
                                              acc,
                                              n,
                                              method = "cor_cyl") {
 
+  if(method=="missing") method <- "cor_cyl"
 
   data <- data.frame(theta, x)
   if (method != "cor_cyl" &&
@@ -138,7 +209,7 @@ setMethod("optCor", "cyl_vonmises", function(copula,
 
 #' Roughly estimate cyl_quadsec parameter from some correlation metric
 #'
-#' @describeIn  optCor the absolute value of the parameter is optimized, positive
+#' @describeIn  fit_cylcop_cor the absolute value of the parameter is optimized, positive
 #' and negative values give the same correlation.
 #'
 # @param copula A \code{cyl_quadsec} object
@@ -155,12 +226,14 @@ setMethod("optCor", "cyl_vonmises", function(copula,
 # @return The estimated value of a.
 #' @export
 #'
-setMethod("optCor", "cyl_quadsec", function(copula,
+setMethod("fit_cylcop_cor", "cyl_quadsec", function(copula,
                                             theta,
                                             x,
                                             acc,
                                             n,
                                             method = "cor_cyl") {
+  if(method=="missing") method <- "cor_cyl"
+
   data <- data.frame(theta, x)
   if (method != "cor_cyl" &&
       method != "mi_cyl"
@@ -207,10 +280,10 @@ setMethod("optCor", "cyl_quadsec", function(copula,
 # @param method A string of characters, describing what correlation metric to
 #   use. Either a rank-based circular-linear coefficient ("cor_cyl") or mutual
 #   information ("mi_cyl").
-#' @describeIn  optCor optimization of parameters, \code{"a"} and \code{"b"},
+#' @describeIn  fit_cylcop_cor optimization of parameters, \code{"a"} and \code{"b"},
 #' can be done separately or simultaneously.
-#' @param parameter A character string specifying which parameter of a
-#' '\code{\linkS4class{cyl_cubsec}}' copula to optimize,
+#' @param parameter For '\code{\linkS4class{cyl_cubsec}}' copulas: A character
+#' string specifying which parameter of the copula to optimize,
 #'   \code{"a"}, \code{"b"}, or \code{"both"}
 #'
 # @return The estimated value of \code("a") or \code("b"), or a \link[base]{numeric} \link[base]{vector} holding the
@@ -219,13 +292,16 @@ setMethod("optCor", "cyl_quadsec", function(copula,
 #'
 #' @export
 #'
-setMethod("optCor", "cyl_cubsec", function(copula,
+setMethod("fit_cylcop_cor", "cyl_cubsec", function(copula,
                                            theta,
                                            x,
                                            acc,
                                            n,
                                            method = "cor_cyl",
                                            parameter = "both") {
+
+  if(method=="missing") method <- "cor_cyl"
+
   data <- data.frame(theta, x)
   if (method != "cor_cyl" &&
       method != "mi_cyl"
@@ -291,11 +367,11 @@ setMethod("optCor", "cyl_cubsec", function(copula,
     diff <- Inf
     if(cylcop.env$silent==F){
       message("total steps: ", nrow(input))}
-    for (i in 1:nrow(input)) {
+    for (i in seq_len(nrow(input))) {
       if (i %% 10 == 0)
         if(cylcop.env$silent==F){
           message("\ncurrent step: ", i)}
-      copula <- setCopParam(copula, param_val=as.matrix(input[i,]), param_name=c("a","b"))
+      copula <- set_cop_param(copula, param_val=as.matrix(input[i,]), param_name=c("a","b"))
       sample <- rcylcop(n, copula)
       test <- fun(c(sample[, 1]), c(sample[, 2]))
       if (abs(cor - test) < diff) {
@@ -333,12 +409,15 @@ setMethod("optCor", "cyl_cubsec", function(copula,
 #   Only mutual information ("mi_cyl") makes sense
 #
 # @return The estimated value of the copula parameter.
-#' @describeIn  optCor the circular-linear correlation coefficient will give a
+#' @describeIn  fit_cylcop_cor the circular-linear correlation coefficient will give a
 #' value close to 0 for any parameter value. It therefore only makes sense to
 #' use \code{method = "mi_cyl"} for the optimization.
 #' @export
 #'
-setMethod("optCor", "cyl_rot_combine", function(copula, theta, x, acc, n, method ="mi_cyl") {
+setMethod("fit_cylcop_cor", "cyl_rot_combine", function(copula, theta, x, acc, n, method ="mi_cyl") {
+
+  if(method=="missing") method <- "mi_cyl"
+
   data <- data.frame(theta, x)
   if (method == "cor_cyl")
     stop(
@@ -392,35 +471,50 @@ setMethod("optCor", "cyl_rot_combine", function(copula, theta, x, acc, n, method
 # @param method A string of characters, describing what correlation metric to
 #   use. Either Kendall's tau ("tau", recommended), a rank-based circular-linear coefficient
 #   ("cor_cyl"), or mutual information ("mi_cyl").
-#' @param background \link[base]{logical} value describing whether to optimize
+#' @param background For '\code{\linkS4class{cyl_rect_combine}}' copulas :
+#' A \link[base]{logical} value describing whether to optimize
 #' the parameter of the background copula, (\code{background = TRUE}) or
-#' the one of the copula in the rectangles(\code{background = FALSE}).
+#' the one of the copula in the rectangles (\code{background = FALSE}).
 #'
-#' @describeIn  optCor it is recommended to use \code{method = "tau"}, since this
-#' calculates the copula parameter analytically.
+#' @describeIn  fit_cylcop_cor if the rectangles span the entire unit square and the background
+#' is the independence copula, it is recommended to use \code{method = "tau"}, since this
+#' calculates the copula parameter analytically. If there is a background copula,
+#' other than the independence copula, its parameter can be optimized by setting
+#' \code{background=TRUE}.
 #
 # @return The estimated value of the copula parameter.
 #' @export
 #'
-setMethod("optCor", "cyl_rect_combine", function(copula,
+setMethod("fit_cylcop_cor", "cyl_rect_combine", function(copula,
                                                theta,
                                                x,
                                                acc,
                                                n,
                                                method = "tau",
                                                background = FALSE) {
+
+  if(method=="missing") method <- "tau"
+
   data <- data.frame(theta, x)
-  if (method != "cor_cyl" &&
-      method != "tau" &&
-      method != "mi_cyl"
-  )
-    stop(error_sound(),
-         "only methods 'tau', 'cor_cyl', and 'mi_cyl' are impelemented for this copula")
+
+  low_rect <- copula@parameters[match(c("low_rect1", "low_rect2"),copula@param.names)]
+  up_rect <- copula@parameters[match(c("up_rect1", "up_rect2"),copula@param.names)]
+  if ((isTRUE(all.equal(low_rect,c(0, 0.5))) &&
+      isTRUE(all.equal(up_rect, c(0.5, 1))) )||
+      any(is(copula@background.cop) == "indepCopula")) {
+    if(background)
+    stop(
+      error_sound(),
+      "background = TRUE only makes sense when there is a background parameter to optimize."
+      )
+  }
+
   if(method=="tau"){
     if(any(is(copula@sym.cop)=="cyl_copula")) stop(
       error_sound(),
       "method = tau is only implemented for linear-linear copulae in the rectangles"
     )
+
     a <- optTau(copula,theta,x)
   }
   else{
@@ -518,7 +612,14 @@ search_cor <-
     cor <- fun(theta = c(data[, 1]), x = c(data[, 2]))
 
     bound <- min + acc
-    copula <- setCopParam(copula,  param_val=bound, param_name=param_name)
+    if(bound >= max){
+      stop(error_sound(),
+           paste0("The interval of the copula parameter at which the correlation is calculated\n",
+                 "(acc = ",acc,") is larger than the search range of the parameter (",
+                 min, " - ",max,". Reduce acc.")
+           )
+    }
+    copula <- set_cop_param(copula,  param_val=bound, param_name=param_name)
     sample <- rcylcop(n, copula)
     current <- fun(c(sample[, 1]), c(sample[, 2]))
 
@@ -532,7 +633,7 @@ search_cor <-
         cat(param_name, ">", bound, "\n")}
       bound <- bound * 2
       if(bound>=max) break
-      copula <- setCopParam(copula, param_val=bound, param_name=param_name)
+      copula <- set_cop_param(copula, param_val=bound, param_name=param_name)
       sample <- rcylcop(n, copula)
       current <- fun(c(sample[, 1]), c(sample[, 2]))
     }
@@ -545,20 +646,20 @@ search_cor <-
                 by = acc)
     l <- 1
     r <- length(vals)
-    m = floor((l + r) / 2)
+    m <- floor((l + r) / 2)
     if(cylcop.env$silent==F){
       cat("Starting binary search :\n")}
     while (m != l & m != r) {
       if(cylcop.env$silent==F){
         cat(vals[l], " < ", param_name, " < ",  vals[r], "\n")}
-      copula <- setCopParam(copula, param_val=vals[m], param_name=param_name)
+      copula <- set_cop_param(copula, param_val=vals[m], param_name=param_name)
       sample <- rcylcop(n, copula)
       current <- fun(c(sample[, 1]), c(sample[, 2]))
       if (current < cor)
         l <- m
       else if (current > cor)
         r <- m
-      m = floor((l + r) / 2)
+      m <- floor((l + r) / 2)
     }
     return(vals[m])
   }
@@ -620,3 +721,13 @@ setMethod("optTau", "Copula", function(copula, theta, x) {
   result <- fitCopula(copula, emp_cop, method = "itau")
   return(result@estimate)
 })
+
+#' @rdname fit_cylcop_cor
+#' @examples
+#' optCor(cyl_quadsec(),
+#'  theta = sample[,1],
+#'  x = sample[,2],
+#'  method = "mi_cyl")
+#'
+#' @export
+optCor <- fit_cylcop_cor

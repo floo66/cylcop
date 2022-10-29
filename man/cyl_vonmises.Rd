@@ -7,11 +7,11 @@
 cyl_vonmises(mu = 0, kappa = 1, flip = FALSE)
 }
 \arguments{
-\item{mu}{\link[base]{numeric} value giving the mean of the vonMises
+\item{mu}{\link[base]{numeric} value giving the mean of the von Mises
 function used to construct the copula.}
 
 \item{kappa}{\link[base]{numeric} value giving the concentration of the
-vonMises function used to construct the copula.}
+von Mises function used to construct the copula.}
 
 \item{flip}{\link[base]{logical} value indicating whether the copula
 should be rotated 90 degrees to capture negative correlation.}
@@ -26,10 +26,14 @@ Constructs a circular-linear von Mises copula according to
 }
 \examples{
 cop <- cyl_vonmises(mu=pi, kappa=10, flip = TRUE)
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 cop <- cyl_vonmises(mu=0, kappa=8, flip = FALSE)
-cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+if(interactive()){
+ plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+}
 
 }
 \references{

@@ -40,9 +40,9 @@ NULL
 #' '\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object. The copula in
 #'   the rectangles.
 #' @slot background.cop '\code{\linkS4class{cyl_vonmises}}' or
-#' '\code{\linkS4class{Copula}}' object of the package '\pkg{copula}'
-#' (does not lead to an overall symmetric circular-linear copula). The copula
-#'   where no rectangles overlay the unit square.
+#' '\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
+#' the copula where no rectangles overlay the unit square. If this copula is not
+#' symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.
 #' @slot flip_up \link[base]{logical} value indicating whether the copula (\code{sym.cop}) is
 #'   rotated 90 degrees in the upper or lower rectangle.
 #' @slot sym_rect \link[base]{logical} value indicating whether the upper rectangle was
@@ -80,16 +80,16 @@ setClass(
 #' @param copula '\code{\linkS4class{Copula}}' object of the package
 #' '\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object, the copula in
 #'   the rectangles.
-#' @param background '\code{\linkS4class{cyl_vonmises}}' or
-#' '\code{\linkS4class{Copula}}' object of the package '\pkg{copula}'
-#' (does not lead to an overall symmetric circular-linear copula), the copula
-#'   where no rectangles overlay the unit square.
-#' @param low_rect \link[base]{numeric} \link[base]{vector} containing the
+#' @param background '\code{\linkS4class{cyl_copula}}' or
+#' '\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
+#' the copula where no rectangles overlay the unit square. If this copula is not
+#' symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.
+#' @param low_rect \link[base]{numeric} \link[base]{vector} of length 2 containing the
 #' lower and upper edge (u-value) of the lower rectangle.
-#' @param up_rect \link[base]{numeric} \link[base]{vector} containing the lower
+#' @param up_rect \link[base]{numeric} \link[base]{vector} of length 2 containing the lower
 #' and upper edge (u-value) of the upper rectangle, or the character string
 #' "symmetric" if it should be the mirror image (with respect to u=0.5) of the lower rectangle.
-#' @param flip_up \link[base]{logical} value indicating whether the copula (\code{sym.cop})
+#' @param flip_up \link[base]{logical} value indicating whether the copula (\code{copula})
 #'   is rotated 90 degrees in the upper (\code{flip_up = TRUE}) or lower rectangle.
 #'
 #' @return An \R object of class '\code{\linkS4class{cyl_rect_combine}}'.
@@ -100,7 +100,9 @@ setClass(
 #'
 #' #symmetric rectangles spanning entire unit square
 #' cop <- cyl_rect_combine(copula::frankCopula(2))
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' #symmetric rectangles, independence copula as background
 #' cop <- cyl_rect_combine(copula::frankCopula(2),
@@ -108,7 +110,9 @@ setClass(
 #'   up_rect = "symmetric",
 #'   flip_up = FALSE
 #' )
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' #symmetric rectangles, cy_quadsec-copula as background
 #' cop <- cyl_rect_combine(copula::normalCopula(0.3),
@@ -116,13 +120,20 @@ setClass(
 #'   up_rect = "symmetric",
 #'   background = cyl_quadsec(-0.1)
 #' )
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' #asymmetric rectangles, von Mises copula as background.
 #' #!!Not a symmetric circular linear copula!!
-#' cop <- cyl_rect_combine(copula::normalCopula(0.3), low_rect = c(0.1, 0.4),
-#' up_rect = c(0.5, 0.7), background = cyl_vonmises(mu = pi, kappa = 0.3))
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' cop <- cyl_rect_combine(copula::normalCopula(0.3),
+#'   low_rect = c(0.1, 0.4),
+#'   up_rect = c(0.5, 0.7),
+#'   background = cyl_vonmises(mu = pi, kappa = 0.3)
+#' )
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot", resolution = 20)
+#' }
 #'
 #' @references \insertRef{Durante2009}{cylcop}
 #'
@@ -138,25 +149,80 @@ cyl_rect_combine <-
            up_rect = "symmetric",
            flip_up = TRUE) {
 
-    sym_rect = FALSE
+    #validate input
+    tryCatch({
+      check_arg_all(list(check_argument_type(copula,
+                                        type="Copula"),
+                         check_argument_type(copula,
+                                             type="cyl_copula")
+                         )
+                    ,2)
+      check_arg_all(list(check_argument_type(background,
+                                             type="Copula"),
+                         check_argument_type(background,
+                                             type="cyl_copula")
+      )
+      ,2)
+      check_arg_all(check_argument_type(low_rect,
+                                        type="numeric",
+                                        length = 2,
+                                        lower=0,
+                                        upper=1)
+                    ,1)
+      check_arg_all(list(check_argument_type(up_rect,
+                                             type="numeric",
+                                             length = 2,
+                                             lower=0,
+                                             upper=1),
+                         check_argument_type(up_rect,
+                                             type="character",
+                                             values = "symmetric")
+      )
+      ,2)
+      check_arg_all(check_argument_type(flip_up,
+                                             type="logical")
+      ,1)
+    },
+    error = function(e) {
+      error_sound()
+      rlang::abort(conditionMessage(e))
+    }
+    )
+
+    sym_rect <-  FALSE
 # Checks and warnings
 
-    if (!is.numeric(up_rect) && !identical(up_rect, "symmetric"))
+    if (identical(up_rect, "symmetric")) {
+      if(low_rect[2]>0.5){
+        stop(
+          error_sound(),
+          "The rectangles are overlapping."
+        )
+      }
+      up_rect <- c(1 - low_rect[2], 1 - low_rect[1])
+      sym_rect <-  TRUE
+    }
+
+    if(!sym_rect){
+      if(low_rect[2]>up_rect[1]){
+        stop(
+          error_sound(),
+          "Rectangles must not be overlapping!"
+        )
+      }}
+
+    if(low_rect[2]<low_rect[1]||up_rect[2]<up_rect[1]){
       stop(
         error_sound(),
-        "up_rect must either be \"symmetric\", or provide upper and lower bound of the upper rectangle"
+        "Upper edge of a rectangle is below its lower edge."
       )
-
-    if (identical(up_rect, "symmetric")) {
-      up_rect <- c(1 - low_rect[2], 1 - low_rect[1])
-      sym_rect = TRUE
     }
 
     if (isTRUE(all.equal(low_rect[1], 0.0)) &&
         isTRUE(all.equal(up_rect[2], 1.0)) &&
         !isTRUE(all.equal(low_rect[2], 1 - up_rect[1]))) {
       warning(warning_sound(),
-              "These rectangles do not lead to a periodic copula in u-direction!")
+              "These rectangles do not lead to a periodic copula in u-direction.")
     }
 
     if (!isTRUE(all.equal(low_rect[1], 1 - up_rect[2])) ||
@@ -186,7 +252,7 @@ cyl_rect_combine <-
     else
       stop(
         error_sound(),
-        "provide a (rotated) 'copula'-object from the 'copula'-package or a circular vonMises-object as input"
+        "provide a (rotated) 'copula'-object from the 'copula'-package or a circular von Mises-object as input"
       )
 
 
@@ -258,7 +324,7 @@ cyl_rect_combine <-
       if ("parameters" %in% methods::slotNames(orig_copula_bg)) {
         orig_copula_bg@param.lowbnd
       },
-      0, 0, 0.5, 0.5)
+      0, 0, 0, 0)
     param_upbnd <-
       c(if ("parameters" %in% methods::slotNames(orig_copula)) {
         orig_copula@param.upbnd
@@ -266,7 +332,7 @@ cyl_rect_combine <-
       if ("parameters" %in% methods::slotNames(orig_copula_bg)) {
         orig_copula_bg@param.upbnd
       },
-      0.5, 0.5, 1, 1)
+      1, 1, 1, 1)
 
     new(
       "cyl_rect_combine",
@@ -316,21 +382,61 @@ setMethod("rcylcop", signature("numeric", "cyl_rect_combine"), function(n, copul
     copula@parameters[match(c("up_rect1", "up_rect2"), copula@param.names)]
 
 
-# The case when the rectangles together cover the entire unit square is treated separatley
-# becasue the equations are a lot simpler and faster to calculate (see text)
+  # The case when the rectangles together cover the entire unit square is treated separatley
+  # becasue the equations are a lot simpler and faster to calculate (see text)
 
   if (isTRUE(all.equal(low_rect, c(0, 0.5))) &&
       isTRUE(all.equal(up_rect, c(0.5, 1))) &&
       any(is(copula@background.cop) == "indepCopula")) {
 
     #background copula
-    c0<-rcylcop(n, indepCopula())
+    c0<-runif(n,0,1)
 
     # non-rotated copula in the upper (flip_up==F) or lower (flip_up==T) rectangle
-    c1<-rcylcop(n, copula@sym.cop)
+
+    if (!copula@flip_up){
+      #rotate copula in the other rectangle
+      if (any(is(copula@sym.cop) == "cyl_vonmises")) {
+        sym_cop <- copula@sym.cop
+        sym_cop@flip <- !copula@sym.cop@flip
+      }else if (any(is(copula@sym.cop) == "upfhCopula")) {
+        sym_cop <- fhCopula("lower")
+      }else if (any(is(copula@sym.cop) == "lowfhCopula")) {
+        sym_cop <- fhCopula("upper")
+      }else{
+        sym_cop <- rotCopula(copula@sym.cop, flip = c(TRUE, FALSE))
+      }
+    }else{
+      sym_cop <- copula@sym.cop
+    }
+
+    lin_sample<-rcylcop(n, sym_cop)
+    sample[,2] <- lin_sample[,2]
+
+    ind <- which(c0 < 0.5)
+
+    sample[ind,1] <- lin_sample[ind,1]/2
+
+    ind <- which(c0 >= 0.5)
+
+    sample[ind,1] <- (1-lin_sample[ind,1]/2)
+
+
+    return(sample)
+  }
+
+
+  # If background is not independent copula or rectangles are not from 0 to 0.5 and from 0.5 to 1
+  # we need to do the full calculations
+  else{
+    #background copula
+    c0 <- rcylcop(n, copula@background.cop)
+
+    # non-rotated copula in the upper (flip_up==F) or lower (flip_up==T) rectangle
+    c1 <- rcylcop(n, copula@sym.cop)
 
     #rotate copula in the other rectangle
-    if (any(is(copula@sym.cop) == "cyl_vonmises")) {
+    if (any(is(copula) == "cyl_vonmises")) {
       rotated_cop <- copula@sym.cop
       rotated_cop@flip <- !copula@sym.cop@flip
       c2 <- rcylcop(n, rotated_cop)
@@ -345,112 +451,51 @@ setMethod("rcylcop", signature("numeric", "cyl_rect_combine"), function(n, copul
       c2 <- rcylcop(n, rotCopula(copula@sym.cop, flip = c(TRUE, FALSE)))
     }
 
-    for (i in 1:n) {
-      #drawn value from background copula that is in lower rectangle
-      if (c0[i,1] < 0.5) {
-        if (copula@flip_up)
-          transformed <- c(c1[i,1] / 2, c1[i,2])
-        else
-          transformed <- c(c2[i,1] / 2, c2[i,2])
+    #C0-volume of the lower rectangle
+    Vlo <- low_rect[2]-low_rect[1]
+    #C0-volume of the upper rectangle
+    Vup <- up_rect[2]-up_rect[1]
 
-      }
-      #drawn value from background copula that is in upper rectangle
-      else{
-        if (copula@flip_up)
-          transformed <- c((c2[i,1] + 1) / 2, c2[i,2])
-        else
-          transformed <- c((c1[i,1] + 1) / 2, c1[i,2])
-      }
-      sample[i, ] <- transformed
+    #See text for expalantion of psi
+    psi1_rect_lo_test <- function(x){
+      x*Vlo+low_rect[1]
     }
-    return(sample)
-  }
+    psi2_rect_lo_test <-
+      GoFKernel::inverse(
+        f = function(y) {(pcylcop(c(low_rect[2], y), copula@background.cop) - pcylcop(c(low_rect[1], y), copula@background.cop)) / Vlo},
+        lower = 0,
+        upper = 1
+      )
+    psi1_rect_up_test <- function(x){
+      x * Vup + up_rect[1]
+    }
+    psi2_rect_up_test <-
+      GoFKernel::inverse(
+        f = function(y) {(pcylcop(c(up_rect[2], y), copula@background.cop) - pcylcop(c(up_rect[1], y), copula@background.cop)) / Vup},
+        lower = 0,
+        upper = 1
+      )
 
-
-# If background is not independent copula or rectangles are not from 0 to 0.5 and from 0.5 to 1
-# we need to do the full calculations
-else{
-  lo1 <- c(low_rect[1], 0)
-  lo2 <- c(low_rect[2], 1)
-  up1 <- c(up_rect[1], 0)
-  up2 <- c(up_rect[2], 1)
-
-  #background copula
-  c0 <- rcylcop(n, copula@background.cop)
-
-  # non-rotated copula in the upper (flip_up==F) or lower (flip_up==T) rectangle
-  c1 <- rcylcop(n, copula@sym.cop)
-
-  #rotate copula in the other rectangle
-  if (any(is(copula) == "cyl_vonmises")) {
-    rotated_cop <- copula@sym.cop
-    rotated_cop@flip <- !copula@sym.cop@flip
-    c2 <- rcylcop(n, rotated_cop)
-  }
-  else if (any(is(copula@sym.cop) == "upfhCopula")) {
-    c2 <- rcylcop(n, fhCopula("lower"))
-  }
-  else if (any(is(copula@sym.cop) == "lowfhCopula")) {
-    c2 <- rcylcop(n, fhCopula("upper"))
-  }
-  else{
-    c2 <- rcylcop(n, rotCopula(copula@sym.cop, flip = c(TRUE, FALSE)))
-  }
-
-  #C0-volume of the lower rectangle
-  Vlo <- prob(copula@background.cop, lo1, lo2)
-  #C0-volume of the upper rectangle
-  Vup <- prob(copula@background.cop, up1, up2)
-
-  #See text for expalantion of psi
-  psi1_rect_lo <-
-    GoFKernel::inverse(
-      f = function(x) {prob(copula@background.cop, lo1, c(x, 1)) / Vlo},
-      lower = low_rect[1],
-      upper = low_rect[2]
-    )
-
-  psi2_rect_lo <-
-    GoFKernel::inverse(
-      f = function(y) {prob(copula@background.cop, lo1, c(low_rect[2], y)) / Vlo},
-      lower = 0,
-      upper = 1
-    )
-
-  psi1_rect_up <-
-    GoFKernel::inverse(
-      f = function(x) {prob(copula@background.cop, up1, c(x, 1)) / Vup},
-      lower = up_rect[1],
-      upper = up_rect[2]
-    )
-
-  psi2_rect_up <-
-    GoFKernel::inverse(
-      f = function(y) {prob(copula@background.cop, up1, c(up_rect[2], y)) / Vup},
-      lower = 0,
-      upper = 1
-    )
-
-    for (i in 1:n) {
-# Draw from background copula in lower rectangle
+    for (i in seq_len(n)) {
+      # Draw from background copula fell in lower rectangle
       if (c0[i,1] < low_rect[2] &&
           c0[i,1] > low_rect[1]) {
         if (copula@flip_up)
-          transformed <- c(psi1_rect_lo(c1[i,1]), psi2_rect_lo(c1[i,2]))
+          transformed <- c(psi1_rect_lo_test(c1[i,1]), psi2_rect_lo_test(c1[i,2]))
         else
-          transformed <- c(psi1_rect_lo(c2[i,1]), psi2_rect_lo(c2[i,2]))
+          transformed <- c(psi1_rect_lo_test(c2[i,1]), psi2_rect_lo_test(c2[i,2]))
       }
 
-# Draw from background copula in upper rectangle
+      # Draw from background copula fell in upper rectangle
       else if (c0[i,1] < up_rect[2] &&
                c0[i,1] > up_rect[1]) {
         if (copula@flip_up)
-          transformed <- c(psi1_rect_up(c2[i,1]), psi2_rect_up(c2[i,2]))
+          transformed <- c(psi1_rect_up_test(c2[i,1]), psi2_rect_up_test(c2[i,2]))
         else
-          transformed <- c(psi1_rect_up(c1[i,1]), psi2_rect_up(c1[i,2]))
+          transformed <- c(psi1_rect_up_test(c1[i,1]), psi2_rect_up_test(c1[i,2]))
       }
 
-# Draw from background copula in neither rectangle
+      # Draw from background copula fell in neither rectangle
       else{
         transformed <- c0[i,]
       }
@@ -467,7 +512,7 @@ else{
 # @describeIn cyl_rect_combine-class Calculate the density.
 #' @export
 setMethod("dcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula) {
-  v <- u[, 2, drop = F]
+  v <- u[, 2,  drop = F]
   u <- u[, 1, drop = F]
 
   low_rect <-
@@ -476,8 +521,8 @@ setMethod("dcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
     copula@parameters[match(c("up_rect1", "up_rect2"), copula@param.names)]
 
 
-# The case when the rectangles together cover the entire unit square is treated separatley
-# because the equations are a lot simpler and faster to calculate (see text)
+  # The case when the rectangles together cover the entire unit square is treated separatley
+  # because the equations are a lot simpler and faster to calculate (see text)
 
   if (isTRUE(all.equal(low_rect, c(0, 0.5))) &&
       isTRUE(all.equal(up_rect, c(0.5, 1))) &&
@@ -487,50 +532,47 @@ setMethod("dcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
     c1 <- copula@sym.cop
 
     #rotate copula in the other rectangle
-    if (any(is(copula@sym.cop) == "cyl_vonmises")) {
-      rotated_cop <- copula@sym.cop
-      rotated_cop@flip <- !copula@sym.cop@flip
-      c2 <- rotated_cop
+
+    u_small_ind <- which(u<0.5)
+    u_large_ind <- which(u>0.5)
+    u_1 <- which(u==0.5)
+
+    pdf <- u
+
+    if (copula@flip_up){
+      pdf[u_small_ind] <- dcylcop(cbind(2 * u[u_small_ind], v[u_small_ind]), c1)
+      pdf[u_large_ind] <- dcylcop(cbind(1-(2 * u[u_large_ind]-1), v[u_large_ind]), c1)
+      pdf[u_1] <- 1
+    }else{
+      pdf[u_small_ind] <- dcylcop(cbind(1-(2 * u[u_small_ind]), v[u_small_ind]), c1)
+      pdf[u_large_ind] <- dcylcop(cbind(2 * u[u_large_ind]-1, v[u_large_ind]), c1)
+      pdf[u_1] <- 1
     }
-    else if (any(is(copula@sym.cop) == "upfhCopula")) {
-      c2 <- fhCopula("lower")
-    }
-    else if (any(is(copula@sym.cop) == "lowfhCopula")) {
-      c2 <- fhCopula("upper")
-    }
-    else{
-      c2 <- rotCopula(copula@sym.cop, flip = c(TRUE, FALSE))
-    }
+    pdf <- c(pdf)
 
-    pdf <- map2_dbl(u, v, function(u, v) {
-      #(u,v) is in lower rectangle
-      if (u < 0.5) {
-        if (copula@flip_up)
-          dcylcop(c(2 * u, v), c1)
-        else
-          dcylcop(c(2 * u, v), c2)
-      }
+    # pdf <- map2_dbl(u, v, function(u, v) {
+    #   #(u,v) is in lower rectangle
+    #   if (u < 0.5) {
+    #     if (copula@flip_up)
+    #       dcylcop(c(2 * u, v), c1)
+    #     else
+    #       dcylcop(c(2 * u, v), c2)
+    #   }
+    #
+    #   #(u,v) is in upper rectangle
+    #   else if (u > 0.5){
+    #     if (copula@flip_up)
+    #       dcylcop(c(2 * u - 1, v), c2)
+    #     else
+    #       dcylcop(c(2 * u - 1, v), c1)
+    #   }
+    #   #(u,v) is on the border, i.e. density of indepCopula
+    #   else{
+    #     1
+    #   }
+    # })
+  }else{
 
-      #(u,v) is in upper rectangle
-      else if (u > 0.5){
-        if (copula@flip_up)
-          dcylcop(c(2 * u - 1, v), c2)
-        else
-          dcylcop(c(2 * u - 1, v), c1)
-      }
-      #(u,v) is on the border, i.e. density of indepCopula
-      else{
-        1
-      }
-    })
-    return(pdf)
-  }
-
-
-# If background is not independent copula or rectangles are not from 0 to 0.5 and from 0.5 to 1
-# we need to do the full calculations
-
-  else{
     lo1 <- c(low_rect[1], 0)
     lo2 <- c(low_rect[2], 1)
     up1 <- c(up_rect[1], 0)
@@ -542,71 +584,52 @@ setMethod("dcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
     # non-rotated copula in the upper (flip_up==F) or lower (flip_up==T) rectangle
     c1 <- copula@sym.cop
 
-    #rotate copula in the other rectangle
-    if (any(is(copula) == "cyl_vonmises")) {
-      rotated_cop <- copula@sym.cop
-      rotated_cop@flip <- !copula@sym.cop@flip
-      c2 <- rotated_cop
-    }
-    else if (any(is(copula@sym.cop) == "upfhCopula")) {
-      c2 <- fhCopula("lower")
-    }
-    else if (any(is(copula@sym.cop) == "lowfhCopula")) {
-      c2 <- fhCopula("upper")
-    }
-    else{
-      c2 <- rotCopula(copula@sym.cop, flip = c(TRUE, FALSE))
-    }
-
     #C0-volume of the lower rectangle
     Vlo <- prob(copula@background.cop, lo1, lo2)
     #C0-volume of the upper rectangle
     Vup <- prob(copula@background.cop, up1, up2)
 
-    pdf <- map2_dbl(u, v, function(u, v) {
-#(u,v) is in lower rectangle
-      if (u <= lo2[1] && u >= lo1[1]) {
-        Vlou <- prob(copula@background.cop, lo1, c(u, 1))
-        Vlov <-
-          prob(copula@background.cop, lo1, c(low_rect[2], v))
+    u_low_ind <- intersect(which(u <= lo2[1]),which(u >= lo1[1]))
+    u_up_ind <- intersect(which(u <= up2[1]),which(u >= up1[1]))
+    u_backgr <- which(u%in%u[-c(u_low_ind,u_up_ind)])
 
-        #calculate integral as difference of conditional copulae to avoid numerical integration
-        integ <- cylcop::ccylcop(c(lo2[1],v), copula@background.cop, cond_on=2, inverse=F)-
-          cylcop::ccylcop(c(lo1[1],v), copula@background.cop, cond_on=2, inverse=F)
-        if (copula@flip_up)
-          pdf <-
-          (integ / Vlo) * dcylcop(c(Vlou / Vlo, Vlov / Vlo), c1)
-        else
-          pdf <-
-          (integ / Vlo) * dcylcop(c(Vlou / Vlo, Vlov / Vlo), c2)
-      }
+    Vlou <- rep(NA,length(u))
+    Vlov <- rep(NA,length(u))
+    Vupu <- rep(NA,length(u))
+    Vupv <- rep(NA,length(u))
+    integ <- rep(NA,length(u))
+    pdf <- rep(NA,length(u))
 
-#(u,v) is in upper rectangle
-      else if (u <= up2[1] && u >= up1[1]) {
-        Vupu <- prob(copula@background.cop, up1, c(u, 1))
-        Vupv <-
-          prob(copula@background.cop, up1, c(up_rect[2], v))
+    Vlou[u_low_ind] <- u[u_low_ind] - low_rect[1]
 
-        integ <- cylcop::ccylcop(c(up2[1],v), copula@background.cop, cond_on=2, inverse=F)-
-          cylcop::ccylcop(c(up1[1],v), copula@background.cop, cond_on=2, inverse=F)
+    Vlov[u_low_ind] <-  pcylcop(cbind(low_rect[2], v[u_low_ind]), copula@background.cop) -
+      pcylcop(cbind(low_rect[1], v[u_low_ind]), copula@background.cop)
 
+    Vupu[u_up_ind] <- u[u_up_ind] - up_rect[1]
 
-        if (copula@flip_up)
-          pdf <-
-          (integ / Vup) * dcylcop(c(Vupu / Vup, Vupv / Vup), c2)
-        else
-          pdf <-
-          (integ / Vup) * dcylcop(c(Vupu / Vup, Vupv / Vup), c1)
-      }
+    Vupv[u_up_ind] <- pcylcop(cbind(up_rect[2], v[u_up_ind]), copula@background.cop) -
+      pcylcop(cbind(up_rect[1], v[u_up_ind]), copula@background.cop)
 
-      #(u,v) is in neither rectangle
-      else {
-        pdf <- dcylcop(c(u, v), c0)
-      }
-      return(pdf)
-    })
-    return(pdf)
+    integ[u_low_ind] <- cylcop::ccylcop(cbind(lo2[1],v[u_low_ind]), copula@background.cop, cond_on=2, inverse=F)-
+      cylcop::ccylcop(cbind(lo1[1],v[u_low_ind]), copula@background.cop, cond_on=2, inverse=F)
+    integ[u_up_ind] <- cylcop::ccylcop(cbind(up2[1],v[u_up_ind]), copula@background.cop, cond_on=2, inverse=F)-
+      cylcop::ccylcop(cbind(up1[1],v[u_up_ind]), copula@background.cop, cond_on=2, inverse=F)
+
+    if (copula@flip_up){
+      pdf[u_low_ind] <-
+        (integ[u_low_ind] / Vlo) * dcylcop(cbind(Vlou[u_low_ind] / Vlo, Vlov[u_low_ind] / Vlo), c1)
+      pdf[u_up_ind] <-
+        (integ[u_up_ind] / Vup) * dcylcop(cbind(1-(Vupu[u_up_ind] / Vup), Vupv[u_up_ind] / Vup), c1)
+      pdf[u_backgr] <- dcylcop(cbind(u[u_backgr], v[u_backgr]), c0)
+    }else{
+      pdf[u_low_ind] <-
+        (integ[u_low_ind] / Vlo) * dcylcop(cbind(1-(Vlou[u_low_ind] / Vlo), Vlov[u_low_ind] / Vlo), c1)
+      pdf[u_up_ind] <-
+        (integ[u_up_ind] / Vup) * dcylcop(cbind(Vupu[u_up_ind] / Vup, Vupv[u_up_ind] / Vup), c1)
+      pdf[u_backgr] <- dcylcop(cbind(u[u_backgr], v[u_backgr]), c0)
+    }
   }
+  return(pdf)
 })
 
 
@@ -616,6 +639,7 @@ setMethod("dcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
 # @describeIn cyl_rect_combine-class Calculate the distribution.
 #' @export
 setMethod("pcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula) {
+
   v <- u[, 2, drop = F]
   u <- u[, 1, drop = F]
 
@@ -625,8 +649,8 @@ setMethod("pcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
     copula@parameters[match(c("up_rect1", "up_rect2"), copula@param.names)]
 
 
-# The case when the rectangles together cover the entire unit square is treated separatley
-# because the equations are a lot simpler and faster to calculate (see text)
+  # The case when the rectangles together cover the entire unit square is treated separatley
+  # because the equations are a lot simpler and faster to calculate (see text)
 
   if (isTRUE(all.equal(low_rect, c(0, 0.5))) &&
       isTRUE(all.equal(up_rect, c(0.5, 1))) &&
@@ -651,33 +675,28 @@ setMethod("pcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
       c2 <- rotCopula(copula@sym.cop, flip = c(TRUE, FALSE))
     }
 
-    cdf <- map2_dbl(u, v, function(u, v) {
-#(u,v) is in lower rectangle
-      if (u < 0.5) {
-        if (copula@flip_up)
-          0.5 * pcylcop(c(2 * u, v), c1)
-        else
-          0.5 * pcylcop(c(2 * u, v), c2)
-      }
 
-#(u,v) is in upper rectangle
-      else if (u > 0.5) {
-        if (copula@flip_up)
-          0.5 * pcylcop(c(2 * u - 1, v), c2) + 0.5 * v
-        else
-          0.5 * pcylcop(c(2 * u - 1, v), c1) + 0.5 * v
-      }
-#(u,v) is on border, indepCopula
-      else{
-        u*v
-      }
-    })
-    return(cdf)
+    u_small_ind <- which(u<0.5)
+    u_large_ind <- which(u>0.5)
+    u_1 <- which(u==0.5)
+
+    cdf <- u
+
+    if (copula@flip_up){
+      cdf[u_small_ind] <- 0.5*pcylcop(cbind(2 * u[u_small_ind], v[u_small_ind]), c1)
+      cdf[u_large_ind] <- 0.5*pcylcop(cbind(2 * u[u_large_ind]-1, v[u_large_ind]), c2)+ 0.5 * v[u_large_ind]
+      cdf[u_1] <- u[u_1]*v[u_1]
+    }else{
+      cdf[u_small_ind] <- 0.5*pcylcop(cbind(2 * u[u_small_ind], v[u_small_ind]), c2)
+      cdf[u_large_ind] <- 0.5*pcylcop(cbind(2 * u[u_large_ind]-1, v[u_large_ind]), c1) + 0.5 * v[u_large_ind]
+      cdf[u_1] <- u[u_1]*v[u_1]
+    }
+    cdf <- c(cdf)
   }
 
 
-# If background is not independent copula or rectangles are not from 0 to 0.5 and from 0.5 to 1
-# we need to do the full calculations
+  # If background is not independent copula or rectangles are not from 0 to 0.5 and from 0.5 to 1
+  # we need to do the full calculations
 
   else{
     lo1 <- c(low_rect[1], 0)
@@ -712,41 +731,47 @@ setMethod("pcylcop", signature("matrix", "cyl_rect_combine"), function(u, copula
     #C0-volume of the upper rectangle
     Vup <- prob(copula@background.cop, up1, up2)
 
-    cdf <- map2_dbl(u, v, function(u, v) {
- #(u,v) is in lower rectangle
-      if (u < low_rect[2] && u > low_rect[1]) {
-        Vlou <- prob(copula@background.cop, lo1, c(u, 1))
-        Vlov <-
-          prob(copula@background.cop, lo1, c(low_rect[2], v))
-        marg1 <-
-          pcylcop(c(u, 0), c0) + pcylcop(c(low_rect[1], v), c0) - pcylcop(c(low_rect[1], 0), c0)
-        if (copula@flip_up)
-          cdf <- Vlo * pcylcop(c(Vlou / Vlo, Vlov / Vlo), c1) + marg1
-        else
-          cdf <- Vlo * pcylcop(c(Vlou / Vlo, Vlov / Vlo), c2) + marg1
-      }
+    u_low_ind <- intersect(which(u < low_rect[2]),which(u > low_rect[1]))
+    u_up_ind <- intersect(which(u < up_rect[2]),which(u > up_rect[1]))
+    u_backgr <- which(u%in%u[-c(u_low_ind,u_up_ind)])
 
-#(u,v) is in upper rectangle
-      else if (u < up_rect[2] && u > up_rect[1]) {
-        Vupu <- prob(copula@background.cop, up1, c(u, 1))
-        Vupv <-
-          prob(copula@background.cop, up1, c(up_rect[2], v))
-        marg2 <-
-          pcylcop(c(u, 0), c0) + pcylcop(c(up_rect[1], v), c0) - pcylcop(c(up_rect[1], 0), c0)
-        if (copula@flip_up)
-          cdf <- Vup * pcylcop(c(Vupu / Vup, Vupv / Vup), c2) + marg2
-        else
-          cdf <- Vup * pcylcop(c(Vupu / Vup, Vupv / Vup), c1) + marg2
-      }
+    Vlou <- rep(NA,length(u))
+    Vlov <- rep(NA,length(u))
+    Vupu <- rep(NA,length(u))
+    Vupv <- rep(NA,length(u))
+    marg <- rep(NA,length(u))
+    cdf <- rep(NA,length(u))
 
-#(u,v) is in neither rectangle
-      else {
-        cdf <- pcylcop(c(u, v), c0)
-      }
-      return(cdf)
-    })
-    return(cdf)
+
+
+    Vlou[u_low_ind] <- u[u_low_ind] - low_rect[1]
+
+    Vlov[u_low_ind] <-  pcylcop(cbind(low_rect[2], v[u_low_ind]), copula@background.cop) -
+      pcylcop(cbind(low_rect[1], v[u_low_ind]), copula@background.cop)
+
+    Vupu[u_up_ind] <- u[u_up_ind] - up_rect[1]
+
+    Vupv[u_up_ind] <- pcylcop(cbind(up_rect[2], v[u_up_ind]), copula@background.cop) -
+      pcylcop(cbind(up_rect[1], v[u_up_ind]), copula@background.cop)
+
+
+    marg[u_low_ind] <-
+      pcylcop(cbind(u[u_low_ind], 0), c0) + pcylcop(cbind(low_rect[1], v[u_low_ind]), c0) - pcylcop(c(low_rect[1], 0), c0)
+    marg[u_up_ind] <-
+      pcylcop(cbind(u[u_up_ind], 0), c0) + pcylcop(cbind(up_rect[1], v[u_up_ind]), c0) - pcylcop(c(up_rect[1], 0), c0)
+
+
+    if (copula@flip_up){
+      cdf[u_low_ind] <- Vlo * pcylcop(cbind(Vlou[u_low_ind] / Vlo, Vlov[u_low_ind] / Vlo), c1) + marg[u_low_ind]
+      cdf[u_up_ind] <- Vup * pcylcop(cbind(Vupu[u_up_ind] / Vup, Vupv[u_up_ind] / Vup), c2) + marg[u_up_ind]
+      cdf[u_backgr] <- pcylcop(cbind(u[u_backgr], v[u_backgr]), c0)
+    }else{
+      cdf[u_low_ind] <- Vlo * pcylcop(cbind(Vlou[u_low_ind] / Vlo, Vlov[u_low_ind] / Vlo), c2) + marg[u_low_ind]
+      cdf[u_up_ind] <- Vup * pcylcop(cbind(Vupu[u_up_ind] / Vup, Vupv[u_up_ind] / Vup), c1) + marg[u_up_ind]
+      cdf[u_backgr] <- pcylcop(cbind(u[u_backgr], v[u_backgr]), c0)
+    }
   }
+  return(cdf)
 })
 
 
@@ -783,10 +808,10 @@ setMethod("ccylcop", signature("cyl_rect_combine"), function(u,
 
 #-----Change attributes of existing cyl_rect_combine object.-------------------------------------------
 #
-#' @rdname setCopParam
+#' @rdname set_cop_param
 #@describeIn cyl_rect_combine-class Change attributes of existing object.
 #' @export
-setMethod("setCopParam", "cyl_rect_combine", function(copula, param_val, param_name) {
+setMethod("set_cop_param", "cyl_rect_combine", function(copula, param_val, param_name) {
   if (is.null(param_name))
     param_name <- copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)

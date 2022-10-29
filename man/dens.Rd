@@ -20,9 +20,12 @@ qdens(p, density)
 \item{n}{\link[base]{integer} value, the number of random samples to be
 generated with \code{rdens()}.}
 
-\item{density}{\link[base]{list} containing information about the kernel density
-estimate. The structure of the list must be as returned by
-\code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.}
+\item{density}{a '\code{\link[stats]{density}}' object (for linear kernel density estimates)
+or a '\code{\link[circular]{density.circular}}' object
+(for circular kernel density estimates) containing information about the kernel density
+  estimate. These objects can be obtained using
+  \code{\link{fit_angle}(..., parametric = FALSE)} or
+  \code{\link{fit_steplength}(..., parametric = FALSE)}.}
 
 \item{x}{\link[base]{numeric} \link[base]{vector} giving the points where
 the density or distribution function is evaluated.}
@@ -48,6 +51,15 @@ set.seed(123)
 
 steps <- rweibull(10, shape=3)
 dens <- fit_steplength(x = steps, parametric = FALSE)
+ddens(c(0.1,0.3), dens)
+pdens(c(0.1,0.3), dens)
+qdens(c(0.1,0.3), dens)
+rdens(4, dens)
+
+angles <- full2half_circ(
+  circular::rvonmises(10, mu = circular::circular(0), kappa = 2)
+)
+dens <- fit_angle(theta = angles, parametric = FALSE)
 ddens(c(0.1,0.3), dens)
 pdens(c(0.1,0.3), dens)
 qdens(c(0.1,0.3), dens)

@@ -17,13 +17,20 @@
 An invisible \code{NULL}. As side effect, a plot is produced.
 }
 \description{
-Methods for \code{\link[base]{plot}()} to draw a scatter plot of a
-random sample from bivariate distributions from package \pkg{cylcop}.
+Method for \code{\link[base]{plot}()} to draw a scatter plot of a
+random sample from a circular-linear copula.
 }
 \examples{
 set.seed(123)
 
 plot(cyl_quadsec(0.1))
-plot(cyl_vonmises(0,2), n=100)
+plot(cyl_vonmises(0,2), n = 100)
+plot(cyl_quadsec(0.1),
+   xlab = "something",
+   ylab = "something else",
+   main = "clever title",
+   col = "red",
+   fg = "blue",
+   asp= 1)
 
 }

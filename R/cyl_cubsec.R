@@ -6,8 +6,9 @@ NULL
 #' An S4 Class of Bivariate Copulas with Cubic Sections
 #'
 #' This class contains bivariate circular-linear copulas with cubic sections in the linear dimension.
-#' They are periodic in the circular dimension, u, and symmetric with respect to u=0.5. I.e.
-#' the can capture correlation in data where there is symmetry between positive and negative angles.
+#' They are periodic in the circular dimension, \eqn{u}, and symmetric with respect
+#' to \eqn{u=0.5}. Therefore,
+#' they can capture correlation in data where there is symmetry between positive and negative angles.
 #' These copulas are described by two parameters, \code{a} and \code{b}.
 #'
 #' @section Objects from the Class:
@@ -53,7 +54,9 @@ setClass("cyl_cubsec", contains = "cyl_copula")
 #'
 #' @examples
 #' cop <- cyl_cubsec(a = 0.1, b = -0.1)
-#' cop_plot(copula = cop, type = "pdf", plot_type = "ggplot")
+#' if(interactive()){
+#'  plot_cop_surf(copula = cop, type = "pdf", plot_type = "ggplot")
+#' }
 #'
 #' @references \insertRef{Nelsen1997}{cylcop}
 #'
@@ -64,8 +67,28 @@ setClass("cyl_cubsec", contains = "cyl_copula")
 #'
 cyl_cubsec <- function(a = 1 / (2 * pi),
                        b = 1 / (2 * pi)) {
-  lowbnd = c(-1 / (2 * pi), -1 / (2 * pi))
-  upbnd = c(1 / (2 * pi), 1 / (2 * pi))
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(a,
+                                      type="numeric",
+                                      length = 1,
+                                      lower=-1 / (2 * pi),
+                                      upper=1 / (2 * pi))
+                  ,1)
+    check_arg_all(check_argument_type(b,
+                                      type="numeric",
+                                      length = 1,
+                                      lower=-1 / (2 * pi),
+                                      upper=1 / (2 * pi))
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+  lowbnd <-  c(-1 / (2 * pi), -1 / (2 * pi))
+  upbnd <-  c(1 / (2 * pi), 1 / (2 * pi))
 
   new(
     "cyl_cubsec",
@@ -175,11 +198,13 @@ setMethod("ccylcop", signature("cyl_cubsec"), function(u,
         v ^ 3 * (alpha_prime - beta_prime)
     }
     if (inverse == TRUE) {
-      if (abs(a + b) < 0.001) {
-        #numerical instability in the analytical solution, use numeric approximation instead
-        result <-
-          numerical_inv_conditional_cop(u_orig, copula, cond_on = 1)
-      } else{
+      if (abs(a + b) < 0.00001) {
+        #numerical instability in the analytical solution, if a is alsmost -b
+        #just set b <- -a+0.00001. less error than when using numeric approximation.
+        # result <-
+        #   numerical_inv_conditional_cop(u_orig, copula, cond_on = 1)
+        b <- -a+(sign(a)*0.00001)
+      }
         result <- map2_dbl(u, v, function(u, w) {
           alpha_prime <- a * 2 * pi * cos(2 * pi * u)
           beta_prime <- -b * 2 * pi * cos(2 * pi * u)
@@ -256,7 +281,7 @@ setMethod("ccylcop", signature("cyl_cubsec"), function(u,
           ind2 <- which(imaginary[ind] == min(imaginary[ind]))
           return(real[ind][ind2])
         })
-      }
+
 
     }
   }
@@ -270,10 +295,10 @@ setMethod("ccylcop", signature("cyl_cubsec"), function(u,
 #-----Change attributes of existing cyl_cubsec object.-------------------------------------------
 #
 #'
-#' @rdname setCopParam
+#' @rdname set_cop_param
 # @describeIn cyl_cubsec-class Change attributes of existing object.
 #' @export
-setMethod("setCopParam", "cyl_cubsec", function(copula, param_val, param_name) {
+setMethod("set_cop_param", "cyl_cubsec", function(copula, param_val, param_name) {
   if (is.null(param_name))
     param_name <- copula@param.names
   param_num <- param_num_checked(copula, param_val, param_name)

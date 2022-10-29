@@ -8,7 +8,7 @@ full2half_circ(angle)
 }
 \arguments{
 \item{angle}{\link[base]{numeric} value of an angle or a
-\code{\link{circular}}-objekt in \eqn{[0, 2\pi)}.}
+\code{\link{circular}}-object in \eqn{[0, 2\pi)}.}
 }
 \value{
 The \link[base]{numeric} value of the angle in \eqn{[-\pi, \pi)}.

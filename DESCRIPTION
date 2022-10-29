@@ -1,7 +1,8 @@
 Package: cylcop
 Title: Circular-Linear Copulas with Angular Symmetry for Movement Data
-Version: 0.1.0
-Date: 2021-08-05
+Version: 0.2.0
+URL: https://github.com/r-lib/devtools
+BugReports: https://github.com/r-lib/devtools/issues
 Authors@R: 
     person(given = "Florian",
            family = "Hodel",
@@ -11,7 +12,7 @@ Authors@R:
 Maintainer: Florian Hodel <florian.hodel@yahoo.com>
 Description: Classes (S4) of circular-linear, symmetric copulas with corresponding
     methods, extending the 'copula' package. These copulas are especially useful
-    for modelling correlation in discrete-time movement data. Methods for density, 
+    for modeling correlation in discrete-time movement data. Methods for density, 
     (conditional) distribution, random number generation, bivariate dependence
     measures and fitting parameters using maximum likelihood and other 
     approaches. The package also contains methods for visualizing movement data
@@ -23,14 +24,12 @@ Depends:
 Imports: 
     circular,
     stats,
-    extraDistr,
     purrr,
     dplyr (>= 0.7.0),
     copula,
     stringr,
     rlang,
     methods,
-    mvtnorm,
     GoFKernel,
     MASS,
     data.table,
@@ -42,9 +41,11 @@ Imports:
     plotly,
     cowplot,
     movMF,
-    Rdpack
+    Rdpack,
+    mixR,
+    transport
 RdMacros: Rdpack
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Collate: 
     'cyl_cop_class.R'
     'Ccond.R'
@@ -57,9 +58,13 @@ Collate:
     'cyl_vonmises.R'
     'cylcop-package.R'
     'density.R'
+    'deprecated.R'
     'fit_cop_corr.R'
     'fit_cop_mle.R'
     'fit_margin.R'
+    'gof.R'
+    'joint_distr.R'
+    'mixed_linear.R'
     'mixedvonmises.R'
     'opt_auto.R'
     'plotting_functions.R'

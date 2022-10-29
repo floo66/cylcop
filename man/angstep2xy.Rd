@@ -24,7 +24,7 @@ The function returns a \link[base]{numeric} \link[base]{vector}
 holding the x and y coordinates of the position
 }
 \description{
-The xy-coordinates of a position in 2-D space is calculated from the angle
+The x-y-coordinates of a position in 2-D space is calculated from the angle
 between that position and the 2 previous ones in the trajectory and the
 distance between that position and the previous one.
 }

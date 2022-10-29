@@ -91,8 +91,8 @@ setMethod("show", "cyl_copula", function(object) {
 
 #' Plot '\code{cyl_copula}' Objects
 #'
-#' Methods for \code{\link[base]{plot}()} to draw a scatter plot of a
-#' random sample from bivariate distributions from package \pkg{cylcop}.
+#' Method for \code{\link[base]{plot}()} to draw a scatter plot of a
+#' random sample from a circular-linear copula.
 #' @param x \R object of class '\code{\linkS4class{cyl_copula}}'.
 #' @param n sample size of the random sample drawn from \code{x}.
 #' @param ... additional arguments passed to \code{\link[base]{plot}()}.
@@ -102,20 +102,39 @@ setMethod("show", "cyl_copula", function(object) {
 #' @examples set.seed(123)
 #'
 #' plot(cyl_quadsec(0.1))
-#' plot(cyl_vonmises(0,2), n=100)
+#' plot(cyl_vonmises(0,2), n = 100)
+#' plot(cyl_quadsec(0.1),
+#'    xlab = "something",
+#'    ylab = "something else",
+#'    main = "clever title",
+#'    col = "red",
+#'    fg = "blue",
+#'    asp= 1)
 #'
 #' @export
 #'
 setMethod("plot", c("cyl_copula", "missing"), function(x, n=1000, ...){
-    sample <- rcylcop(n, copula = x)
-    plot(sample[,2], sample[,1], xlim=0:1, ylim=0:1, xlab="v", ylab="u", main=x@name, ...)
+  sample <- rcylcop(n, copula = x)
+
+  mc <- match.call()
+  mc$n <- NULL
+  mc$x <- sample[,2]
+  mc$y <- sample[,1]
+  if (is.null(mc$xlim)) mc$xlim <- 0:1
+  if (is.null(mc$ylim)) mc$ylim <- 0:1
+  if (is.null(mc$xlab)) mc$xlab <- "v"
+  if (is.null(mc$ylab)) mc$ylab <- "u"
+  if (is.null(mc$main)) mc$main <- x@name
+
+  mc[[1]] <- as.name("plot")
+  eval(mc, parent.frame())
 }
 )
 
 
 #Print Copula Parameters
 #
-#Used e.g. for printing a short summary of the copula in \code{make_traj()} and other
+#Used e.g. for printing a short summary of the copula in \code{traj_sim()} and other
 #functions.
 #
 # @param copula A \code{cyl_copula} or \code{Copula} object.
@@ -133,7 +152,7 @@ setGeneric("printCop",
 # Print  '\code{cyl_copula}' Parameters
 # @describeIn printCop Print \code{cyl_copula} parameters
 setMethod("printCop", "cyl_copula", function(copula) {
-  parameter_summary = paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
+  parameter_summary <-  paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
   if (length(copula@parameters) > 1) {
     for (i in 2:length(copula@parameters)) {
       parameter_summary <-
@@ -164,7 +183,7 @@ setMethod("printCop", "cyl_copula", function(copula) {
 # Print Copula parameterss
 # @describeIn printCop Print \code{Copula} parameters
 setMethod("printCop", "Copula", function(copula) {
-  parameter_summary = paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
+  parameter_summary <- paste(copula@param.names[1], " = ", round(copula@parameters[1],4))
   if (length(copula@parameters) > 1) {
     for (i in 2:length(copula@parameters)) {
       parameter_summary <-
@@ -233,6 +252,25 @@ setMethod("printCop", "Copula", function(copula) {
 #'
 #' @export
 setMethod("prob", "cyl_copula", function(x, l, u) {
+  #validate input
+  tryCatch({
+    check_arg_all(check_argument_type(l,
+                                      type="numeric",
+                                      length = 2,
+                                      lower=0,
+                                      upper=1)
+                  ,1)
+    check_arg_all(check_argument_type(u,
+                                      type="numeric",
+                                      length = 2,
+                                      lower=l)
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
   stopifnot(is.numeric(l), is.numeric(u),
             0 <= l, l <= u, u <= 1)
   pcylcop(c(l[1], l[2]), x) - pcylcop(c(l[1], u[2]), x) - pcylcop(c(u[1], l[2]), x) + pcylcop(c(u[1], u[2]), x)
@@ -247,7 +285,7 @@ setMethod("prob", "cyl_copula", function(x, l, u) {
 #'
 #' @details Note that for a rectangular patchwork copula
 #' ('\code{\linkS4class{cyl_rect_combine}}')
-#' the attribute \code{rectangles_symmetric} cannot be changed by \code{setCopParam()},
+#' the attribute \code{rectangles_symmetric} cannot be changed by \code{set_cop_param()},
 #' since rectangular patchwork copulas with symmetric rectangles are treated as
 #' distinct from rectangular patchwork copulas with potentially asymmetric rectangles.
 #' Therefore, when changing one of the bounds of the lower rectangle of such a copula,
@@ -262,21 +300,21 @@ setMethod("prob", "cyl_copula", function(x, l, u) {
 #' @param ... additional arguments.
 #'
 #' @return A '\code{\linkS4class{cyl_copula}}' object with the changed parameters.
-#' @name setCopParam
+#' @name set_cop_param
 #'
 #' @examples
 #' cop <- cyl_rect_combine(copula::normalCopula(0.2),low_rect = c(0.1,0.4), up_rect="symmetric")
 #' cop
-#' cop <- setCopParam(cop, param_val = c(0.1, 0.3), param_name = c("rho.1", "low_rect2"))
+#' cop <- set_cop_param(cop, param_val = c(0.1, 0.3), param_name = c("rho.1", "low_rect2"))
 #' cop <- cyl_rect_combine(copula::normalCopula(0.2),low_rect = c(0.1,0.4), up_rect=c(0.6,0.9))
 #' cop
-#' cop <- setCopParam(cop, param_val = 0.3, param_name = "low_rect2")
+#' cop <- set_cop_param(cop, param_val = 0.3, param_name = "low_rect2")
 #' cop
 #' @export
 #'
-setGeneric("setCopParam",
-           function(copula, param_val, param_name=NULL, ...)
-             standardGeneric("setCopParam"),
+setGeneric("set_cop_param",
+           function(copula, param_val, param_name, ...)
+             standardGeneric("set_cop_param"),
            signature = "copula")
 
 
@@ -299,7 +337,7 @@ setGeneric("setCopParam",
 #' @param ... additional arguments.
 #'
 #' @return A vector containing the values of the distribution of the copula at
-#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+#' \code{u[,-cond_on]} conditional on the values of \code{u[,cond_on]}.
 #'
 #' @details This is a generic that calls the function \code{copula::\link[copula]{cCopula}()}
 #' for 2-dimensional '\code{\linkS4class{Copula}}' objects from the '\pkg{copula}'
@@ -328,6 +366,34 @@ setGeneric("setCopParam",
 #'
 setGeneric("ccylcop",
            function(u, copula, cond_on = 2, inverse = FALSE, ...){
+
+             tryCatch({
+               check_arg_all(list(check_argument_type(u, type="numeric",
+                                                      length=2,
+                                                      lower=0,
+                                                      upper=1),
+                                  check_argument_type(u, type="matrix",
+                                                      ncol=2,
+                                                      lower=0,
+                                                      upper=1))
+                             ,2)
+               check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
+                                  check_argument_type(copula, type="Copula"))
+                             ,2)
+               check_arg_all(check_argument_type(cond_on,
+                                                 type="numeric",
+                                                 length=1,
+                                                 values=c(1,2))
+                             ,1)
+               check_arg_all(check_argument_type(inverse,
+                                                 type="logical")
+                             ,1)
+             },
+             error = function(e) {
+               error_sound()
+               rlang::abort(conditionMessage(e))
+             }
+             )
              if(!is.matrix(u)) u <- rbind(u, deparse.level = 0L)
              standardGeneric("ccylcop")
              },
@@ -376,15 +442,6 @@ param_num_checked <- function(copula, param_val, param_name){
 #' and generate random
 #' samples (\code{rcylcop()}) of a '\code{\linkS4class{cyl_copula}}' object or a
 #' '\code{\linkS4class{Copula}}' object (package '\pkg{copula}', only 2-dimensional).
-#' For '\code{\linkS4class{Copula}}' objects \code{pcylcop()} and \code{rcylcop()}
-#' just call the functions of the '\pkg{copula}' package
-#' \code{\link[copula]{pCopula}()} and \code{\link[copula]{rCopula}()}, respectively.
-#' The density is, however, calculated differently in \code{dcylcop()} and
-#' \code{\link[copula]{dCopula}()}. The difference is
-#'  that \code{copula::\link[copula]{dCopula}()}
-#'  will return a density of 0 for points on the boundary of the unit square,
-#'  whereas \code{dcylcop()} will return the correct density on the boundaries
-#'  for both '\code{\linkS4class{cyl_copula}}' and '\code{\linkS4class{Copula}}' objects.
 #'
 #' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'.
 #' or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).
@@ -393,14 +450,24 @@ param_num_checked <- function(copula, param_val, param_name){
 #'  as second the linear dimension
 #' @param n number of random samples to be generated with \code{rcylcop()}.
 #' @param log \link[base]{logical} indicating if the logarithm of the density
-#'  should be returned.
-#' @param ... additional arguments
+#'  should be returned (\code{dcylcop()}).
+#'
 #'
 #' @returns The functions \code{pcylcop()} and \code{dcylcop()} give a \link[base]{vector} of
 #' length \code{nrow(u)} containing the distribution and the density, respectively,
-#'  at the corresponding values of \code{u}. Te function \code{rcylcop()} generates a
+#'  at the corresponding values of \code{u}. The function \code{rcylcop()} generates a
 #'  \link[base]{matrix} with 2 columns and \code{n} rows containing
 #' the random samples.
+#'
+#' @details For '\code{\linkS4class{Copula}}' objects, \code{pcylcop()} and \code{rcylcop()}
+#' just call the functions of the '\pkg{copula}' package
+#' \code{\link[copula]{pCopula}()} and \code{\link[copula]{rCopula}()}, respectively.
+#' The density is, however, calculated differently in \code{dcylcop()} and
+#' \code{\link[copula]{dCopula}()}. The difference is
+#'  that \code{copula::\link[copula]{dCopula}()}
+#'  will return a density of 0 for points on the boundary of the unit square,
+#'  whereas \code{dcylcop()} will return the correct density on the boundaries
+#'  for both '\code{\linkS4class{cyl_copula}}' and '\code{\linkS4class{Copula}}' objects.
 #'
 #' @examples set.seed(123)
 #'
@@ -435,7 +502,27 @@ NULL
 #' Calcualte distribution
 #' @rdname Cylcop
 #' @export
-setGeneric("pcylcop", function(u, copula, ...) {
+setGeneric("pcylcop", function(u, copula) {
+  tryCatch({
+    check_arg_all(list(check_argument_type(u, type="numeric",
+                                           length=2,
+                                           lower=0,
+                                           upper=1),
+                       check_argument_type(u, type="matrix",
+                                           ncol=2,
+                                           lower=0,
+                                           upper=1))
+                  ,2)
+    check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
+                       check_argument_type(copula, type="Copula"))
+                  ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+
   if(!is.matrix(u)) u <- rbind(u, deparse.level = 0L)
   ## here as well, 'outside' and 'on-boundary' are equivalent:
   u[] <- pmax(0, pmin(1, u))
@@ -445,13 +532,53 @@ setGeneric("pcylcop", function(u, copula, ...) {
 #' Random numbers
 #' @rdname Cylcop
 #' @export
-setGeneric("rcylcop", function(n, copula, ...) standardGeneric("rcylcop"))
+setGeneric("rcylcop", function(n, copula) {
+  tryCatch({
+    check_arg_all(check_argument_type(n,
+                                      type="numeric",
+                                      length=1,
+                                      integer=T,
+                                      lower=0)
+                  ,1)
+    check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
+                       check_argument_type(copula, type="Copula"))
+                  ,2)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
+  standardGeneric("rcylcop")
+})
 
 #' Copula Density
 #'
 #' @rdname Cylcop
 #' @export
-setGeneric("dcylcop", function(u, copula, log=FALSE, ...) {
+setGeneric("dcylcop", function(u, copula, log=FALSE) {
+
+  tryCatch({
+    check_arg_all(list(check_argument_type(u, type="numeric",
+                                           length=2,
+                                           lower=0,
+                                           upper=1),
+                       check_argument_type(u, type="matrix",
+                                           ncol=2,
+                                           lower=0,
+                                           upper=1))
+                  ,2)
+    check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
+                       check_argument_type(copula, type="Copula"))
+                  ,2)
+    check_arg_all(check_argument_type(log, type="logical")
+                  ,1)
+  },
+  error = function(e) {
+    error_sound()
+    rlang::abort(conditionMessage(e))
+  }
+  )
 
   #Code is directly taken from copula::dCopula() of package copula.
   #The only difference is marked with !!!
