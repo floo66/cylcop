@@ -41,7 +41,8 @@ numerical_conditional_cop <- function(u, copula, cond_on){
                                            upper=1))
                   ,2)
     check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
-                       check_argument_type(copula, type="Copula"))
+                       check_argument_type(copula, type="Copula",
+                                           dimension = 2))
                   ,2)
     check_arg_all(check_argument_type(cond_on,
                                       type="numeric",
@@ -99,7 +100,7 @@ numerical_conditional_cop <- function(u, copula, cond_on){
 #'
 #' @return
 #' A vector containing the values of the inverse distribution of the copula at
-#' \code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+#' \code{u[,-cond_on]} conditional on the values of \code{u[,cond_on]}.
 #'
 #' @examples cop <- cyl_quadsec(0.1)
 #' u <- cbind(c(0.3, 0.1), c(0.7, 0.3))
@@ -126,7 +127,8 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
                                            upper=1))
                   ,2)
     check_arg_all(list(check_argument_type(copula, type="cyl_copula"),
-                       check_argument_type(copula, type="Copula"))
+                       check_argument_type(copula, type="Copula",
+                                           dimension = 2))
                   ,2)
     check_arg_all(check_argument_type(cond_on,
                                       type="numeric",
@@ -145,46 +147,41 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
   u <- u[, 1, drop = F]
   Ccond<-rep(1,length)
 
+  bound_ind <- check_boundary(cbind(u,v),copula)
 
-  if(cond_on==2){
-    for (i in seq_len(length)) {
-      cond_func_v <- function(u){
-        integrand <- function(x) {
-          dcylcop(c(x[1], v[i,]), copula)
-        }
-        cond <-
-          stats::integrate(f = Vectorize(integrand),
-                           lower = 0,
-                           upper = u)
-        return(cond$value)
+  for (i in seq_len(length)) {
+    if(cond_on==2){
+      cond_func <- function(x){
+        ccylcop(cbind(x,v[i,]),cond_on = 2,inverse = F,copula = copula)
       }
-
-      cdf_cond_inv <- GoFKernel::inverse(f = cond_func_v,
-                                         lower = 0,
-                                         upper = 1)
-      Ccond[i] <- cdf_cond_inv(u[i,])
-    }
-  }
-  else if(cond_on==1){
-    for (i in seq_len(length)) {
-      cond_func_u <- function(v){
-        integrand <- function(y) {
-          dcylcop(c(u[i,], y[1]), copula)
-        }
-        cond <-
-          stats::integrate(f = Vectorize(integrand),
-                           lower = 0,
-                           upper = v)
-        return(cond$value)
+    }else if(cond_on==1){
+      cond_func <- function(x){
+        ccylcop(cbind(u[i,],x),cond_on = 1,inverse = F,copula = copula)
       }
-
-      cdf_cond_inv <- GoFKernel::inverse(f = cond_func_u,
-                                         lower = 0,
-                                         upper = 1)
-      Ccond[i] <- cdf_cond_inv(v[i,])
     }
+    cdf_cond_inv <- function(y){uniroot(f = function(x){cond_func(x)-y},lower=0,upper=1)$root}
+
+
+    Ccond[i] <- tryCatch({
+      if(cond_on==2){
+        cdf_cond_inv(u[i,]) %>% suppressWarnings()
+      }else if(cond_on==1){
+        cdf_cond_inv(v[i,]) %>% suppressWarnings()
+      }
+    }, error = function(e) {
+
+      if(i %in% bound_ind){
+        NaN
+      }else{
+        stop(e)
+      }
+    })
+
   }
-  else stop("cond_on for conditional distribution must be 1 or 2.")
+
+  if(any(is.na(Ccond))){
+    warning("NaN produced, because calculation on the boundaries requested.")
+  }
   return(Ccond)
 }
 
@@ -195,35 +192,89 @@ numerical_inv_conditional_cop <- function(u, copula, cond_on){
 #' @export
 setMethod("ccylcop", "Copula", function(u, copula, cond_on, inverse) {
   if(dim(copula)!=2) stop("cylcop::ccylcop() works only for copulas of dimension 2. For other copula-objects, try copula::cCopula().")
+  calc_cCopula <- function(u, copula, cond_on, inverse){
+    if("mixCopula" %in% is(copula)){
+      if(inverse){ stop("do numeric")
+      }
+      sum <- 0
+      for (i in seq_along(copula@w)) {
+        sum <- sum + copula@w[i]*calc_cCopula(u, copula@cops[[i]], cond_on, inverse=F)
+      }
+      return(sum)
+    }
 
-  if(cond_on==2){
-    u_swap <- matrix(ncol=2,c(u[,2],u[,1]))
-    tryCatch({
-      result <- copula::cCopula(u_swap,copula,indices =2, inverse = inverse) %>% as.numeric()
-      if(any(is.na(result))) stop()
-      result
-    }, error = function(e) {
-      if(inverse==F){
-      numerical_conditional_cop(u,copula,cond_on = 2)
+    cop_orig <- copula
+    u_adapt <- u
+    complement_res <- F
+
+
+    if(cond_on==1){
+      if("rotCopula" %in% is(copula)){
+        # if(inverse){ stop("do numeric")
+        # }
+        cop_orig <- copula@copula
+        if(all(copula@flip==c(T,T))){
+          u_adapt <- 1-u
+          complement_res <- T
+        }else if(all(copula@flip==c(T,F))){
+          u_adapt[,1] <- 1-u[,1]
+        }else if(all(copula@flip==c(F,T))){
+          u_adapt[,2] <- 1-u[,2]
+          complement_res <- T
+        }
       }
-      else{
-        numerical_inv_conditional_cop(u,copula,cond_on = 2)
+    }else if (cond_on==2){
+      u_adapt[,1] <- u[,2]
+      u_adapt[,2] <- u[,1]
+      if("rotCopula" %in% is(copula)){
+        # if(inverse){ stop("do numeric")
+        # }
+        cop_orig <- copula@copula
+        if(all(copula@flip==c(T,T))){
+          u_adapt[,1] <- 1-u[,2]
+          u_adapt[,2] <- 1-u[,1]
+          complement_res <- T
+        }else if(all(copula@flip==c(T,F))){
+          u_adapt[,1] <- u[,2]
+          u_adapt[,2] <- 1-u[,1]
+          complement_res <- T
+        }else if(all(copula@flip==c(F,T))){
+          u_adapt[,1] <- 1-u[,2]
+          u_adapt[,2] <- u[,1]
+        }
       }
-    })
+    }
+    if(!any(c("archmCopula", "ellipCopula", "indepCopula","fhCopula") %in% is(cop_orig))){
+      stop("do numeric")
+    }
+    result <- copula::cCopula(u_adapt,cop_orig,indices =2, inverse = inverse) %>% as.numeric()
+    if(any(is.na(result))){
+      bound_ind <- check_boundary(u_adapt,cop_orig)
+      na_ind <- which(is.na(result))
+      if(length(bound_ind)>0 && all(na_ind%in%bound_ind)){
+        warning("NaN produced, because calculation on the boundaries requested.")
+      }else{
+        stop("do numeric")
+      }
+    }
+    if(complement_res){
+      result <- 1-result
+    }
+    result
   }
-  else if(cond_on==1){
-    tryCatch({
-      result <- copula::cCopula(u,copula,indices =2, inverse = inverse) %>% as.numeric()
-      if(any(is.na(result))) stop()
-      result
-    }, error = function(e) {
-      if(inverse==F){
-        numerical_conditional_cop(u,copula,cond_on = 1)
-      }
-      else{
-        numerical_inv_conditional_cop(u,copula,cond_on = 1)
-      }
-    })
-  }
-  else stop("cond_on must be either 1 or 2")
+
+tryCatch({
+    calc_cCopula(u, copula, cond_on, inverse)
+  }, error = function(e) {
+    if(inverse==F){
+      warning("Analytical expression not available, conditional copula was calculated numerically")
+      numerical_conditional_cop(u,copula,cond_on)
+
+    }
+    else{
+      warning("Analytical expression not available, inverse was calculated numerically")
+      numerical_inv_conditional_cop(u,copula,cond_on)
+    }
+  })
+
 })

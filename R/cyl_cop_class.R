@@ -624,5 +624,40 @@ setMethod("rcylcop", signature("numeric", "Copula"), function(n, copula) {
 #' @rdname Cylcop
 #' @export
 setMethod("pcylcop", signature("matrix", "Copula"), function(u, copula) {
-  copula::pCopula(u,copula)
+
+  res <- rep(NA, nrow(u))
+
+  # Handle cases where u contains 0 or 1
+  zero_ind <- unique(which(u == 0, arr.ind = TRUE)[, 1])
+  one_ind <- unique(which(u == 1, arr.ind = TRUE)[, 1])
+
+  # For rows with 1, handle two cases:
+  # 1. If a row has both entries as 1, return 1.
+  # 2. If a row has only one entry as 1, return the other value.
+  if (length(one_ind) > 0) {
+    one_value <- apply(u[one_ind, ,drop=F], 1, function(row) {
+      if (all(row == 1)) {
+        return(1)  # Both columns are 1, so return 1.
+      } else {
+        return(row[row != 1])  # Return the non-1 value.
+      }
+    })
+
+    one_value <- unlist(one_value)
+
+    res[one_ind] <- one_value
+  }
+
+  # Set values for rows with u == 0
+  res[zero_ind] <- 0
+
+  # Handle remaining rows that are neither fully 0 nor 1
+  ind_remain <- setdiff(seq_len(nrow(u)), c(zero_ind, one_ind))
+
+  if (length(ind_remain) > 0) {
+    res[ind_remain] <- copula::pCopula(u[ind_remain, ], copula)
+  }
+
+  return(res)
+
 })

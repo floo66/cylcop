@@ -20,7 +20,7 @@ of u the inverse of the Copula conditional on the element in the second column.}
 }
 \value{
 A vector containing the values of the inverse distribution of the copula at
-\code{[u,-cond_on]} conditional on the values of \code{[u,cond_on]}.
+\code{u[,-cond_on]} conditional on the values of \code{u[,cond_on]}.
 }
 \description{
 Numerically calculate the inverse of the conditional copula

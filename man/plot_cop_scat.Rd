@@ -22,14 +22,7 @@ A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 }
 \description{
 This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
-a sample from a copula. Either a sample is provided as input, or a sample
-is drawn from a copula to quickly visualize it.
-}
-\details{
-Alternatively, instead of plotting a sample from a copula \code{cop}
-using \code{scatterplot(copula=cop)}, you can also use \code{\link{plot}(cop)}.
-If a trajectory is provided and \code{n} is smaller than \code{nrow(traj)},
-\code{n} steps are randomly selected from the trajectory and plotted.
+a sample from a copula.
 }
 \examples{
 set.seed(123)

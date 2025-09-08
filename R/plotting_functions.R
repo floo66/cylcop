@@ -7,26 +7,26 @@
 #'  the columns \code{traj$angle} and \code{traj$steplength}.
 #' @param theta (alternatively) \link[base]{numeric} \link[base]{vector} of angles
 #' (measurements of a circular variable).
-#' @param x (alternatively) \link[base]{numeric} \link[base]{vector} of step lengths
-#' (measurements of a linear variable).
+#' @param x (alternatively) \link[base]{numeric} \link[base]{vector} of
+#' measurements of a linear variable.
 #' @param periodic \link[base]{logical} value denoting whether the plot should
 #' be periodically extended past -pi and pi.
-#' @param plot_margins \link[base]{logical} determining whether the marginal kernel
-#' density estimates are computed and plotted. Alternatively, \code{plot_margins} can
-#' be a list of length 2 containing first a kernel density estimate for \code{theta} and
-#' second a kernel density estimate for \code{x}. The first entry must be of type
-#' \code{'density.circular'} (as returned e.g. by \code{\link{fit_angle}(theta, parametric=FALSE))},
-#' and the second entry must be of type \code{"density"}
-#' (as returned e.g. by \code{\link{fit_steplength}(x, parametric=FALSE))}.
+#' @param margins \link[base]{logical} determining whether the marginal kernel
+#' density estimates are computed and plotted. Alternatively, \code{margins} can
+#' be a list of length 2 containing a kernel density estimate for \code{theta} and
+#' a kernel density estimate for \code{x}. One entry must be of type
+#' \code{'density.circular'} (as returned e.g. by \code{\link{fit_circ_np}(theta))},
+#' and the other entry must be of type \code{"density"}
+#' (as returned e.g. by \code{\link{fit_lin_np}(x))}.
 #'
-#' @details You can either specify \code{traj} or the angels and step lengths
+#' @details You can either specify \code{traj} or the angles and step lengths
 #' (\code{theta} and \code{x}).
-#' If \code{plot_margins=T}, the code will attempt to find appropriate bandwidths for
+#' If \code{margins=T}, the code will attempt to find appropriate bandwidths for
 #' the kernel density estimate autonomously, also taking into account computational time.
 #' For more control over the actual method and parameters used to obtain the kernel
 #' density estimates, you can calculate them "by hand" using e.g.
-#' \code{\link{fit_angle}(theta, parametric=FALSE)}
-#' and \code{\link{fit_steplength}(x, parametric=FALSE))}.
+#' \code{\link{fit_circ_np}(theta))}
+#' and \code{\link{fit_lin_np}(x))}.
 #'
 #' @return A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 #'
@@ -39,12 +39,12 @@
 #'
 #' plot1 <- plot_joint_scat(traj)
 #' plot2 <- plot_joint_scat(traj, periodic = TRUE)
-#' plot3 <- plot_joint_scat(theta=traj$angle, x=traj$steplength, periodic = TRUE, plot_margins=TRUE)
+#' plot3 <- plot_joint_scat(theta=traj$angle, x=traj$steplength, periodic = TRUE, margins=TRUE)
 #'
 #' bw <- opt_circ_bw(theta = traj$angle, method = "nrd",kappa.est = "trigmoments")
-#' ang_dens <- fit_angle(theta=traj$angle, parametric=FALSE, bandwidth=bw)
-#' step_dens <- fit_steplength(x=traj$steplength, parametric=FALSE)
-#' plot4 <- plot_joint_scat(traj, periodic = TRUE, plot_margins=list(ang_dens, step_dens))
+#' ang_dens <- fit_circ_np(theta=traj$angle, bandwidth=bw)
+#' step_dens <- fit_lin_np(x=traj$steplength)
+#' plot4 <- plot_joint_scat(traj, periodic = TRUE, margins=list(ang_dens, step_dens))
 #'
 #' @references \insertRef{Hodelappl}{cylcop}
 #'
@@ -60,7 +60,7 @@ plot_joint_scat <-
            theta = NULL,
            x = NULL,
            periodic = FALSE,
-           plot_margins = FALSE) {
+           margins = FALSE) {
     #validate input
     tryCatch({
       check_arg_all(list(
@@ -88,9 +88,9 @@ plot_joint_scat <-
                                         type = "logical")
                     , 1)
       check_arg_all(list(
-        check_argument_type(plot_margins,
+        check_argument_type(margins,
                             type = "logical"),
-        check_argument_type(plot_margins,
+        check_argument_type(margins,
                             type = "list")
       )
       , 2)
@@ -120,19 +120,35 @@ plot_joint_scat <-
       traj <- data.frame(angle = theta, steplength = x)
     }
 
-    if (!is.list(plot_margins)) {
-      calc_margins <- plot_margins
+    if (!is.list(margins)) {
+      calc_margins <- margins
+      plot_margins <- margins
     } else{
-      if ((!any(is(plot_margins[[1]]) == "density.circular")) ||
-          (!any(is(plot_margins[[2]]) == "density"))) {
+      marginal_angle_dens <- NULL
+      marginal_step_dens <- NULL
+
+      for (i in 1:2) {
+        if (any(is(margins[[i]]) == "density.circular")) {
+          marginal_angle_dens <- margins[[i]]
+        } else if (any(is(margins[[i]]) == "density")) {
+          marginal_step_dens <- margins[[i]]
+        } else {
+          stop(
+            error_sound(),
+            "If a list of densities is provided with input 'margins', the elements
+      of that list must be of type 'density.circular' or 'density'."
+          )
+        }
+      }
+
+      # Check if both variables are assigned
+      if (is.null(marginal_angle_dens) || is.null(marginal_step_dens)) {
         stop(
           error_sound(),
-          "If a list of densities is provided with plot_margins, the first entry
-      of that list must be of type 'density.circular' and the second of type 'density'."
+          "If a list of densities is provided with input 'margins', one entry
+      of that list must be of type 'density.circular' and the other of type 'density'."
         )
       }
-      marginal_angle_dens <- plot_margins[[1]]
-      marginal_step_dens <- plot_margins[[2]]
       plot_margins <- TRUE
       calc_margins <- FALSE
     }
@@ -143,7 +159,7 @@ plot_joint_scat <-
         colour = "grey60",
         size = 0.2
       ),
-      geom_point(shape = 16, alpha = 0.3),
+      geom_point(shape = 16, alpha = 0.5),
       theme(legend.position = "none"),
       theme_bw(),
       xlab("X"),
@@ -189,8 +205,13 @@ plot_joint_scat <-
                                     0)
         )
 
+      if(min(traj$steplength)>0){
+        lowlim <- 0
+      }else{
+        lowlim <- -Inf
+      }
       marginal_step_dens <-
-        fit_steplength(traj$steplength, parametric = FALSE)
+        fit_lin_np(traj$steplength, limits=c(lowlim,Inf))
 
     }
     if (plot_margins) {
@@ -243,9 +264,9 @@ plot_joint_scat <-
                                -0.75 * pi,
                                -0.5 * pi
                              )
-                           )) +
+                           ),expand=c(0.01,0.01)) +
         plot_theme +
-        scale_color_manual(values = c("black", "grey"))
+        scale_color_manual(values = c("black", "grey60"))
 
       # add densities on the margins of the main plot
       if (any(plot_margins != FALSE)) {
@@ -370,8 +391,8 @@ plot_joint_scat <-
 #' )
 #' plot1 <- plot_track(traj=traj)
 #'
-#' x_coord <- list(runif(10),runif(20),runif(3))
-#' y_coord <- list(runif(10),runif(20),runif(3))
+#' x_coord <- list(runif(1000),runif(20),runif(3))
+#' y_coord <- list(runif(1000),runif(20),runif(3))
 #'
 #' plot2 <- plot_track(x_coord=x_coord, y_coord=y_coord)
 #'
@@ -386,7 +407,8 @@ plot_joint_scat <-
 #'
 plot_track <- function(traj = NULL,
                       x_coord = NULL,
-                      y_coord = NULL) {
+                      y_coord = NULL
+                      ) {
   tryCatch({
     check_arg_all(list(
       check_argument_type(traj,
@@ -500,10 +522,10 @@ plot_track <- function(traj = NULL,
         data = dplyr::slice(traj, 1, nrow(traj)),
         #mark first and last point of trajectory
         aes(x = .data$pos_x, y = .data$pos_y),
-        size = 4,
+        size = max(1.5,min(2*min(4, 100 / nrow(traj)),4)),
         color = "red"
       ) +
-      scale_colour_gradientn(colours = inferno(1000)) +
+      scale_colour_gradientn(colours = inferno(1000, end = 0.9)) +
       theme_bw() +
       xlab("X-position") +
       ylab("Y-position") +
@@ -557,6 +579,9 @@ plot_track <- function(traj = NULL,
 #' (measurements of a circular variable) or "circular" component of pseudo-observations.
 #' @param x (alternatively) \link[base]{numeric} \link[base]{vector} of step lengths
 #' (measurements of a linear variable) or "linear" component of pseudo-observations.
+#' @param margin \link[base]{logical} determining whether the marginal kernel
+#' density estimates are computed and plotted. Alternatively, \code{margins} can
+#' be a \code{'density.circular'} object (as returned e.g. by \code{\link{fit_circ_np}(theta))}.
 #'
 #' @details You can either specify \code{traj} or the angels and step lengths
 #' \code{theta} and \code{x}.
@@ -571,7 +596,7 @@ plot_track <- function(traj = NULL,
 #'   marginal_circ = list(name="vonmises",coef=list(0, 1)),
 #'   marginal_lin = list(name="weibull", coef=list(shape=3))
 #' )
-#' plot1 <- plot_joint_circ(traj)
+#' plot1 <- plot_joint_circ(traj, margin = T)
 #'
 #' @references \insertRef{Hodelmethod}{cylcop}
 #'
@@ -582,7 +607,8 @@ plot_track <- function(traj = NULL,
 #'
 plot_joint_circ <- function(traj = NULL,
                       theta = NULL,
-                      x = NULL) {
+                      x = NULL,
+                      margin = FALSE) {
   #validate input
   tryCatch({
     check_arg_all(list(
@@ -606,11 +632,21 @@ plot_joint_circ <- function(traj = NULL,
                           type = "NULL")
     )
     , 2)
+    check_arg_all(list(
+      check_argument_type(margin,
+                          type = "logical"),
+      check_argument_type(margin,
+                          type = "density.circular")
+    )
+    , 2)
   },
   error = function(e) {
     error_sound()
     rlang::abort(conditionMessage(e))
   })
+
+  #validate input
+
   if ((is.null(theta) &&
        !is.null(x)) || (!is.null(theta) && is.null(x))) {
     stop(error_sound(), "Specify angles AND step lengths")
@@ -636,20 +672,50 @@ plot_joint_circ <- function(traj = NULL,
       )))),]
   }
 
-  #circular marginal density estimated with von Mises kernel density and rough bandwidth estimate
-  marginal_angle_dens <- traj$angle %>%
-    half2full_circ() %>%
-    circular::circular(zero = 0, rotation = "counter") %>%
-    circular::density.circular(
-      bw = suppressWarnings(
-        opt_circ_bw(traj$angle, method = "nrd", kappa.est = "trigmoments")
-      ),
-      kernel = "vonmises",
-      na.rm = TRUE,
-      control.circular = list(rotation = "counter", zero = 0)
-    )
+
+  if (!any(is(margin) == "density.circular")) {
+    calc_margin <- margin
+    plot_margin <- margin
+  } else{
+    calc_margin <- F
+    plot_margin <- T
+    marginal_angle_dens <- margin
+  }
+  if(calc_margin){
+    #rough bandwidth estimate with trigonometric moments. This can fail when
+    #the function has no root (i.e. uniroot gives an error) in this case use
+    #only a subset of the sample (for speed) and maximize the cross validation
+    #log–likelihood with respect to the bandwidth
+    bw <-  tryCatch({
+      suppressWarnings(opt_circ_bw(traj$angle, method = "nrd", kappa.est = "trigmoments"))
+    },
+    error = function(e) {
+      if (length(traj$angle) > 1000) {
+        sample_angle <-
+          traj$angle[sample(seq_along(traj$angle), 1000, replace = FALSE)]
+      } else{
+        sample_angle <- traj$angle
+      }
+      suppressWarnings(opt_circ_bw(sample_angle, method = "cv"))
+    })
+
+    marginal_angle_dens <- traj$angle %>%
+      half2full_circ() %>%
+      circular::circular(zero = 0, rotation = "counter") %>%
+      circular::density.circular(
+        #circular marginal density estimated with von Mises kernel density and rough bandwidth estimate
+        bw = bw,
+        kernel = "vonmises",
+        na.rm = TRUE,
+        control.circular = list(rotation = "counter", zero =
+                                  0)
+      )
+  }
+
   marginal_angle_dens$x <- full2half_circ(marginal_angle_dens$x)
   marginal_angle_dens$y <- as.double(marginal_angle_dens$y)
+
+
 
   #set the breaks for the gridlines of the plot
   y_breaks <-
@@ -657,10 +723,18 @@ plot_joint_circ <- function(traj = NULL,
   y_breaks <- c(y_breaks, tail(y_breaks, 1) + y_breaks[2])
   x_breaks <- seq(-0.75 * pi, pi, 0.25 * pi)
 
+
+  if(!plot_margin){
+    marginal_angle_dens$x <- seq(-pi,0.75*pi,length.out=7)
+    marginal_angle_dens$y <- rep(0,7)
+  }
+
   #blow up the marginal density, so its zero is the the outermost gridline of the circular plot
   marginal_angle_dens <- cbind(x = marginal_angle_dens$x,
                                y = (0.6 * marginal_angle_dens$y + 1) * tail(y_breaks, 1)) %>%
     as.data.frame()
+
+
 
   #set positions of radius labels
   radius_label_pos <-
@@ -671,9 +745,16 @@ plot_joint_circ <- function(traj = NULL,
 
   #set positions of angle labels
   max_rad <- max(y_breaks)
+
+  if(plot_margin){
+    ang_offset <- c(1.3, 1.3, 1.3, 1.15, 1.3, 1.3, 1.3, 1.15)
+  }else{
+    ang_offset <- c(1, 1, 1, 0.95, 1, 1, 1, 0.95)
+  }
+
   angle_label_pos <-  cbind(
     x = x_breaks,
-    y = c(1.3, 1.3, 1.3, 1.15, 1.3, 1.3, 1.3, 1.15) *
+    y = ang_offset *
       marginal_angle_dens$y[map(x_breaks,  ~ which.min(abs(marginal_angle_dens$x -
                                                              .x))) %>% unlist()]
   ) %>%
@@ -695,40 +776,23 @@ plot_joint_circ <- function(traj = NULL,
 
 
   #set theme
-
+  if(plot_margin){
+    y_intercept_lim <- length(y_breaks)
+  }else{
+    y_intercept_lim <- length(y_breaks)-1
+  }
   circ_plot_layers <- list(
     geom_hline(
-      yintercept = y_breaks[seq(2, length(y_breaks), 2)],
+      yintercept = y_breaks[seq(2, y_intercept_lim, 2)],
       colour = "darkgreen",
       size = 0.2
     ),
     geom_hline(
-      yintercept = y_breaks[seq(1, length(y_breaks), 2)],
+      yintercept = y_breaks[seq(1, y_intercept_lim, 2)],
       colour = "darkred",
       size = 0.2
     ),
-    #geom_vline(xintercept = x_breaks, colour = "grey90", size = 0.2),
     coord_polar(start = pi, clip = "off"),
-
-    # scale_x_continuous(limits = c(-pi, pi),
-    # breaks = x_breaks,
-    # labels = c(expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
-    # 0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
-    # )
-    # ),
-
-    # scale_y_continuous(breaks = y_breaks[1:(length(y_breaks) - 1)]),
-    # geom_hline(
-    #   yintercept = y_breaks[(length(y_breaks) - 1)],
-    #   colour = "darkred",
-    #   size = 0.3
-    # ),
-
-    geom_hline(
-      yintercept = tail(y_breaks, 1),
-      colour = "grey30",
-      size = 0.2
-    ),
 
     theme_bw(),
 
@@ -740,7 +804,6 @@ plot_joint_circ <- function(traj = NULL,
       axis.text = element_blank(),
       axis.ticks.y = element_blank(),
       axis.text.y = element_blank(),
-      # plot.margin = unit(c(-10-5*top_correction, -10-5*right_correction, -10-5*bottom_correction, -10-5*left_correction), "pt")
     ),
 
     geom_segment(
@@ -757,7 +820,7 @@ plot_joint_circ <- function(traj = NULL,
     geom_segment(
       aes(
         x = x_breaks,
-        y = tail(y_breaks, 1),
+        y = if(plot_margin){tail(y_breaks, 1)}else{tail(y_breaks, 2)[1]},
         xend = angle_label_pos$x,
         yend = angle_label_pos$y
       ),
@@ -797,6 +860,35 @@ plot_joint_circ <- function(traj = NULL,
 
 
   # plot
+  if(plot_margin){
+    margin_layer <-
+      list(
+        geom_line(
+          data = marginal_angle_dens,
+          aes(y = .data$y, x = .data$x),
+          colour = "black",
+          size = 0.2
+        ),
+        geom_ribbon(
+          data = marginal_angle_dens,
+          aes(
+            x = .data$x,
+            ymin = tail(y_breaks, 1),
+            ymax = .data$y
+          ),
+          alpha = 0.3,
+          fill = "blue"
+        ),
+        geom_hline(
+          yintercept = tail(y_breaks, 1),
+          colour = "grey30",
+          size = 0.2
+        )
+      )
+  }else{
+    margin_layer <- NULL
+  }
+
 
   p <- ggplot() +
     circ_plot_layers +
@@ -804,33 +896,18 @@ plot_joint_circ <- function(traj = NULL,
       data = traj,
       aes(y = .data$steplength, x = as.numeric(.data$angle)),
       alpha = 0.5,
-      size = 0.3
+      size = 0.5
     ) +
-    geom_line(
-      data = marginal_angle_dens,
-      aes(y = .data$y, x = .data$x),
-      colour = "black",
-      size = 0.2
-    ) +
-    geom_ribbon(
-      data = marginal_angle_dens,
-      aes(
-        x = .data$x,
-        ymin = tail(y_breaks, 1),
-        ymax = .data$y
-      ),
-      alpha = 0.3,
-      fill = "blue"
-    )
+    margin_layer
   return(suppressWarnings(cowplot::ggdraw(p)))
+
 }
 
 
 #' Scatterplot of Copula Values
 #'
 #' This function produces a scatterplot ('\code{\link[ggplot2]{ggplot}}' object) of
-#' a sample from a copula. Either a sample is provided as input, or a sample
-#' is drawn from a copula to quickly visualize it.
+#' a sample from a copula.
 #'
 #' @param traj a \link[base]{data.frame} containing the trajectory produced by e.g.
 #' \code{\link{traj_sim}()}, which must contain the columns
@@ -842,10 +919,6 @@ plot_joint_circ <- function(traj = NULL,
 #'
 #' @return A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
 #'
-#' @details Alternatively, instead of plotting a sample from a copula \code{cop}
-#' using \code{scatterplot(copula=cop)}, you can also use \code{\link{plot}(cop)}.
-#' If a trajectory is provided and \code{n} is smaller than \code{nrow(traj)},
-#' \code{n} steps are randomly selected from the trajectory and plotted.
 #'
 #' @examples set.seed(123)
 #' traj <- traj_sim(100,
@@ -936,7 +1009,7 @@ plot_cop_scat <- function(traj = NULL,
   }
 
   plot_theme <- list(
-    geom_point(size = 0.01, alpha = 0.5),
+    geom_point(size = 0.5, alpha = 0.5),
     theme(legend.position = "none"),
     theme_bw(),
     xlab("v"),
@@ -968,7 +1041,7 @@ plot_cop_scat <- function(traj = NULL,
 #' Surface Plot or Heat Map of the Distribution or the Density of a Copula
 #'
 #' This function plots the distribution or the density of a copula. It can produce
-#' a surface plot using either functions from the '\pkg{rgl}' or from the
+#' a 3 dimensional surface plot using either functions from the '\pkg{rgl}' or from the
 #' '\pkg{plotly}' package, or it can produce a heat map using functions from
 #' '\pkg{ggplot2}'.
 #'
@@ -1033,7 +1106,7 @@ plot_cop_scat <- function(traj = NULL,
 plot_cop_surf <- function(copula,
                      type = "pdf",
                      plot_type = "rgl",
-                     resolution = 50,
+                     resolution = 51,
                      n_gridlines = 11) {
   #validate input
   tryCatch({
@@ -1237,66 +1310,75 @@ plot_cop_surf <- function(copula,
                byrow = F)
     }
 
+    # Generate title
+    if (any(is(copula) == "Copula")) {
+      title <-
+        paste(
+          type,
+          "of",
+          copula@class[1],
+          "with\n",
+          copula@param.names,
+          "=",
+          copula@parameters
+        )
+    }
+    else if (any(is(copula) == "cyl_copula")) {
+      parameter_summary = paste(copula@param.names[1], " = ", copula@parameters[1])
+      if (length(copula@parameters) > 1) {
+        for (i in 2:length(copula@parameters)) {
+          parameter_summary <-
+            paste(
+              parameter_summary,
+              ", ",
+              copula@param.names[i],
+              " = ",
+              round(copula@parameters[i], 3)
+            )
+        }
+      }
+      #rgl doesn't like \n character, so need to split title in 2
+      if("cyl_rect_combine" %in%is(copula)){
+        base_cop <- get_cop_name(copula@cop.lo)
+        title1 <- paste(type, "of rectangular patchwork of")
+        title2 <- base_cop
+      }else{
+        title1 <-
+          paste(type, "of", copula@name, "with")
+        title2 <- parameter_summary
+      }
+    }
+
+
     #------------Make surface plot with rgl------
 
     if (plot_type == "rgl") {
       # Generate title
 
-      if (any(is(copula) == "Copula")) {
-        title <-
-          paste(
-            type,
-            "of",
-            copula@class[1],
-            "with",
-            copula@param.names,
-            "=",
-            copula@parameters
-          )
-      }
-      else if (any(is(copula) == "cyl_copula")) {
-        parameter_summary = paste(copula@param.names[1], " = ", copula@parameters[1])
-        if (length(copula@parameters) > 1) {
-          for (i in 2:length(copula@parameters)) {
-            parameter_summary <-
-              paste(
-                parameter_summary,
-                ", ",
-                copula@param.names[i],
-                " = ",
-                round(copula@parameters[i], 3)
-              )
-          }
-        }
-        title <-
-          paste(type, "of", copula@name, "with", parameter_summary)
-      }
-
-
       # Make plot
 
       p <-  rgl::persp3d(
-        u,
         v,
-        mat,
+        u,
+        t(mat),
         col = inferno(50)[cut(mat, breaks = 50)],
         fit = "smooth",
         lit = TRUE,
         alpha = 0.9,
-        xlab = "u",
-        ylab = "v",
+        xlab = "v",
+        ylab = "u",
         zlab = if (type == "pdf")
           "c(u,v)"
         else
           "C(u,v)",
         expand = 0
       ) +      rgl::light3d(theta = 0, phi = 30) +
-        rgl::title3d(main = title) +
+        rgl::title3d(main = paste(title1,title2)) +
         (if (n_gridlines > 0) {
           rgl::surface3d(
-            u_grid,
             v_grid,
-            mat_grid,
+            u_grid,
+            t(mat_grid),
             color = "black",
             lit = FALSE,
             front = "lines",
@@ -1323,58 +1405,19 @@ plot_cop_surf <- function(copula,
       gridlines_x <-
         mutate(gridlines_x, zg) %>% dplyr::rename(ug = u) %>% dplyr::rename(vg = v)
 
-      #for aesthetics, add a small number so the gridlines are slightly above the surface
-      gridlines_x$zg <- gridlines_x$zg + 0.01
-
       gridlines_y <- expand.grid(v = u_grid, u = v_grid)
       gridlines_y <- gridlines_y[c("u", "v")]
       zg <- c(t(mat_grid))
       gridlines_y <-
         mutate(gridlines_y, zg) %>% dplyr::rename(ug = u) %>% dplyr::rename(vg = v)
 
-      #for aesthetics, add a small number so the gridlines are slightly above the surface
-      gridlines_y$zg <- gridlines_y$zg + 0.01
-
-
-      # Generate title
-
-      if (any(is(copula) == "Copula")) {
-        title <-
-          paste(
-            type,
-            "of",
-            copula@class[1],
-            "with\n",
-            copula@param.names,
-            "=",
-            copula@parameters
-          )
-      }
-      else if (any(is(copula) == "cyl_copula")) {
-        parameter_summary = paste(copula@param.names[1], " = ", copula@parameters[1])
-        if (length(copula@parameters) > 1) {
-          for (i in 2:length(copula@parameters)) {
-            parameter_summary <-
-              paste(
-                parameter_summary,
-                ", ",
-                copula@param.names[i],
-                " = ",
-                round(copula@parameters[i], 3)
-              )
-          }
-        }
-        title <-
-          paste(type, "of", copula@name, "with\n", parameter_summary)
-      }
-
 
       # Make plot
 
       p <-
         plot_ly(
-          x = u,
-          y = v,
+          x = v,
+          y = u,
           z = mat,
           showscale = FALSE,
           colorscale = col,
@@ -1382,10 +1425,10 @@ plot_cop_surf <- function(copula,
           lighting = list(ambient = 0.9, specular = 0)
         ) %>%
         plotly::layout(
-          title = title,
+          title = paste0(title1,"\n",title2),
           scene = list(
-            xaxis = list(title = "u"),
-            yaxis = list(title = "v"),
+            xaxis = list(title = "v"),
+            yaxis = list(title = "u"),
             zaxis = if (type == "pdf")
               list(title = "c(u,v)")
             else
@@ -1396,85 +1439,46 @@ plot_cop_surf <- function(copula,
               z = 1.62
             ))
           )
-        ) %>% add_surface()
+        ) %>% add_surface(
+          hovertemplate = paste0('u: %{x:.3f}<br>',
+
+                                'v: %{y:.3f}<br>',
+
+                                if (type == "pdf"){
+                                  'c(u,v):  %{z:.3f}'
+                                  }else{
+                                  'C(u,v):  %{z:.3f}'
+                                })
+        )
 
 
       # Add gridlines
       if (n_gridlines > 0) {
-        for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
-          p <-
-            add_trace(
-              p,
-              data = gridlines_x[i:(i + n_gridlines - 1), ],
-              x = ~ vg,
-              y = ~ ug,
-              z = ~ zg,
-              type = 'scatter3d',
-              mode = 'lines',
-              opacity = 1,
-              line = list(
-                width = 0.5,
-                color = "white",
-                reverscale = FALSE
-              )
-            )
-        }
-        for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
-          p <-
-            add_trace(
-              p,
-              data = gridlines_y[i:(i + n_gridlines - 1), ],
-              x = ~ vg,
-              y = ~ ug,
-              z = ~ zg,
-              type = 'scatter3d',
-              mode = 'lines',
-              opacity = 1,
-              line = list(
-                width = 0.9,
-                color = "white",
-                reverscale = FALSE
-              )
-            )
-        }
 
-        gridlines_x$zg <- gridlines_x$zg - 0.02
-        gridlines_y$zg <- gridlines_y$zg - 0.02
-        for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
-          p <-
-            add_trace(
-              p,
-              data = gridlines_x[i:(i + n_gridlines - 1), ],
-              x = ~ vg,
-              y = ~ ug,
-              z = ~ zg,
-              type = 'scatter3d',
-              mode = 'lines',
-              opacity = 1,
-              line = list(
-                width = 0.5,
-                color = "white",
-                reverscale = FALSE
-              )
+        gridline_fun <- function(plot, data, offset=0.1){
+          #for aesthetics, add a small number so the gridlines are slightly above the surface
+          data$zg <- data$zg+offset
+          add_trace(
+            plot,
+            data = data,
+            x = ~ vg,
+            y = ~ ug,
+            z = ~ zg,
+            type = 'scatter3d',
+            mode = 'lines',
+            opacity = 1,
+            line = list(
+              width = 0.5,
+              color = "white",
+              reverscale = FALSE
             )
+          )
         }
         for (i in seq(n_gridlines + 1, ((n_gridlines - 1) * n_gridlines) + 1, n_gridlines)) {
-          p <-
-            add_trace(
-              p,
-              data = gridlines_y[i:(i + n_gridlines - 1), ],
-              x = ~ vg,
-              y = ~ ug,
-              z = ~ zg,
-              type = 'scatter3d',
-              mode = 'lines',
-              opacity = 1,
-              line = list(
-                width = 0.9,
-                color = "white",
-                reverscale = FALSE
-              )
-            )
+          p <- gridline_fun(p, gridlines_x[i:(i + n_gridlines - 1), ], offset = 0.02)
+          p <- gridline_fun(p, gridlines_y[i:(i + n_gridlines - 1), ], offset = 0.02)
+          p <- gridline_fun(p, gridlines_x[i:(i + n_gridlines - 1), ], offset = -0.02)
+          p <- gridline_fun(p, gridlines_y[i:(i + n_gridlines - 1), ], offset = -0.02)
         }
       }
 
@@ -1512,6 +1516,8 @@ plot_cop_surf <- function(copula,
 
     # Make plot
 
+    gridline_size <- if(n_gridlines <= 11){0.8}else if(n_gridlines>=11 && n_gridlines <21){0.6}else{0.3}
+
     p <- ggplot(outp, aes(v, u)) +
       geom_raster(
         aes(fill = .data$z),
@@ -1538,15 +1544,15 @@ plot_cop_surf <- function(copula,
       ) +
       geom_raster(aes(fill = .data$z), alpha = 0.2) +
       geom_vline(
-        xintercept = seq(0, 1, by = 0.125),
+        xintercept = seq(0, 1, length.out=n_gridlines),
         colour = "grey60",
-        size = 0.8,
+        size = gridline_size,
         alpha = 0.25
       ) +
       geom_hline(
-        yintercept = seq(0, 1, by = 0.125),
+        yintercept = seq(0, 1, length.out=n_gridlines),
         colour = "grey60",
-        size = 0.8,
+        size = gridline_size,
         alpha = 0.25
       ) +
       scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
@@ -1564,9 +1570,8 @@ plot_cop_surf <- function(copula,
 #' The step lengths are split into quantiles. For each quantile a boxplot of the
 #' corresponding turn angles is produced and wrapped around the circle.
 #' The turn angle values are plotted
-#' as scatter plot overlaying the boxplot. Outliers are plotted in red.
-#' The median of the turn angles is defined as the center of the shortest arc
-#' that connects all points. The length of the whiskers is 1.5 times the interquartile range.
+#' as scatter plot overlaying the boxplot.  Outliers are plotted in red.
+#'
 #' @param traj \link[base]{data.frame} containing the trajectory produced by e.g.
 #' \code{\link{traj_sim}()}. It must contain
 #'  the columns \code{traj$angle} and \code{traj$steplength}.
@@ -1578,8 +1583,9 @@ plot_cop_surf <- function(copula,
 #' quantiles into which the step lengths are split.
 #' @param marginal_lin named \link[base]{list} (for parametric estimates) or
 #' a '\code{\link[stats]{density}}' object (for kernel density estimates).
-#' The output of function \code{\link{fit_steplength}()} can be used here directly for
-#' both cases. If \code{marginal_lin} is specified, the limits of the quantiles of the step lengths
+#' The outputs of functions \code{\link{fit_lin_np}()} or
+#' \code{\link{fit_lin_param}()} can be used here directly.
+#'  If \code{marginal_lin} is specified, the limits of the quantiles of the step lengths
 #'  are determined from that distribution instead of from the data specified with
 #' \code{traj$steplength} or \code{x}.
 #' @param spacing \link[base]{numeric} value between 0 and 10 determining the
@@ -1588,8 +1594,15 @@ plot_cop_surf <- function(copula,
 #' of the step length quantiles). Either \code{"left"}, \code{"right"}, \code{"top"}, or
 #' \code{"bottom"}
 #'
-#' @details You can either specify \code{traj} or the angels (\code{theta})
-#' and step lengths (code{x}).
+#' @details
+#' The distance of the plotted points from the center
+#'  of the circle is of no meaning and is randomized.
+#' Only their angular position is relevant.
+#' The median of the turn angles is defined as the center of the shortest arc
+#' that connects all points. The length of the whiskers is 1.5 times the interquartile range.
+#'
+#' You can either specify \code{traj} or the angels (\code{theta})
+#' and linear masurements (code{x}).
 #' If entered "by hand", the named list describing the marginal linear distribution
 #' (for \code{marginal_lin}) must contain 2 entries:
 #' \enumerate{
@@ -1633,7 +1646,9 @@ plot_joint_box <-
            levels = 5,
            marginal_lin = NULL,
            spacing = 0.3,
-           legend_pos = "right") {
+           legend_pos = "right",
+           min_a=3,
+           max_a=4353) {
     #validate input
     tryCatch({
       check_arg_all(list(
@@ -1772,7 +1787,9 @@ plot_joint_box <-
         IQR_fac = IQR_fac,
         spacing = spacing,
         levels = levels,
-        expand = expand
+        expand = expand,
+        min_a = min_a,
+        max_a = max_a
       )
 
     make_plot(
@@ -1798,7 +1815,9 @@ calc_plot_data <-
            IQR_fac,
            spacing,
            levels,
-           expand) {
+           expand,
+           min_a,
+           max_a) {
     box_heights <-
       cbind(seq(spacing, (levels - 1 + (spacing * levels)), length.out = levels),
             seq((1 + spacing), (levels + (spacing * levels)), length.out = levels))
@@ -2001,7 +2020,7 @@ calc_plot_data <-
       )
       avg_height <- (box_heights[i, 1] + box_heights[i, 2]) / 2
 
-      angles_a <- traj$angle[3:4353][traj$quant[3:4353] == i]
+      angles_a <- traj$angle[min_a:max_a][traj$quant[min_a:max_a] == i]
       ind1_a <- within_angles(
         angle1 = whiskers_start[1],
         angle2 = whiskers_max[1],

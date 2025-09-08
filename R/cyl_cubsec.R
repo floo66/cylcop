@@ -182,8 +182,7 @@ setMethod("ccylcop", signature("cyl_cubsec"), function(u,
     beta <- -b * sin(2 * pi * u)
     if (inverse == F) {
       result <-
-        u + (-alpha + beta) * (1 - v) * v + (1 - v) * (alpha * (1 - v) + beta *
-                                                         v) - v * (alpha * (1 - v) + beta * v)
+        u + 2 * (beta - alpha) * (1 - v) * v + alpha * (1 - v)^2 - beta * v^2
     }
     if (inverse == TRUE) {
       result <-  numerical_inv_conditional_cop(u_orig, copula, cond_on = 2)

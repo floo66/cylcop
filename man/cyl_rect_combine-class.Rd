@@ -46,7 +46,7 @@ parameters.}
 '\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object. The copula in
   the rectangles.}
 
-\item{\code{background.cop}}{'\code{\linkS4class{cyl_vonmises}}' or
+\item{\code{cop.bg}}{'\code{\linkS4class{cyl_vonmises}}' or
 '\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
 the copula where no rectangles overlay the unit square. If this copula is not
 symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.}

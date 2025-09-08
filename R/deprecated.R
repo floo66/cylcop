@@ -6,10 +6,12 @@
 #' @name cylcop-deprecated
 #' @param ... Parameters to be passed to the new versions of the functions
 #' @docType package
-#' @export  scat_plot traj_plot circ_plot cop_scat_plot cop_plot make_traj qmixedvonmises mle.mixedvonmises
-#' @aliases scat_plot traj_plot circ_plot cop_scat_plot cop_plot make_traj qmixedvonmises mle.mixedvonmises
+#' @export  fit_steplength fit_angle scat_plot traj_plot circ_plot cop_scat_plot cop_plot make_traj qmixedvonmises mle.mixedvonmises
+#' @aliases fit_steplength fit_angle scat_plot traj_plot circ_plot cop_scat_plot cop_plot make_traj qmixedvonmises mle.mixedvonmises
 #' @section Details:
 #' \tabular{rl}{
+#'   \code{fit_angle()} \tab is replaced by \code{\link{fit_circ_param}()} and \code{\link{fit_circ_np}()}\cr
+#'   \code{fit_steplength()} \tab is replaced by \code{\link{fit_lin_param}()} and \code{\link{fit_lin_np}()}\cr
 #'   \code{scat_plot()} \tab is replaced by \code{\link{plot_joint_scat}()}\cr
 #'   \code{traj_plot()} \tab is replaced by \code{\link{plot_track}()}\cr
 #'   \code{circ_plot()} \tab is replaced by \code{\link{plot_joint_circ}()}\cr
@@ -19,7 +21,81 @@
 #'   \code{qmixedvonmises()} \tab is replaced by \code{\link{qvonmisesmix}()}\cr
 #'   \code{mle.mixedvonmises()} \tab is replaced by \code{\link{mle.vonmisesmix}()}\cr
 #' }
-#'
+
+
+#helper function to get a list containing the default
+#and non-default input parameters
+get_inp_lst <- function(mc,defaults, non_default_names){
+
+  # Define the ordered list of required and optional parameters
+  param_order <- c(non_default_names, names(defaults))
+
+  if(is.null(names(mc))){
+    unnamed_args <- seq(1,length(mc))
+  }else{
+    unnamed_args <- which(names(mc) == "")
+  }
+
+  # Determine which parameters are available for unnamed arguments
+  unnamed_avail <- param_order[which(!param_order %in%names(mc))]
+
+  # Loop through unnamed arguments and assign them the appropriate names
+  name_vec <- names(mc)
+  j <- 1
+  for (i in unnamed_args) {
+    name_vec[i] <- unnamed_avail[j]
+    j <- j+1
+  }
+
+  #Update the names of the captured arguments
+  names(mc) <- name_vec
+
+ #Ensure the required parameters are provided
+  for(i in seq_along(non_default_names)){
+    if (!non_default_names[i] %in% names(mc)) {
+      stop(paste0(non_default_names[i], " is a required parameter."))
+    }
+  }
+
+  # Combine the defaults with the provided arguments,
+  # giving precedence to user-specified values
+  mc <- modifyList(defaults, mc)
+
+  return(mc)
+}
+
+
+fit_steplength <- function(...){
+  # Capture the arguments passed via ...
+  mc <- list(...)
+  mc <- get_inp_lst(mc,
+                    defaults = list(start=NULL, bandwidth=NULL, ncomp=2),
+                    non_default_names=c("x", "parametric"))
+
+  if(isFALSE(mc$parametric)){
+    .Deprecated("fit_lin_np", package = "cylcop")
+
+    fit_lin_np(x = mc$x, bandwidth = mc$bandwidth, limits = c(0,Inf))
+  }else{
+    .Deprecated("fit_lin_param", package = "cylcop")
+    fit_lin_param(x = mc$x, densfun = mc$parametric, start = mc$start, ncomp = mc$ncomp)
+  }
+}
+
+fit_angle <- function(...){
+  mc <- list(...)
+  mc <- get_inp_lst(mc,
+                    defaults = list(bandwidth=NULL, mu=NULL, ncomp=2),
+                    non_default_names=c("theta", "parametric"))
+  if(isFALSE(mc$parametric)){
+    .Deprecated("fit_circ_np", package = "cylcop")
+    fit_circ_np(theta = mc$theta, bandwidth = mc$bandwidth)
+  }else{
+    .Deprecated("fit_circ_param", package = "cylcop")
+    fit_circ_param(theta = mc$theta, densfun = mc$parametric, mu = mc$mu, ncomp = mc$ncomp)
+  }
+}
+
 scat_plot <- function(...) {
   .Deprecated("plot_joint_scat", package = "cylcop")
   mc <- list(...)
@@ -116,4 +192,6 @@ cop_scat_plot <- function(...) {
   mle.mixedvonmises <-  function(...)  {
     .Deprecated("mle.vonmisesmix", package = "cylcop")
   }
+
+
 

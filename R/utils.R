@@ -456,6 +456,7 @@ check_argument_type <- function(argument,
                                          "circular",
                                          "data.frame"),
                                 integer =F,
+                                dimension = NULL,
                                 length = NULL,
                                 ncol = NULL,
                                 values = NULL,
@@ -464,6 +465,7 @@ check_argument_type <- function(argument,
   cond_lst <- list(
     arg_name = deparse(substitute(argument)),
     type_cond = T,
+    dimension_cond =T,
     length_cond = T,
     ncol_cond = T,
     value_cond = T,
@@ -503,6 +505,13 @@ check_argument_type <- function(argument,
     return(cond_lst)
   }
 
+  if (!is.null(dimension)) {
+    if (!dimension == dim(argument)) {
+      cond_lst$dimension_cond <- dimension
+      return(cond_lst)
+    }
+  }
+
   if (!is.null(length)) {
     if (!length == length(argument)) {
       cond_lst$length_cond <- length
@@ -518,11 +527,12 @@ check_argument_type <- function(argument,
   }
 
   if(integer && any(type %in% c("numeric", "matrix"))){
-    cond_lst$integer_cond <- is.logical(all.equal(c(argument), as.integer(argument)))
+    cond_lst$integer_cond <- is.logical(all.equal(c(argument[!is.na(argument)]), as.integer(argument[!is.na(argument)])))
+    return(cond_lst)
   }
 
   if (!is.null(values)) {
-    if (!all(argument %in% values)) {
+    if (!all(argument[!is.na(argument)] %in% values)) {
       cond_lst$value_cond <- values
       return(cond_lst)
     }
@@ -534,10 +544,10 @@ check_argument_type <- function(argument,
     if (is.matrix(argument) && length(lower) == ncol(argument)) {
       lower_cond <- rep(T, length(lower))
       for (i in seq_along(lower)) {
-        lower_cond[i] <- all(lower[i] <= argument[, i])
+        lower_cond[i] <- all(lower[i] <= argument[, i][!is.na(argument[, i])])
       }
     } else{
-      lower_cond <- (lower <= argument)
+      lower_cond <- (lower <= argument[!is.na(argument)])
     }
 
     if (!all(lower_cond)) {
@@ -553,10 +563,10 @@ check_argument_type <- function(argument,
     if (is.matrix(argument) && length(upper) == ncol(argument)) {
       upper_cond <- rep(T, length(upper))
       for (i in seq_along(upper)) {
-        upper_cond[i] <- all(upper[i] >= argument[, i])
+        upper_cond[i] <- all(upper[i] >= argument[, i][!is.na(argument[, i])])
       }
     } else{
-      upper_cond <- (upper >= argument)
+      upper_cond <- (upper >= argument[!is.na(argument)])
     }
     if (!all(upper_cond)) {
       cond_lst$upper_cond <- upper
@@ -605,6 +615,20 @@ check_arg_all <- function(arg_type, type_num) {
 
 
   if(cond_lst$all_good) return()
+
+
+  if (!isTRUE(cond_lst$dimension_cond)) {
+    stop(
+
+      paste0(
+        cond_lst$arg_name,
+        " must be of dimension ",
+        cond_lst$dimension_cond,
+        "."
+      )
+    )
+  }
+
   if (!isTRUE(cond_lst$length_cond)) {
     stop(
 
@@ -705,3 +729,68 @@ check_arg_all <- function(arg_type, type_num) {
     }
   }
 }
+
+
+check_boundary <- function(u,copula){
+
+  eq_tol <- function(num1,num2){
+    out <- rep(FALSE,length(num1))
+    ind <- which(abs(num1-num2)<1e-7)
+    out[ind] <- TRUE
+    out
+  }
+
+  if(any(is(copula)=="Copula")){
+    check_vals <- c(0,1)
+  }else if(any(is(copula)=="cyl_rot_combine")){
+    if(!copula@shift){
+      check_vals <- c(0,1)
+    }else{
+      check_vals <- c(0.5,0,1)
+    }
+  }else if(any(is(copula)=="cyl_rect_combine")){
+    check_vals <- unique(c(0,5,copula@parameters[2:5]))
+  }else{
+    check_vals <- c(0,1)
+  }
+  ind <- NULL
+  for (i in seq_along(check_vals)) {
+    if(nrow(u)>1){
+      new <- (apply(u, 2, function(x){eq_tol(x,check_vals[i])})%>%
+                which(arr.ind = T))[,1]
+    }else{
+      new <- eq_tol(u,check_vals[i])
+      if(any(new)){new <- 1}else{
+        new <- integer(0)
+      }
+
+    }
+    if(length(new > 0 )){
+      ind <- c(ind,new)
+    }
+  }
+  ind <- unique(ind)
+  ind
+
+}
+
+
+get_cop_name <- function(copula){
+  if (any(is(copula) == "cyl_copula")) {
+    name <- copula@name
+  }
+
+  else if (any(is(copula) == "rotCopula")) {
+    orig_copula <- copula@copula
+    name <-
+      class(orig_copula)[1] %>% stringr::str_remove("Copula") %>% stringr::str_to_sentence(locale = "en") %>% paste("copula (rotated)")
+  }
+  else if (any(is(copula) == "Copula") &&
+           any(is(copula) != "rotCopula")) {
+    name <-
+      class(copula)[1] %>% stringr::str_remove("Copula") %>% stringr::str_to_sentence(locale = "en") %>% paste("copula")
+  }
+  return(name)
+}
+
+

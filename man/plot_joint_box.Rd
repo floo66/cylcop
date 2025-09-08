@@ -30,8 +30,9 @@ quantiles into which the step lengths are split.}
 
 \item{marginal_lin}{named \link[base]{list} (for parametric estimates) or
 a '\code{\link[stats]{density}}' object (for kernel density estimates).
-The output of function \code{\link{fit_steplength}()} can be used here directly for
-both cases. If \code{marginal_lin} is specified, the limits of the quantiles of the step lengths
+The outputs of functions \code{\link{fit_lin_np}()} or
+\code{\link{fit_lin_param}()} can be used here directly.
+ If \code{marginal_lin} is specified, the limits of the quantiles of the step lengths
  are determined from that distribution instead of from the data specified with
 \code{traj$steplength} or \code{x}.}
 

@@ -95,26 +95,26 @@ See also individual methods (below) for more detailed explanations.
 }
 \section{Functions}{
 \itemize{
-\item \code{fit_cylcop_cor(cyl_vonmises)}: only parameter \code{"kappa"} can be optimized, since parameter
+\item \code{fit_cylcop_cor,cyl_vonmises-method}: only parameter \code{"kappa"} can be optimized, since parameter
 \code{"mu"} does not influence the correlation.
 
-\item \code{fit_cylcop_cor(cyl_quadsec)}: the absolute value of the parameter is optimized, positive
+\item \code{fit_cylcop_cor,cyl_quadsec-method}: the absolute value of the parameter is optimized, positive
 and negative values give the same correlation.
 
-\item \code{fit_cylcop_cor(cyl_cubsec)}: optimization of parameters, \code{"a"} and \code{"b"},
+\item \code{fit_cylcop_cor,cyl_cubsec-method}: optimization of parameters, \code{"a"} and \code{"b"},
 can be done separately or simultaneously.
 
-\item \code{fit_cylcop_cor(cyl_rot_combine)}: the circular-linear correlation coefficient will give a
+\item \code{fit_cylcop_cor,cyl_rot_combine-method}: the circular-linear correlation coefficient will give a
 value close to 0 for any parameter value. It therefore only makes sense to
 use \code{method = "mi_cyl"} for the optimization.
 
-\item \code{fit_cylcop_cor(cyl_rect_combine)}: if the rectangles span the entire unit square and the background
+\item \code{fit_cylcop_cor,cyl_rect_combine-method}: if the rectangles span the entire unit square and the background
 is the independence copula, it is recommended to use \code{method = "tau"}, since this
 calculates the copula parameter analytically. If there is a background copula,
 other than the independence copula, its parameter can be optimized by setting
 \code{background=TRUE}.
-
 }}
+
 \examples{
 set.seed(123)
 

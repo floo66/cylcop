@@ -30,9 +30,9 @@ be periodically extended past -pi and pi.}
 density estimates are computed and plotted. Alternatively, \code{plot_margins} can
 be a list of length 2 containing first a kernel density estimate for \code{theta} and
 second a kernel density estimate for \code{x}. The first entry must be of type
-\code{'density.circular'} (as returned e.g. by \code{\link{fit_angle}(theta, parametric=FALSE))},
+\code{'density.circular'} (as returned e.g. by \code{\link{fit_circ_np}(theta))},
 and the second entry must be of type \code{"density"}
-(as returned e.g. by \code{\link{fit_steplength}(x, parametric=FALSE))}.}
+(as returned e.g. by \code{\link{fit_lin_np}(x))}.}
 }
 \value{
 A '\code{\link[ggplot2]{ggplot}}' object, the scatterplot.
@@ -48,8 +48,8 @@ If \code{plot_margins=T}, the code will attempt to find appropriate bandwidths f
 the kernel density estimate autonomously, also taking into account computational time.
 For more control over the actual method and parameters used to obtain the kernel
 density estimates, you can calculate them "by hand" using e.g.
-\code{\link{fit_angle}(theta, parametric=FALSE)}
-and \code{\link{fit_steplength}(x, parametric=FALSE))}.
+\code{\link{fit_circ_np}(theta))}
+and \code{\link{fit_lin_np}(x))}.
 }
 \examples{
 set.seed(123)
@@ -64,8 +64,8 @@ plot2 <- plot_joint_scat(traj, periodic = TRUE)
 plot3 <- plot_joint_scat(theta=traj$angle, x=traj$steplength, periodic = TRUE, plot_margins=TRUE)
 
 bw <- opt_circ_bw(theta = traj$angle, method = "nrd",kappa.est = "trigmoments")
-ang_dens <- fit_angle(theta=traj$angle, parametric=FALSE, bandwidth=bw)
-step_dens <- fit_steplength(x=traj$steplength, parametric=FALSE)
+ang_dens <- fit_circ_np(theta=traj$angle, bandwidth=bw)
+step_dens <- fit_lin_np(x=traj$steplength)
 plot4 <- plot_joint_scat(traj, periodic = TRUE, plot_margins=list(ang_dens, step_dens))
 
 }

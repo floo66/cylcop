@@ -20,12 +20,14 @@ traj_sim(
 
 \item{marginal_circ}{named \link[base]{list} (for parametric estimates) or
 a '\code{\link[circular]{density.circular}}' object (for kernel density estimates).
-The output of function \code{\link{fit_angle}()} can be used here directly for
+The output of functions \code{\link{fit_circ_np}()} and
+\code{\link{fit_circ_param}()}, respectively, can be used here directly for
 both cases.}
 
 \item{marginal_lin}{named \link[base]{list} (for parametric estimates) or
 a '\code{\link[stats]{density}}' object (for kernel density estimates).
-The output of function \code{\link{fit_steplength}()} can be used here directly for
+The output of functions \code{\link{fit_lin_np}()} and
+\code{\link{fit_lin_param}()}, respectively, can be used here directly for
 both cases.}
 
 \item{ignore_first}{\link[base]{logical} value. If \code{ignore_first = TRUE} (default),
@@ -94,10 +96,10 @@ angles <- rvonmisesmix(100,
 )
 angles <- full2half_circ(angles)
 bw <- opt_circ_bw(theta = angles, method = "nrd", kappa.est = "trigmoments")
-marg_ang <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw)
+marg_ang <- fit_circ_np(theta = angles, bandwidth = bw)
 
 steplengths <- rlnorm(100, 0, 0.3)
-marg_stepl <- fit_steplength(x = steplengths, parametric = "lnorm")
+marg_stepl <- fit_lin_param(x = steplengths, densfun = "lnorm")
 
 traj_sim(n = 5,
 copula = cyl_quadsec(0.1),
@@ -110,7 +112,8 @@ pos_2 = c(5,5)
 }
 \seealso{
 \code{\link{traj_get}()},
-\code{\link{fit_steplength}()}, \code{\link{fit_angle}()},
+\code{\link{fit_circ_np}()}, \code{\link{fit_circ_lin}()},
+\code{\link{fit_lin_np}()}, \code{\link{fit_lin_lin}()},
 \code{\link{plot_track}()}, \code{\link{plot_cop_scat}()},
 \code{\link{plot_joint_scat}()}, \code{\link{plot_joint_circ}()}.
 }

@@ -9,8 +9,9 @@ wasserstein(
   copula2 = NULL,
   theta = NULL,
   x = NULL,
-  n_grid = 2500,
-  p = 2
+  emp_binned = T,
+  nbins = 50,
+  method = "aha"
 )
 }
 \arguments{
@@ -26,29 +27,47 @@ or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 \item{x}{(alternatively) \link[base]{numeric} \link[base]{vector} of step lengths
 (measurements of a linear variable) or "linear" component of pseudo-observations.}
 
-\item{n_grid}{\link[base]{integer} number of grid cells at which the PDF of the copula(s) is calculated
-Default is 2500}
+\item{emp_binned}{\link[base]{logical} denoting whether the empirical copula
+is treated as a set of pseudo observations \code{emp_binned=F}, or if it the empirical
+density is represented as a histogram through binning.
+(\code{emp_binned=T}, default). See details for more information.}
 
-\item{p}{\link[base]{integer} power (1 or 2) to which the Euclidean distance
-between points is taken in order to compute transportation costs.}
+\item{nbins}{\link[base]{integer} value, the number of bins to use in each dimension.
+at which the PDF of the copula(s) is calculated.Default is 50.}
+
+\item{method}{Currently 2 methods are available. The Aurenhammer–Hoffmann–Aronov method
+(\code{method="aha"}, default)
+is faster, but gives an approximate result. Alternatively, the network simplex
+ algorithm (\code{method="networkflow"}) is available}
 }
 \value{
-\link[base]{numeric}, the pth Wasserstein distance
+\link[base]{numeric}, the 2nd Wasserstein distance
 }
 \description{
-The Wasserstein distance is calculated based on the Euclidean distance
+The Wasserstein distance is calculated based on the squared Euclidean distance
 between two copula PDFs on a grid, or between a copula PDF and
 pseudo-observations.
 }
 \details{
 Note that when comparing 2 copula PDFs (i.e. \code{theta = NULL} and \code{x = NULL}),
-the calculated Wasserstein distance will depend on the number of grid cells
-(\code{n_grid}) used to approximate the PDFs. The distance will converge to a certain
+the calculated Wasserstein distance between them will depend on the number of grid cells
+(\code{nbins}) used to approximate the PDFs. The distance will converge to a certain
 value with a higher number of grid cells, but the computational time will also increase.
-The default of 2500 seems to be a good (empirically determined) compromise.
-The same is true when calculating the Wasserstein distance between a copula
-PDF and pseudo-observations. There, it is also important to only compare distances
-that use the same number of observations.
+2 different methods are available to find the optimal transport plan:
+The Aurenhammer–Hoffmann–Aronov algorithm is an iterative method based on gradient descent.
+Therefore, the optimal transport plan obtained is not exactly the plan from \code{copula}
+to \code{copula2}. This means that even when \code{copula} is equal to \code{copula2},
+the estimated Wasserstein distance will be slightly larger than 0. The network simplex
+ algorithm does not have this issue, but will be a lot slower and usually should be
+ used only with a smaller number of grid cells.
+
+When calculating the Wasserstein distance between a copula PDF and pseudo-observations
+(obtained from \code{theta} and \code{x}),
+there are 2 options. \code{emp_binned=T} will calculate a histogram from the empirical
+distribution using \code{nbins^2} grid cells and then calculate the optimal transport
+plan to go from the grid of \code{copula} to the grid with the empirical density.
+When \code{emp_binned=F}, the optimal transport plan to move the copula density on the grid
+to the pseudo observations (each with equal weight) is calculated.
 
 The code is based on the functions \code{transport::\link[transport]{wasserstein}()}
 and \code{transport::\link[transport]{semidiscrete}()}.
@@ -57,9 +76,9 @@ and \code{transport::\link[transport]{semidiscrete}()}.
 set.seed(1234)
 copula1 <- cyl_quadsec(0.1)
 copula2 <- cyl_rect_combine(copula::frankCopula(2))
-wasserstein(copula=copula1,copula2 = copula2,p=2,n_grid=20)
-wasserstein(copula=copula1,copula2 = copula1,p=2,n_grid=20)
-wasserstein(copula=copula1,copula2 = copula::frankCopula(2),p=2,n_grid=20)
+wasserstein(copula=copula1,copula2 = copula2,nbins=5)
+wasserstein(copula=copula1,copula2 = copula1,nbins=5)
+wasserstein(copula=copula1,copula2 = copula::frankCopula(2),nbins=5)
 
  sample <- rjoint(10,
   copula1,
@@ -67,5 +86,6 @@ wasserstein(copula=copula1,copula2 = copula::frankCopula(2),p=2,n_grid=20)
   marginal_2 = list(name = "weibull", coef = list(3,4))
 )
 
-wasserstein(copula=copula1, theta=sample[,1], x=sample[,2], n_grid=20)
+wasserstein(copula=copula1, theta=sample[,1], x=sample[,2], emp_binned=T,nbins=5)
+wasserstein(copula=copula1, theta=sample[,1], x=sample[,2], emp_binned=F,nbins=5)
 }

@@ -16,7 +16,8 @@
 #' @param marginal_1 named \link[base]{list} (for parametric estimates) or
 #' a '\code{\link[stats]{density}}' object (for linear kernel density estimates)
 #' or a '\code{\link[circular]{density.circular}}' object (for circular kernel density estimates).
-#' The output of functions \code{\link{fit_angle}()} and \code{\link{fit_steplength}()}
+#' The output of functions \code{\link{fit_circ_param}()}, \code{\link{fit_lin_param}()},
+#' \code{\link{fit_circ_np}()}, and \code{\link{fit_lin_np}()}
 #' can be used here directly.
 #' @param marginal_2 This input is similar to \code{marginal_1}.
 #'
@@ -63,8 +64,8 @@
 #' marginal_2 <- list(name="weibull",coef=list(shape=3))
 #'
 #' sample <- rjoint(10,cop,marginal_1,marginal_2)
-#' marginal_1 <- fit_angle(theta=sample[,1], parametric=FALSE)
-#' marginal_2 <- fit_steplength(x=sample[,2],parametric="lnorm")
+#' marginal_1 <- fit_circ_np(theta=sample[,1])
+#' marginal_2 <- fit_lin_param(x=sample[,2],densfun="lnorm")
 #' pjoint(c(0.3*pi,4),cop,marginal_1,marginal_2)
 #' djoint(c(0,2),cop,marginal_1,marginal_2)
 #'
@@ -246,7 +247,8 @@ tryCatch({
   check_arg_all(list(check_argument_type(copula,
                                          type="cyl_copula"),
                      check_argument_type(copula,
-                                         type="Copula"))
+                                         type="Copula",
+                                         dimension = 2))
                 ,2)
   check_arg_all(list(check_argument_type(marginal_1,
                                          type="list"),

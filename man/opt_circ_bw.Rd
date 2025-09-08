@@ -61,9 +61,9 @@ bw1 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "ML")
 bw2 <- opt_circ_bw(theta = angles, method="nrd", kappa.est = "trigmoments")
 bw3 <- opt_circ_bw(theta = angles, method="cv")
 
-dens1 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw1)
-dens2 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw2)
-dens3 <- fit_angle(theta = angles, parametric = FALSE, bandwidth = bw3)
+dens1 <- fit_circ_np(theta = angles, bandwidth = bw1)
+dens2 <- fit_circ_np(theta = angles, bandwidth = bw2)
+dens3 <- fit_circ_np(theta = angles, bandwidth = bw3)
 true_dens <- dvonmisesmix(
   seq(-pi,pi,0.001),
   mu = c(0,pi),

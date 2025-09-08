@@ -24,8 +24,8 @@ generated with \code{rdens()}.}
 or a '\code{\link[circular]{density.circular}}' object
 (for circular kernel density estimates) containing information about the kernel density
   estimate. These objects can be obtained using
-  \code{\link{fit_angle}(..., parametric = FALSE)} or
-  \code{\link{fit_steplength}(..., parametric = FALSE)}.}
+  \code{\link{fit_circ_np}()} or
+  \code{\link{fit_lin_np}()}.}
 
 \item{x}{\link[base]{numeric} \link[base]{vector} giving the points where
 the density or distribution function is evaluated.}
@@ -44,13 +44,13 @@ generates a \link[base]{vector} of length \code{n} containing the random samples
 Calculate the density (\code{ddens()}), the distribution (\code{pdens()}),
  the quantiles (\code{qdens()}) and generate random
 samples (\code{rdens()}) of a kernel density estimate as returned by
-\code{\link{fit_angle}()} or \code{\link{fit_steplength}()}.
+\code{\link{fit_circ_np}()} or \code{\link{fit_lin_np}()}.
 }
 \examples{
 set.seed(123)
 
 steps <- rweibull(10, shape=3)
-dens <- fit_steplength(x = steps, parametric = FALSE)
+dens <- fit_lin_np(x = steps, limits=c(0,Inf))
 ddens(c(0.1,0.3), dens)
 pdens(c(0.1,0.3), dens)
 qdens(c(0.1,0.3), dens)
@@ -59,7 +59,7 @@ rdens(4, dens)
 angles <- full2half_circ(
   circular::rvonmises(10, mu = circular::circular(0), kappa = 2)
 )
-dens <- fit_angle(theta = angles, parametric = FALSE)
+dens <- fit_circ_np(theta = angles)
 ddens(c(0.1,0.3), dens)
 pdens(c(0.1,0.3), dens)
 qdens(c(0.1,0.3), dens)
@@ -67,6 +67,5 @@ rdens(4, dens)
 
 }
 \seealso{
-\code{\link{fit_angle}()}, \code{\link{fit_steplength}()},
-\code{\link{fit_steplength}()}.
+\code{\link{fit_circ_np}()}, \code{\link{fit_lin_np}()}.
 }

@@ -80,8 +80,9 @@ cyl_rot_combine <- function(copula, shift = FALSE) {
   #validate input
   tryCatch({
     check_arg_all(check_argument_type(copula,
-                                           type="Copula")
-    ,1)
+                                      type="Copula",
+                                      dimension = 2)
+                  ,1)
     check_arg_all(check_argument_type(shift,
                                       type="logical")
                   ,1)
@@ -110,9 +111,9 @@ cyl_rot_combine <- function(copula, shift = FALSE) {
 
   if(cylcop.env$silent==F){
     message(name,
-      " made periodic in u, by taking arithmetic mean with 90 degree rotated ",
-      name,
-      "\n")}
+            " made periodic in u, by taking arithmetic mean with 90 degree rotated ",
+            name,
+            "\n")}
 
   new(
     "cyl_rot_combine",
@@ -213,12 +214,12 @@ setMethod("pcylcop", signature("matrix", "cyl_rot_combine"), function(u, copula)
   if (copula@shift) {
     cdf <- map2_dbl(u, v, function(u, v) {
       if (u >= 0.5) {
-        cdf <- pcylcop(c(1, v), period_cop) -
+        cdf <- v -
           pcylcop(c(0.5, v), period_cop) +
-          pcylcop(c(0.5 - (1 - u), v), period_cop)
+          pcylcop(c((u - 0.5), v), period_cop)
       }
       else if (u < 0.5) {
-        cdf <- pcylcop(c(1 - (0.5 - u), v), period_cop) -
+        cdf <- pcylcop(c((0.5 + u), v), period_cop) -
           pcylcop(c(0.5, v), period_cop)
       }
     })
@@ -238,7 +239,15 @@ setMethod("ccylcop", signature("cyl_rot_combine"), function(u,
                                                             copula,
                                                             cond_on = 2,
                                                             inverse = FALSE) {
+
   u_orig <- matrix(ncol=2,u)
+  if(inverse){
+    warning("Analytical expression not available, inverse was calculated numerically")
+   result <- numerical_inv_conditional_cop(u_orig, copula, cond_on)
+   return(result)
+}
+
+
   length <- nrow(u)
   v <- u_orig[, 2, drop = F]
   u <- u_orig[, 1, drop = F]
@@ -249,18 +258,15 @@ setMethod("ccylcop", signature("cyl_rot_combine"), function(u,
   period_cop <-
     mixCopula(list(copula@orig.cop, copula90), w = c(0.5, 0.5))
 
-
   if (!copula@shift) {
-    result <- cylcop::ccylcop(u_orig,period_cop, cond_on, inverse)
-  }
-  else{
-    result <- matrix(ncol=2,rep(1,length))
-    result[u>=0.5,] <- cylcop::ccylcop(matrix(ncol=2,c(rep(1,nrow(v[u>=0.5])),v[u>=0.5])),period_cop, cond_on, inverse)+
-      cylcop::ccylcop(matrix(ncol=2,c(rep(0.5,nrow(v[u>=0.5])),v[u>=0.5])),period_cop, cond_on, inverse)+
-      cylcop::ccylcop(matrix(ncol=2,c(rep(u-0.5,nrow(v[u>=0.5])),v[u>=0.5])),period_cop, cond_on, inverse)
-    result[u<0.5,] <- cylcop::ccylcop(matrix(ncol=2,c(rep(0.5,nrow(v[u<0.5])),v[u<0.5])),period_cop, cond_on, inverse)+
-      cylcop::ccylcop(matrix(ncol=2,c(rep(u+0.5,nrow(v[u<0.5])),v[u<0.5])),period_cop, cond_on, inverse)
-  }
+    result <- ccylcop(u_orig,period_cop, cond_on, inverse=F)
+  }else{
+    result <- ccylcop(cbind(((u-0.5)%%1),v),period_cop, cond_on, inverse=F)
+    if(cond_on==2){
+      result[u <= 0.5] <- result[u <= 0.5] - 0.5
+      result[u > 0.5] <- result[u > 0.5] + 0.5
+    }
+    }
   return(result)
 })
 

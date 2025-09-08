@@ -198,17 +198,10 @@ setMethod("pcylcop", signature("matrix", "cyl_vonmises"), function(u, copula) {
       )
   }
   else{
-    #if the copula is flipped, instead of integrating from (0,0) to (u,v) we need to integrate from  (1-u,0) to (1,v).
-    #Use the C-volume of the unflipped copula for that.
+    #we need to calculate the CDF of the 90 degree rotation
     unflipped <- copula
     unflipped@flip <- FALSE
-    low <- cbind((1-u),0)
-    up <- cbind(1, v)
-    cdf <- pcylcop(cbind(low[,1], low[,2]), unflipped) -
-      pcylcop(cbind(low[,1], up[,2]), unflipped) -
-      pcylcop(cbind(up[,1], low[,2]), unflipped) +
-      pcylcop(cbind(up[,1], up[,2]), unflipped)
-
+    cdf <- v - pcylcop(cbind((1-u), v), unflipped)
   }
   return(c(cdf))
 })

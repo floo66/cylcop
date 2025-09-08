@@ -3,6 +3,9 @@
 \docType{package}
 \name{cylcop-deprecated}
 \alias{cylcop-deprecated}
+\alias{get_inp_lst}
+\alias{fit_steplength}
+\alias{fit_angle}
 \alias{scat_plot}
 \alias{traj_plot}
 \alias{circ_plot}
@@ -13,7 +16,7 @@
 \alias{mle.mixedvonmises}
 \title{Deprecated functions}
 \usage{
-scat_plot(...)
+get_inp_lst(mc, defaults, non_default_names)
 }
 \arguments{
 \item{...}{Parameters to be passed to the new versions of the functions}
@@ -25,6 +28,8 @@ the cylcop package. They may eventually be completely
 \section{Details}{
 
 \tabular{rl}{
+  \code{fit_angle()} \tab is replaced by \code{\link{fit_circ_param}()} and \code{\link{fit_circ_np}()}\cr
+  \code{fit_steplength()} \tab is replaced by \code{\link{fit_lin_param}()} and \code{\link{fit_lin_np}()}\cr
   \code{scat_plot()} \tab is replaced by \code{\link{plot_joint_scat}()}\cr
   \code{traj_plot()} \tab is replaced by \code{\link{plot_track}()}\cr
   \code{circ_plot()} \tab is replaced by \code{\link{plot_joint_circ}()}\cr

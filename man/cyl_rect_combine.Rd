@@ -6,10 +6,11 @@
 \usage{
 cyl_rect_combine(
   copula,
+  copula2 = "rotated",
   background = indepCopula(),
   low_rect = c(0, 0.5),
   up_rect = "symmetric",
-  flip_up = TRUE
+  flip = TRUE
 )
 }
 \arguments{
