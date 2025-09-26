@@ -136,7 +136,7 @@ angstep2xy <- function(angle, steplength, prevp1, prevp2) {
 #' to an angle on the full circle  (i.e. in the interval \eqn{[0, 2\pi)}).
 #'
 #' @param angle \link[base]{numeric} value of an angle or a
-#' \code{\link{circular}}-object in \eqn{[-\pi, \pi)}.
+#' \code{\link[circular]{circular}}-object in \eqn{[-\pi, \pi)}.
 #'
 #' @return The \link[base]{numeric} value of the angle in \eqn{[0, 2\pi)}.
 #' @export
@@ -170,7 +170,7 @@ half2full_circ <- function(angle) {
 #' to an angle on the half circle  (i.e. in the interval \eqn{[-\pi, \pi)}).
 #'
 #' @param angle \link[base]{numeric} value of an angle or a
-#' \code{\link{circular}}-object in \eqn{[0, 2\pi)}.
+#' \code{\link[circular]{circular}}-object in \eqn{[0, 2\pi)}.
 #'
 #' @return The \link[base]{numeric} value of the angle in \eqn{[-\pi, \pi)}.
 #' @export

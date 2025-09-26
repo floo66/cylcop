@@ -41,15 +41,15 @@ the quantile function is evaluated.}
 }
 \value{
 \itemize{
-\item{\code{dlnormmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
- containing the density at \code{x}.}
-\item{\code{plnormmix()}}{ gives a
+\item \code{dlnormmix()} gives a \link[base]{vector} of length \code{length(x)}
+ containing the density at \code{x}.
+\item \code{plnormmix()} gives a
 \link[base]{vector} of length \code{length(q)} containing
-the distribution function at the corresponding values of \code{q}.}
-\item{\code{qlnormmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-containing the quantiles at the corresponding values of \code{p}.}
-\item{\code{rlnormmix()}}{ generates a \link[base]{vector} of length \code{n}
-containing the random samples.}
+the distribution function at the corresponding values of \code{q}.
+\item \code{qlnormmix()} gives a \link[base]{vector} of length \code{length(p)}
+containing the quantiles at the corresponding values of \code{p}.
+\item \code{rlnormmix()} generates a \link[base]{vector} of length \code{n}
+containing the random samples.
 }
 }
 \description{

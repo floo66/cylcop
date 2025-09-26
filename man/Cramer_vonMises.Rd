@@ -16,7 +16,7 @@ cramer_vonmises(
 }
 \arguments{
 \item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}' or
-'\code{\linkS4class{Copula}}' (package '\pkg{copula}'.}
+'\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}'.}
 
 \item{theta}{\link[base]{numeric} \link[base]{vector} of angles
 (measurements of a circular variable) or "circular" component of pseudo-observations.}
@@ -32,7 +32,7 @@ holding the names of the parameters to be optimized when using the bootstrap
 procedure.
   These can be any parameters in \code{copula@parameters}. Default is to
   optimize the first 2 parameters. \code{parameters} has no effect if \code{copula}
-  is of class '\code{\linkS4class{Copula}}' (package '\pkg{copula}'}
+  is of class '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}'}
 
 \item{optim.method}{\link[base]{character} string, optimizer used in
 \code{\link[stats]{optim}()}, can be

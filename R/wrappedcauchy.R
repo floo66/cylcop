@@ -41,15 +41,15 @@
 #'
 #' @return
 #' \itemize{
-#' \item{\code{dwrappedcauchy()}}{ gives a \link[base]{vector} of length \code{length(theta)}
-#'  containing the density at \code{theta}.}
-#' \item{\code{pwrappedcauchy()}}{ gives a
+#' \item \code{dwrappedcauchy()} gives a \link[base]{vector} of length \code{length(theta)}
+#'  containing the density at \code{theta}.
+#' \item \code{pwrappedcauchy()} gives a
 #' \link[base]{vector} of length \code{length(theta)} containing
-#' the distribution function at the corresponding values of \code{theta}.}
-#' \item{\code{qwrappedcauchy()}}{ gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.}
-#' \item{\code{rwrappedcauchy()}}{ generates a \link[base]{vector} of length \code{n}
-#' containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.}
+#' the distribution function at the corresponding values of \code{theta}.
+#' \item \code{qwrappedcauchy()} gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.
+#' \item \code{rwrappedcauchy()} generates a \link[base]{vector} of length \code{n}
+#' containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.
 #'}
 #'
 #' @examples set.seed(123)

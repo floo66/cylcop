@@ -44,15 +44,15 @@ the quantile function is evaluated.}
 }
 \value{
 \itemize{
-\item{\code{dgammamix()}}{ gives a \link[base]{vector} of length \code{length(x)}
- containing the density at \code{x}.}
-\item{\code{pgammamix()}}{ gives a
+\item \code{dgammamix()} gives a \link[base]{vector} of length \code{length(x)}
+ containing the density at \code{x}.
+\item \code{pgammamix()} gives a
 \link[base]{vector} of length \code{length(q)} containing
-the distribution function at the corresponding values of \code{q}.}
-\item{\code{qgammamix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-containing the quantiles at the corresponding values of \code{p}.}
-\item{\code{rgammamix()}}{ generates a \link[base]{vector} of length \code{n}
-containing the random samples.}
+the distribution function at the corresponding values of \code{q}.
+\item \code{qgammamix()} gives a \link[base]{vector} of length \code{length(p)}
+containing the quantiles at the corresponding values of \code{p}.
+\item \code{rgammamix()} generates a \link[base]{vector} of length \code{n}
+containing the random samples.
 }
 }
 \description{

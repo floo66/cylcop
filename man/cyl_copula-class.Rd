@@ -6,7 +6,7 @@
 \title{An S4 Class of Bivariate Copulas on the Cylinder}
 \description{
 The class '\code{cyl_copula}' follows somewhat the structure of the class
-'\code{\linkS4class{Copula}}' of the package '\pkg{copula}'. It contains
+'\code{\link[copula:Copula-class]{Copula}}' of the package '\pkg{copula}'. It contains
 circular-linear copulas.
 }
 \section{Slots}{

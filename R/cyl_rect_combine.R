@@ -6,11 +6,11 @@ NULL
 #' An S4 Class of Circular-Linear Copulas Generated from a Rectangular Patchwork
 #'
 #' This class contains bivariate circular-linear copulas generated from
-#' linear-linear bivariate '\code{\linkS4class{Copula}}' objects of the package
+#' linear-linear bivariate '\code{\link[copula:Copula-class]{Copula}}' objects of the package
 #' '\pkg{copula}' or circular-linear copulas of class '\code{\linkS4class{cyl_copula}}'.
 #' 2 non-overlapping rectangles are laid over the unit square, both have width
 #' 1 in v-direction. In the area covered by the first rectangle, the copula is
-#' derived from a linear-linear bivariate '\code{\linkS4class{Copula}}' object.
+#' derived from a linear-linear bivariate '\code{\link[copula:Copula-class]{Copula}}' object.
 #' Rectangle 2 contains the same copula as rectangle 1, but 90 degrees rotated.
 #' In the area not covered by the rectangles, the "background", the copula is
 #' derived from a circular-linear '\code{\linkS4class{cyl_copula}}' object.
@@ -36,11 +36,11 @@ NULL
 #'   parameters.
 #' @slot param.upbnd \link[base]{numeric} \link[base]{vector} holding the upper bounds of the
 #'   parameters.
-#' @slot sym.cop '\code{\linkS4class{Copula}}' object of the package
+#' @slot sym.cop '\code{\link[copula:Copula-class]{Copula}}' object of the package
 #' '\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object. The copula in
 #'   the rectangles.
 #' @slot background.cop '\code{\linkS4class{cyl_vonmises}}' or
-#' '\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
+#' '\code{\link[copula:Copula-class]{Copula}}' object of the package '\pkg{copula}',
 #' the copula where no rectangles overlay the unit square. If this copula is not
 #' symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.
 #' @slot flip_up \link[base]{logical} value indicating whether the copula (\code{sym.cop}) is
@@ -50,7 +50,7 @@ NULL
 #'   construction of the object.
 #'
 #' @section Extends:
-#' Class '\code{cyl_rect_combine}' extends class '\code{\linkS4class{Copula}}'.
+#' Class '\code{cyl_rect_combine}' extends class '\code{\link[copula:Copula-class]{Copula}}'.
 #'
 #' @references \insertRef{Durante2009}{cylcop}
 #'
@@ -77,11 +77,11 @@ setClass(
 #' '\code{\linkS4class{cyl_rect_combine}}' from a rectangular patchwork of copulas.
 #'
 #'
-#' @param copula '\code{\linkS4class{Copula}}' object of the package
+#' @param copula '\code{\link[copula:Copula-class]{Copula}}' object of the package
 #' '\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object, the copula in
 #'   the rectangles.
 #' @param background '\code{\linkS4class{cyl_copula}}' or
-#' '\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
+#' '\code{\link[copula:Copula-class]{Copula}}' object of the package '\pkg{copula}',
 #' the copula where no rectangles overlay the unit square. If this copula is not
 #' symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.
 #' @param low_rect \link[base]{numeric} \link[base]{vector} of length 2 containing the

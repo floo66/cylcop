@@ -21,15 +21,15 @@
 #'
 #' @return
 #' \itemize{
-#' \item{\code{dnormmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}.}
-#' \item{\code{pnormmix()}}{ gives a
+#' \item \code{dnormmix()} gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.
+#' \item \code{pnormmix()} gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.}
-#' \item{\code{qnormmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.}
-#' \item{\code{rnormmix()}}{ generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.}
+#' the distribution function at the corresponding values of \code{q}.
+#' \item \code{qnormmix()} gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.
+#' \item \code{rnormmix()} generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.
 #'}
 #'
 #'
@@ -76,15 +76,15 @@ NULL
 #'
 #' @return
 #' \itemize{
-#' \item{\code{dweibullmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}.}
-#' \item{\code{pweibullmix()}}{ gives a
+#' \item \code{dweibullmix()} gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.
+#' \item \code{pweibullmix()} gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.}
-#' \item{\code{qweibullmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.}
-#' \item{\code{rweibullmix()}}{ generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.}
+#' the distribution function at the corresponding values of \code{q}.
+#' \item \code{qweibullmix()} gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.
+#' \item \code{rweibullmix()} generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.
 #'}
 #'
 #' @examples
@@ -130,15 +130,15 @@ NULL
 #'
 #' @return
 #' \itemize{
-#' \item{\code{dlnormmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}.}
-#' \item{\code{plnormmix()}}{ gives a
+#' \item \code{dlnormmix()} gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.
+#' \item \code{plnormmix()} gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.}
-#' \item{\code{qlnormmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.}
-#' \item{\code{rlnormmix()}}{ generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.}
+#' the distribution function at the corresponding values of \code{q}.
+#' \item \code{qlnormmix()} gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.
+#' \item \code{rlnormmix()} generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.
 #'}
 #'
 #' @examples
@@ -186,15 +186,15 @@ NULL
 #'
 #' @return
 #' \itemize{
-#' \item{\code{dgammamix()}}{ gives a \link[base]{vector} of length \code{length(x)}
-#'  containing the density at \code{x}.}
-#' \item{\code{pgammamix()}}{ gives a
+#' \item \code{dgammamix()} gives a \link[base]{vector} of length \code{length(x)}
+#'  containing the density at \code{x}.
+#' \item \code{pgammamix()} gives a
 #' \link[base]{vector} of length \code{length(q)} containing
-#' the distribution function at the corresponding values of \code{q}.}
-#' \item{\code{qgammamix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-#' containing the quantiles at the corresponding values of \code{p}.}
-#' \item{\code{rgammamix()}}{ generates a \link[base]{vector} of length \code{n}
-#' containing the random samples.}
+#' the distribution function at the corresponding values of \code{q}.
+#' \item \code{qgammamix()} gives a \link[base]{vector} of length \code{length(p)}
+#' containing the quantiles at the corresponding values of \code{p}.
+#' \item \code{rgammamix()} generates a \link[base]{vector} of length \code{n}
+#' containing the random samples.
 #'}
 #'
 #' @examples

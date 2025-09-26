@@ -41,15 +41,15 @@ the quantile function is evaluated.}
 }
 \value{
 \itemize{
-\item{\code{dweibullmix()}}{ gives a \link[base]{vector} of length \code{length(x)}
- containing the density at \code{x}.}
-\item{\code{pweibullmix()}}{ gives a
+\item \code{dweibullmix()} gives a \link[base]{vector} of length \code{length(x)}
+ containing the density at \code{x}.
+\item \code{pweibullmix()} gives a
 \link[base]{vector} of length \code{length(q)} containing
-the distribution function at the corresponding values of \code{q}.}
-\item{\code{qweibullmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-containing the quantiles at the corresponding values of \code{p}.}
-\item{\code{rweibullmix()}}{ generates a \link[base]{vector} of length \code{n}
-containing the random samples.}
+the distribution function at the corresponding values of \code{q}.
+\item \code{qweibullmix()} gives a \link[base]{vector} of length \code{length(p)}
+containing the quantiles at the corresponding values of \code{p}.
+\item \code{rweibullmix()} generates a \link[base]{vector} of length \code{n}
+containing the random samples.
 }
 }
 \description{

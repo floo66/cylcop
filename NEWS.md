@@ -1,3 +1,17 @@
+
+# cylcop 0.2.1
+
+## Bug fixes
+
+* Several plotting routines used the function `expression()` as a text label in
+ggplot. This is not allowed and was historically possible in older versions of `ggplot2`
+only by accident. It has been replaced by using a regular character vector and
+`parse=T`.
+
+* Missing package anchors were added to Rd \link{} targets in the documentations.
+
+
+
 # cylcop 0.2.0
 
 ## New features

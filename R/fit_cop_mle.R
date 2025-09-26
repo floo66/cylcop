@@ -33,8 +33,8 @@
 #' exactly the same whether measurements (\code{theta=theta} and \code{x=x})
 #' or pseudo observations (\code{theta=copula::\link[copula]{pobs}(theta,x)[,1]}
 #' and \code{x=copula::\link[copula]{pobs}(theta,x)[,2]}) are provided.
-#' If you wish to fit parameters of a '\code{\linkS4class{Copula}}' object
-#' (package '\pkg{copula}'), use the function \code{copula::\link{fitCopula}()}.
+#' If you wish to fit parameters of a '\code{\link[copula:Copula-class]{Copula}}' object
+#' (package '\pkg{copula}'), use the function \code{copula::\link[copula]{fitCopula}()}.
 #' \code{optML()} is an alias for \code{fit_cylcop_ml}.
 #'
 #' @return A list of length 3 containing the same type of '\code{\linkS4class{cyl_copula}}'

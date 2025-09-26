@@ -19,7 +19,7 @@ pjoint(q, copula, marginal_1, marginal_2)
 generated with \code{rjoint()}.}
 
 \item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'.
-or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
+or '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 
 \item{marginal_1}{named \link[base]{list} (for parametric estimates) or
 a '\code{\link[stats]{density}}' object (for linear kernel density estimates)
@@ -38,13 +38,13 @@ the distribution function is evaluated.}
 }
 \value{
 \itemize{
-\item{\code{djoint()}}{ gives a \link[base]{vector} of length \code{length(x)}
- containing the density at \code{x}.}
-\item{\code{pjoint()}}{ gives a
+\item\code{djoint()} gives a \link[base]{vector} of length \code{length(x)}
+ containing the density at \code{x}.
+\item\code{pjoint()} gives a
 \link[base]{vector} of length \code{length(q)} containing
-the distribution function at the corresponding values of \code{q}.}
-\item{\code{rjoint()}}{ generates a \link[base]{vector} of length \code{n}
-containing the random samples.}
+the distribution function at the corresponding values of \code{q}.
+\item\code{rjoint()} generates a \link[base]{vector} of length \code{n}
+containing the random samples.
 }
 }
 \description{

@@ -58,7 +58,7 @@ The median of the turn angles is defined as the center of the shortest arc
 that connects all points. The length of the whiskers is 1.5 times the interquartile range.
 
 You can either specify \code{traj} or the angels (\code{theta})
-and step lengths (code{x}).
+and step lengths (\code{x}).
 If entered "by hand", the named list describing the marginal linear distribution
 (for \code{marginal_lin}) must contain 2 entries:
 \enumerate{

@@ -13,12 +13,12 @@ cyl_rect_combine(
 )
 }
 \arguments{
-\item{copula}{'\code{\linkS4class{Copula}}' object of the package
+\item{copula}{'\code{\link[copula:Copula-class]{Copula}}' object of the package
 '\pkg{copula}' or '\code{\linkS4class{cyl_vonmises}}' object, the copula in
   the rectangles.}
 
 \item{background}{'\code{\linkS4class{cyl_copula}}' or
-'\code{\linkS4class{Copula}}' object of the package '\pkg{copula}',
+'\code{\link[copula:Copula-class]{Copula}}' object of the package '\pkg{copula}',
 the copula where no rectangles overlay the unit square. If this copula is not
 symmetric, the overall \code{cyl_rect_combine}-copula will also not be symmetric.}
 

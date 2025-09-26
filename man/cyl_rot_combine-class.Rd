@@ -7,7 +7,7 @@
  of Copulas}
 \description{
 This class contains bivariate circular-linear copulas, generated from
-linear-linear bivariate '\code{\linkS4class{Copula}}' objects of the package
+linear-linear bivariate '\code{\link[copula:Copula-class]{Copula}}' objects of the package
 '\pkg{copula}', by taking the arithmetic mean of the original copula and
 the 90 deg rotated copula. This results in copulas that are periodic in the
 circular dimension, u, and symmetric with respect to \eqn{u=0.5}, i.e. positive
@@ -28,7 +28,7 @@ parameters.}
 \item{\code{param.upbnd}}{\link[base]{numeric} \link[base]{vector} holding the upper bounds of the
 parameters.}
 
-\item{\code{orig.cop}}{linear-linear 2-dimensional '\code{\linkS4class{Copula}}'
+\item{\code{orig.cop}}{linear-linear 2-dimensional '\code{\link[copula:Copula-class]{Copula}}'
 object of the package '\pkg{copula}'.}
 
 \item{\code{shift}}{\link[base]{logical} value indicating whether the (u-periodic)
@@ -42,7 +42,7 @@ Objects are created by    \code{\link{cyl_rot_combine}()}.
 
 \section{Extends}{
 
-Class '\code{cyl_rot_combine}' extends class '\code{\linkS4class{Copula}}'.
+Class '\code{cyl_rot_combine}' extends class '\code{\link[copula:Copula-class]{Copula}}'.
 }
 
 \references{

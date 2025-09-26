@@ -74,7 +74,7 @@ values in \eqn{[0,1]^2}, containing as first column the circular (periodic) and
 as second the linear dimension}
 
 \item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'.
-or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
+or '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 
 \item{n}{number of random samples to be generated with \code{rcylcop()}.}
 
@@ -92,10 +92,10 @@ the random samples.
 Calculate the distribution (\code{pcylcop()}), the density (\code{dcylcop()}),
 and generate random
 samples (\code{rcylcop()}) of a '\code{\linkS4class{cyl_copula}}' object or a
-'\code{\linkS4class{Copula}}' object (package '\pkg{copula}', only 2-dimensional).
+'\code{\link[copula:Copula-class]{Copula}}' object (package '\pkg{copula}', only 2-dimensional).
 }
 \details{
-For '\code{\linkS4class{Copula}}' objects, \code{pcylcop()} and \code{rcylcop()}
+For '\code{\link[copula:Copula-class]{Copula}}' objects, \code{pcylcop()} and \code{rcylcop()}
 just call the functions of the '\pkg{copula}' package
 \code{\link[copula]{pCopula}()} and \code{\link[copula]{rCopula}()}, respectively.
 The density is, however, calculated differently in \code{dcylcop()} and
@@ -103,7 +103,7 @@ The density is, however, calculated differently in \code{dcylcop()} and
  that \code{copula::\link[copula]{dCopula}()}
  will return a density of 0 for points on the boundary of the unit square,
  whereas \code{dcylcop()} will return the correct density on the boundaries
- for both '\code{\linkS4class{cyl_copula}}' and '\code{\linkS4class{Copula}}' objects.
+ for both '\code{\linkS4class{cyl_copula}}' and '\code{\link[copula:Copula-class]{Copula}}' objects.
 }
 \examples{
 set.seed(123)

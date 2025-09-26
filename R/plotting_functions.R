@@ -787,11 +787,12 @@ plot_joint_circ <- function(traj = NULL,
       data = angle_label_pos,
       aes(.data$x, .data$y),
       label = c(
-        expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
-                   0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
+        "-0.75 * pi", "-0.5 * pi", "-0.25 * pi", "0",
+        "0.25 * pi", "0.5 * pi", "0.75 * pi", "pi"
       ),
       size = 10 / 2.834646,
-      label.size = 0
+      label.size = 0,
+      parse = T
     )
   )
 
@@ -972,7 +973,7 @@ plot_cop_scat <- function(traj = NULL,
 #' '\pkg{plotly}' package, or it can produce a heat map using functions from
 #' '\pkg{ggplot2}'.
 #'
-#' @param copula '\code{\linkS4class{cyl_copula}}' or a '\code{\linkS4class{Copula}}' object
+#' @param copula '\code{\linkS4class{cyl_copula}}' or a '\code{\link[copula:Copula-class]{Copula}}' object
 #' from the package '\pkg{copula}'.
 #' @param type \link[base]{character} string describing what is plotted,
 #' either \code{"pdf"} or \code{"cdf"}.
@@ -1589,7 +1590,7 @@ plot_cop_surf <- function(copula,
 #' \code{"bottom"}
 #'
 #' @details You can either specify \code{traj} or the angels (\code{theta})
-#' and step lengths (code{x}).
+#' and step lengths (\code{x}).
 #' If entered "by hand", the named list describing the marginal linear distribution
 #' (for \code{marginal_lin}) must contain 2 entries:
 #' \enumerate{
@@ -2480,11 +2481,12 @@ plot_circ_hist <- function(theta, nbars = 20) {
       ),
       aes(.data$x, .data$y),
       label = c(
-        expression(-0.75 * pi,-0.5 * pi,-0.25 * pi, 0,
-                   0.25 * pi, 0.5 * pi, 0.75 * pi, pi)
+        "-0.75 * pi", "-0.5 * pi", "-0.25 * pi", "0",
+        "0.25 * pi", "0.5 * pi", "0.75 * pi", "pi"
       ),
       size = 10 / 2.834646,
-      label.size = 0
+      label.size = 0,
+      parse = TRUE
     ) +
 
     geom_hline(yintercept = breaks[seq(2, length(breaks), 2)],

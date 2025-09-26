@@ -1,7 +1,7 @@
 #' An S4 Class of Bivariate Copulas on the Cylinder
 #'
 #'The class '\code{cyl_copula}' follows somewhat the structure of the class
-#' '\code{\linkS4class{Copula}}' of the package '\pkg{copula}'. It contains
+#' '\code{\link[copula:Copula-class]{Copula}}' of the package '\pkg{copula}'. It contains
 #' circular-linear copulas.
 #'
 #' @section Extended by:
@@ -327,7 +327,7 @@ setGeneric("set_cop_param",
 #' values in \eqn{[0,1]^2}, containing as first column
 #'  the circular (periodic) and as second the linear dimension.
 #' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'.
-#' or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).
+#' or '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}', only 2-dimensional).
 #' @param cond_on column number of \code{u} on which the copula is conditioned. E.g if
 #' \code{cond_on = 2}, the function calculates for each element in the first
 #' column of \code{u} the copula conditional on the corresponding element in the
@@ -340,7 +340,7 @@ setGeneric("set_cop_param",
 #' \code{u[,-cond_on]} conditional on the values of \code{u[,cond_on]}.
 #'
 #' @details This is a generic that calls the function \code{copula::\link[copula]{cCopula}()}
-#' for 2-dimensional '\code{\linkS4class{Copula}}' objects from the '\pkg{copula}'
+#' for 2-dimensional '\code{\link[copula:Copula-class]{Copula}}' objects from the '\pkg{copula}'
 #' package for which \code{copula::\link[copula]{cCopula}()} is available. If
 #' \code{copula::\link[copula]{cCopula}()} is not available, the conditional copula is
 #' calculated numerically. For '\code{\linkS4class{cyl_copula}}' objects,
@@ -441,10 +441,10 @@ param_num_checked <- function(copula, param_val, param_name){
 #' Calculate the distribution (\code{pcylcop()}), the density (\code{dcylcop()}),
 #' and generate random
 #' samples (\code{rcylcop()}) of a '\code{\linkS4class{cyl_copula}}' object or a
-#' '\code{\linkS4class{Copula}}' object (package '\pkg{copula}', only 2-dimensional).
+#' '\code{\link[copula:Copula-class]{Copula}}' object (package '\pkg{copula}', only 2-dimensional).
 #'
 #' @param copula \R object of class '\code{\linkS4class{cyl_copula}}'.
-#' or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).
+#' or '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}', only 2-dimensional).
 #' @param u \link[base]{matrix} (or \link[base]{vector})  of \link[base]{numeric}
 #'  values in \eqn{[0,1]^2}, containing as first column the circular (periodic) and
 #'  as second the linear dimension
@@ -459,7 +459,7 @@ param_num_checked <- function(copula, param_val, param_name){
 #'  \link[base]{matrix} with 2 columns and \code{n} rows containing
 #' the random samples.
 #'
-#' @details For '\code{\linkS4class{Copula}}' objects, \code{pcylcop()} and \code{rcylcop()}
+#' @details For '\code{\link[copula:Copula-class]{Copula}}' objects, \code{pcylcop()} and \code{rcylcop()}
 #' just call the functions of the '\pkg{copula}' package
 #' \code{\link[copula]{pCopula}()} and \code{\link[copula]{rCopula}()}, respectively.
 #' The density is, however, calculated differently in \code{dcylcop()} and
@@ -467,7 +467,7 @@ param_num_checked <- function(copula, param_val, param_name){
 #'  that \code{copula::\link[copula]{dCopula}()}
 #'  will return a density of 0 for points on the boundary of the unit square,
 #'  whereas \code{dcylcop()} will return the correct density on the boundaries
-#'  for both '\code{\linkS4class{cyl_copula}}' and '\code{\linkS4class{Copula}}' objects.
+#'  for both '\code{\linkS4class{cyl_copula}}' and '\code{\link[copula:Copula-class]{Copula}}' objects.
 #'
 #' @examples set.seed(123)
 #'

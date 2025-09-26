@@ -15,10 +15,10 @@ wasserstein(
 }
 \arguments{
 \item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'.
-or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
+or '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 
 \item{copula2}{\R object of class '\code{\linkS4class{cyl_copula}}'.
-or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
+or '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 
 \item{theta}{(alternatively) \link[base]{numeric} \link[base]{vector} of angles
 (measurements of a circular variable) or "circular" component of pseudo-observations.}

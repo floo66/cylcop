@@ -11,8 +11,8 @@ Classes (S4) of circular-linear, symmetric copulas with corresponding methods, e
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/r-lib/devtools}
-  \item Report bugs at \url{https://github.com/r-lib/devtools/issues}
+  \item \url{https://github.com/floo66/cylcop}
+  \item Report bugs at \url{https://github.com/floo66/cylcop/issues}
 }
 
 }

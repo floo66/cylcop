@@ -7,7 +7,7 @@
 cyl_rot_combine(copula, shift = FALSE)
 }
 \arguments{
-\item{copula}{linear-linear 2-dimensional '\code{\linkS4class{Copula}}'
+\item{copula}{linear-linear 2-dimensional '\code{\link[copula:Copula-class]{Copula}}'
 object of the package '\pkg{copula}'.}
 
 \item{shift}{\link[base]{logical} value indicating whether the (u-periodic)

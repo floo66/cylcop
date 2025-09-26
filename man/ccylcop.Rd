@@ -31,7 +31,7 @@ values in \eqn{[0,1]^2}, containing as first column
  the circular (periodic) and as second the linear dimension.}
 
 \item{copula}{\R object of class '\code{\linkS4class{cyl_copula}}'.
-or '\code{\linkS4class{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
+or '\code{\link[copula:Copula-class]{Copula}}' (package '\pkg{copula}', only 2-dimensional).}
 
 \item{cond_on}{column number of \code{u} on which the copula is conditioned. E.g if
 \code{cond_on = 2}, the function calculates for each element in the first
@@ -53,7 +53,7 @@ copulas and 2-dimensional linear-linear copulas.
 }
 \details{
 This is a generic that calls the function \code{copula::\link[copula]{cCopula}()}
-for 2-dimensional '\code{\linkS4class{Copula}}' objects from the '\pkg{copula}'
+for 2-dimensional '\code{\link[copula:Copula-class]{Copula}}' objects from the '\pkg{copula}'
 package for which \code{copula::\link[copula]{cCopula}()} is available. If
 \code{copula::\link[copula]{cCopula}()} is not available, the conditional copula is
 calculated numerically. For '\code{\linkS4class{cyl_copula}}' objects,

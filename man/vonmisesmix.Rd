@@ -37,15 +37,15 @@ the quantile function is evaluated.}
 }
 \value{
 \itemize{
-\item{\code{dvonmisesmix()}}{ gives a \link[base]{vector} of length \code{length(theta)}
- containing the density at \code{theta}.}
-\item{\code{pvonmisesmix()}}{ gives a
+\item \code{dvonmisesmix()} gives a \link[base]{vector} of length \code{length(theta)}
+ containing the density at \code{theta}.
+\item \code{pvonmisesmix()} gives a
 \link[base]{vector} of length \code{length(theta)} containing
-the distribution function at the corresponding values of \code{theta}.}
-\item{\code{qvonmisesmix()}}{ gives a \link[base]{vector} of length \code{length(p)}
-containing the quantiles at the corresponding values of \code{p}.}
-\item{\code{rvonmisesmix()}}{ generates a \link[base]{vector} of length \code{n}
-containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.}
+the distribution function at the corresponding values of \code{theta}.
+\item \code{qvonmisesmix()} gives a \link[base]{vector} of length \code{length(p)}
+containing the quantiles at the corresponding values of \code{p}.
+\item \code{rvonmisesmix()} generates a \link[base]{vector} of length \code{n}
+containing the random samples, i.e. angles in \eqn{[-\pi, \pi)}.
 }
 }
 \description{

@@ -13,7 +13,7 @@ plot_cop_surf(
 )
 }
 \arguments{
-\item{copula}{'\code{\linkS4class{cyl_copula}}' or a '\code{\linkS4class{Copula}}' object
+\item{copula}{'\code{\linkS4class{cyl_copula}}' or a '\code{\link[copula:Copula-class]{Copula}}' object
 from the package '\pkg{copula}'.}
 
 \item{type}{\link[base]{character} string describing what is plotted,
