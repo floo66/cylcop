@@ -141,7 +141,7 @@ plot_joint_scat <-
       geom_hline(
         yintercept = 0,
         colour = "grey60",
-        size = 0.2
+        linewidth = 0.2
       ),
       geom_point(shape = 16, alpha = 0.3),
       theme(legend.position = "none"),
@@ -226,7 +226,7 @@ plot_joint_scat <-
                )) +
         geom_hline(yintercept = c(pi, -pi),
                    colour = "black",
-                   size = 0.2) +
+                   linewidth = 0.2) +
         scale_y_continuous(breaks = seq(-1.5 * pi, 1.5 * pi, 0.25 * pi),
                            labels = c(
                              expression(
@@ -700,12 +700,12 @@ plot_joint_circ <- function(traj = NULL,
     geom_hline(
       yintercept = y_breaks[seq(2, length(y_breaks), 2)],
       colour = "darkgreen",
-      size = 0.2
+      linewidth = 0.2
     ),
     geom_hline(
       yintercept = y_breaks[seq(1, length(y_breaks), 2)],
       colour = "darkred",
-      size = 0.2
+      linewidth = 0.2
     ),
     #geom_vline(xintercept = x_breaks, colour = "grey90", size = 0.2),
     coord_polar(start = pi, clip = "off"),
@@ -727,7 +727,7 @@ plot_joint_circ <- function(traj = NULL,
     geom_hline(
       yintercept = tail(y_breaks, 1),
       colour = "grey30",
-      size = 0.2
+      linewidth = 0.2
     ),
 
     theme_bw(),
@@ -751,7 +751,7 @@ plot_joint_circ <- function(traj = NULL,
         yend = y_breaks[(length(y_breaks) - 1)]
       ),
       colour = "grey30",
-      size = 0.2
+      linewidth = 0.2
     ),
 
     geom_segment(
@@ -1541,13 +1541,13 @@ plot_cop_surf <- function(copula,
       geom_vline(
         xintercept = seq(0, 1, by = 0.125),
         colour = "grey60",
-        size = 0.8,
+        linewidth = 0.8,
         alpha = 0.25
       ) +
       geom_hline(
         yintercept = seq(0, 1, by = 0.125),
         colour = "grey60",
-        size = 0.8,
+        linewidth = 0.8,
         alpha = 0.25
       ) +
       scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
@@ -2179,7 +2179,7 @@ make_plot <-
       geom_hline(
         yintercept = y_breaks[(length(y_breaks))],
         colour = "grey60",
-        size = 0.3 * expand
+        linewidth = 0.3 * expand
       ),
 
       theme_bw(),
@@ -2230,14 +2230,14 @@ make_plot <-
           yend = y_breaks[(length(y_breaks))]
         ),
         colour = "grey90",
-        size = 0.3 * expand
+        linewidth = 0.3 * expand
       ),
       #for position of axis labels
       geom_hline(
         yintercept = y_breaks[(length(y_breaks))] + 0.5 * expand,
         colour = "white",
         alpha = 0,
-        size = 0.3 * expand
+        linewidth = 0.3 * expand
       )
     )
 
@@ -2272,7 +2272,7 @@ make_plot <-
           xend = .data$xend,
           yend = .data$yend
         ),
-        size = 0.5 * expand
+        linewidth = 0.5 * expand
       ) +
       geom_segment(
         data = whiskers,
@@ -2282,7 +2282,7 @@ make_plot <-
           xend = .data$xend,
           yend = .data$yend
         ),
-        size = 0.4 * expand
+        linewidth = 0.4 * expand
       ) +
       geom_segment(
         data = endbars,
@@ -2292,7 +2292,7 @@ make_plot <-
           xend = .data$xend,
           yend = .data$yend
         ),
-        size = 0.4 * expand
+        linewidth = 0.4 * expand
       ) +
       geom_point(
         data = outliers,
@@ -2444,7 +2444,7 @@ plot_circ_hist <- function(theta, nbars = 20) {
         yend = .data$yend
       ),
       colour = "grey40",
-      size = 0.5
+      linewidth = 0.5
     ) +
     geom_segment(
       data = df_line_x_minor,
@@ -2455,7 +2455,7 @@ plot_circ_hist <- function(theta, nbars = 20) {
         yend = .data$yend
       ),
       colour = "grey60",
-      size = 0.2
+      linewidth = 0.2
     ) +
     geom_rect(
       data = df_rect,
@@ -2491,10 +2491,10 @@ plot_circ_hist <- function(theta, nbars = 20) {
 
     geom_hline(yintercept = breaks[seq(2, length(breaks), 2)],
                colour = "darkgreen",
-               size = 0.2) +
+               linewidth = 0.2) +
     geom_hline(yintercept = breaks[seq(1, length(breaks), 2)],
                colour = "darkred",
-               size = 0.2) +
+               linewidth = 0.2) +
     geom_label(
       data = data.frame(x = rep(-0.95, length(breaks[seq(2, length(breaks), 2)])), y =
                           breaks[seq(2, length(breaks), 2)]),
