@@ -762,7 +762,7 @@ plot_joint_circ <- function(traj = NULL,
         yend = angle_label_pos$y
       ),
       colour = "grey30",
-      size = 0.2
+      linewidth = 0.2
     ),
 
     #hjust= and vjust= don't seem to work with coord_polar()
@@ -811,7 +811,7 @@ plot_joint_circ <- function(traj = NULL,
       data = marginal_angle_dens,
       aes(y = .data$y, x = .data$x),
       colour = "black",
-      size = 0.2
+      linewidth = 0.2
     ) +
     geom_ribbon(
       data = marginal_angle_dens,
