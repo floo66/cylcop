@@ -2466,7 +2466,7 @@ plot_circ_hist <- function(theta, nbars = 20) {
         ymax = .data$ymax
       ),
       color = "black",
-      size = 0.5,
+      linewidth = 0.5,
       fill = "grey60"
     ) +
     coord_polar(start = pi) +
