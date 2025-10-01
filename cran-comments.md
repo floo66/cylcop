@@ -1,32 +1,21 @@
 ## Test environments
-- local R installation, Windows 10 x64, R 4.2.1
-- win-builder (devel and release),
-- R-hub windows-x86_64-devel (r-devel)
-- R-hub macos-highsierra-release-cran (r-release)
-- R-hub fedora-clang-devel (r-devel)
+* Local R installation, windows 11 (R-4.4.2)
+* R-hub:
+  - [VM] linux (ubuntu-latest, R-devel)
+  - [VM] macos (macOS 13, R-release)
+  - [VM] windows (Windows-latest, R-release)
 
 ## R CMD check results
+There were no ERRORs, WARNINGs, or NOTEs.
 
-There were no ERRORs or WARNINGs. There are 2 NOTEs:
-
-### On windows-x86_64-devel (r-devel)
-
-* checking for detritus in the temp directory ... NOTE
-  Found the following files/directories:
-    'lastMiKTeXException'
-
-As noted in R-hub issue #503, this could be due to a bug/crash in MiKTeX and can likely be ignored.
-
-### On fedora-clang-devel (r-devel)
-
-* checking HTML version of manual ... NOTE
-  Skipping checking HTML validation: no command 'tidy' found
-  Skipping checking math rendering: package 'V8' unavailable
+## Notes for CRAN
+* This submission fixes issues with Rd cross-references reported in the
+  previous CRAN checks (now updated to use `\link[PKG]{FOO}` style
+  anchors).
   
-I cannot change that Tidy is not on the path, or update Tidy on the external 
-Fedora Linux server.
-Same for pacakge V8.
-  
+* It fixes the issues "Lost braces in \itemize; \value handles \item{}{} directly"
 
-## Downstream dependencies
-There are no downstream dependencies.
+* It fixes the issued from wrongly using the `size` aesthetic for lines in ggplot
+
+* It fixes the error arising from using the function `expression()` as a text label in 
+  some ggplot objects
